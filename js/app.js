@@ -240,6 +240,36 @@ class App {
     if (nextPhaseBtn) {
       nextPhaseBtn.addEventListener("click", () => this.advanceToPhase2());
     }
+
+    // View prompt button (shows modal)
+    const viewPromptBtn = document.getElementById("view-prompt-btn");
+    if (viewPromptBtn) {
+      viewPromptBtn.addEventListener("click", () => {
+        const modal = document.getElementById("prompt-modal");
+        const promptText = document.getElementById("prompt-text");
+        promptText.textContent = this.currentProject.phase1Prompt || "";
+        modal.classList.remove("hidden");
+      });
+    }
+
+    // Close modal button
+    const closeModalBtn = document.getElementById("close-modal-btn");
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener("click", () => {
+        const modal = document.getElementById("prompt-modal");
+        modal.classList.add("hidden");
+      });
+    }
+
+    // Close modal on background click
+    const modal = document.getElementById("prompt-modal");
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          modal.classList.add("hidden");
+        }
+      });
+    }
   }
 
   async advanceToPhase2() {
@@ -265,9 +295,7 @@ class App {
   async savePhase1Data() {
     const title = document.getElementById("title-input").value.trim();
     const context = document.getElementById("context-textarea").value.trim();
-    const decision = document.getElementById("decision-textarea").value.trim();
-    const consequences = document.getElementById("consequences-textarea").value.trim();
-    const rationale = document.getElementById("rationale-textarea").value.trim();
+    const phase1Response = document.getElementById("phase1-response-textarea").value.trim();
     const status = document.getElementById("status-select").value;
 
     if (!title || !context) {
@@ -279,9 +307,7 @@ class App {
       ...this.currentProject,
       title,
       context,
-      decision,
-      consequences,
-      rationale,
+      phase1Response,
       status,
       updatedAt: new Date().toISOString()
     };
@@ -313,24 +339,17 @@ class App {
       promptTemplate = promptTemplate.replace(/{title}/g, title);
       promptTemplate = promptTemplate.replace(/{context}/g, context);
       promptTemplate = promptTemplate.replace(/{status}/g, this.currentProject.status || "Proposed");
-      promptTemplate = promptTemplate.replace(/{decision}/g, this.currentProject.decision || "[To be filled by Claude]");
-      promptTemplate = promptTemplate.replace(/{consequences}/g, this.currentProject.consequences || "[To be filled by Claude]");
-      promptTemplate = promptTemplate.replace(/{rationale}/g, this.currentProject.rationale || "[To be filled by Claude]");
       
-      // Display prompt
-      const promptDisplay = document.getElementById("prompt-display");
-      const promptText = document.getElementById("prompt-text");
-      promptText.textContent = promptTemplate;
-      promptDisplay.classList.remove("hidden");
+      // Save prompt to project
+      this.currentProject.phase1Prompt = promptTemplate;
+      await storage.saveProject(this.currentProject);
       
-      // Setup copy button
-      const copyBtn = document.getElementById("copy-prompt-btn");
-      copyBtn.onclick = async() => {
-        await navigator.clipboard.writeText(promptTemplate);
-        showToast("Prompt copied to clipboard!", "success");
-      };
+      // Copy to clipboard
+      await navigator.clipboard.writeText(promptTemplate);
+      showToast("Prompt copied to clipboard! Paste it to Claude.ai", "success");
       
-      showToast("Prompt generated! Copy it and paste to Claude.ai", "success");
+      // Re-render to show prompt preview
+      this.renderPhase1Form();
     } catch (error) {
       console.error("Failed to generate prompt:", error);
       showToast("Failed to generate prompt", "error");

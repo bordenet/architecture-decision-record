@@ -3,6 +3,8 @@
  * Handles view rendering
  */
 
+import { escapeHtml } from "./ui.js";
+
 function renderPhase1Form(project) {
   return `
     <div class="phase-1-form space-y-6">
@@ -10,7 +12,7 @@ function renderPhase1Form(project) {
         <div>
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 1: Initial Draft</h2>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Fill in your architectural decision details
+            Generate ADR draft with Claude's help
           </p>
         </div>
         <button id="back-to-list-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
@@ -61,84 +63,73 @@ function renderPhase1Form(project) {
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
           >${project.context || ""}</textarea>
         </div>
+      </div>
 
-        <!-- Decision -->
-        <div>
-          <label for="decision-textarea" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Decision (Optional - AI can help generate this)
-          </label>
-          <textarea 
-            id="decision-textarea"
-            rows="6"
-            placeholder="Describe the decision made or leave blank for AI to generate..."
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          >${project.decision || ""}</textarea>
-        </div>
+      <!-- Step 1: Generate Prompt -->
+      <div class="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 1: Copy Prompt to Claude
+        </h3>
+        <button id="generate-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          📋 Copy Prompt to Clipboard
+        </button>
+        ${project.phase1Prompt ? `
+          <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
+              <button id="view-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                View Full Prompt
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+              ${escapeHtml(project.phase1Prompt.substring(0, 200))}...
+            </p>
+          </div>
+        ` : ""}
+      </div>
 
-        <!-- Consequences -->
-        <div>
-          <label for="consequences-textarea" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Consequences (Optional - AI can help generate this)
-          </label>
-          <textarea 
-            id="consequences-textarea"
-            rows="4"
-            placeholder="What are the consequences of this decision?..."
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          >${project.consequences || ""}</textarea>
-        </div>
-
-        <!-- Rationale -->
-        <div>
-          <label for="rationale-textarea" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Rationale (Optional - AI can help generate this)
-          </label>
-          <textarea 
-            id="rationale-textarea"
-            rows="4"
-            placeholder="Why is this the best decision?..."
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          >${project.rationale || ""}</textarea>
-        </div>
+      <!-- Step 2: Paste Response -->
+      <div class="mt-6 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 2: Paste Claude's Response
+        </h3>
+        <textarea
+          id="phase1-response-textarea"
+          rows="12"
+          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
+          placeholder="Paste Claude's entire response here..."
+        >${escapeHtml(project.phase1Response || "")}</textarea>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          💡 Paste the entire response from Claude - no need to split it into separate fields
+        </p>
       </div>
 
       <!-- Action Buttons -->
       <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-        <div class="space-x-3">
-          <button id="save-phase1-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Save
+        <div class="flex gap-3">
+          <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            �� Save & Continue
           </button>
-          <button id="generate-prompt-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-            📋 Generate Prompt for Claude
-          </button>
-          <button id="next-phase-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+          <button id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             → Phase 2
           </button>
-        </div>
-
-        <!-- Prompt Display Area (hidden by default) -->
-        <div id="prompt-display" class="hidden mt-6 p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">📋 Prompt for Claude</h3>
-            <button id="copy-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              📋 Copy Prompt
-            </button>
-          </div>
-          <pre id="prompt-text" class="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 p-4 rounded border border-gray-300 dark:border-gray-600 max-h-96 overflow-y-auto"></pre>
-          <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded">
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Next steps:</strong><br>
-              1. Click "Copy Prompt" above<br>
-              2. Open Claude.ai in a new tab<br>
-              3. Paste the prompt and get Claude's response<br>
-              4. Paste Claude's response into the Decision, Consequences, and Rationale fields above<br>
-              5. Click "Save" and proceed to Phase 2
-            </p>
-          </div>
         </div>
         <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
           Delete
         </button>
+      </div>
+
+      <!-- Prompt Modal (hidden by default) -->
+      <div id="prompt-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto m-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">📋 Prompt for Claude</h3>
+            <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              ✕
+            </button>
+          </div>
+          <pre id="prompt-text" class="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-900 p-4 rounded border border-gray-300 dark:border-gray-600"></pre>
+        </div>
       </div>
     </div>
   `;
