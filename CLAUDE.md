@@ -1,63 +1,6 @@
 # AI Assistant Instructions for architecture-decision-record
 
-**CRITICAL**: Read this file FIRST before working on this codebase.
-
----
-
-## 🎯 PROJECT STATUS: Complete and Production-Ready ✅
-
-**Status**: Path A complete (Genesis module system fix). Path B complete (all E2E tests + nice-to-haves).  
-**Date**: 2025-12-01  
-**Coverage**: 84.18% (exceeds 70% target)  
-**Tests**: 67/67 unit + 17/17 E2E passing
-
-### What Was Completed
-**Path B (Architecture-Decision-Record)**: ✅ COMPLETE
-1. ✅ Fixed E2E test setup (localStorage access via http://)
-2. ✅ Enhanced dark mode E2E test (verifies HTML class toggle)
-3. ✅ Improved coverage: 76.43% → 84.18%
-4. ✅ Extracted Tailwind CSS from CDN to local build (removed warnings)
-5. ✅ Fixed process.env error (browser/Node.js compatibility)
-6. ✅ Fixed GitHub link visibility (footer styling)
-7. ✅ Added privacy notice close E2E test with persistence
-8. ✅ Added error-handler module with user-friendly error messages (8 tests)
-9. ✅ Added keyboard-shortcuts module (Cmd+S, Cmd+E, Escape) (6 tests)
-
-**Path A (Genesis Module System Fix)**: ✅ COMPLETE
-- Phase 1 ✅: Verified all Genesis templates already use ES6 modules
-- Phase 2 ✅: Verified AI Instructions document module system requirement
-- Phase 3 ✅: Implemented validate-module-system.sh validation script
-- Phase 4 ✅: Tested script on Genesis templates, PRA, architecture-decision-record
-- Phase 5 ✅: Committed to Genesis repo and pushed to origin/main
-- **Deliverable**: New validation script catches module system issues immediately
-
-### Live Deployment
-- **URL**: https://bordenet.github.io/architecture-decision-record/
-- **Status**: ✅ Live and working
-- **Performance**: All assets local (no CDN)
-- **Warnings**: 0 console errors
-
-### Quality Metrics
-- **Linting**: 0 errors ✅
-- **Unit tests**: 67/67 passing ✅
-- **E2E tests**: 17/17 passing ✅
-- **Coverage**: 84.18% (exceeds 70% threshold) ✅
-
-### Architecture
-- ES6 modules (properly bundled with esbuild)
-- Local Tailwind CSS build (PostCSS + autoprefixer)
-- Full test coverage (unit + E2E)
-- Zero dependencies on CDN
-
-### Path Status Summary
-1. **Path A**: Genesis Module System Fix (8-10 hours → 2 hours actual) ✅ COMPLETE
-2. **Path B**: E2E Tests (1-2 hours → 1.5 hours actual) ✅ COMPLETE
-3. **Path C**: Both Paths ✅ COMPLETE
-
-### For Future Work
-- architecture-decision-record: Production-ready, no further work needed
-- Genesis: validate-module-system.sh available for all future projects
-- Reference: product-requirements-assistant (passes all validation)
+**Project Status**: Production-ready. Live at https://bordenet.github.io/architecture-decision-record/
 
 ---
 
@@ -94,35 +37,13 @@
    - Lessons learned from Genesis implementation
 
 #### When to Reference:
-**✅ ALWAYS check these implementations when:**
-- Implementing dark mode (check `docs/index.html` lines 9-15 for Tailwind config)
-- Setting up workflow phases (check `js/workflow.js`)
-- Creating forms (check `js/app.js` renderPhase1Form)
-- Writing scripts (check `scripts/deploy-web.sh`, `scripts/setup-macos.sh`)
-- Adding UI patterns (check HTML/CSS patterns)
+**✅ Check these implementations when:**
+- Implementing dark mode (check Tailwind config patterns)
+- Setting up workflow phases (check 3-phase architecture)
+- Creating forms (check form patterns)
+- Writing scripts (check script best practices)
+- Adding UI patterns (check CSS/HTML patterns)
 - **ANY TIME you're unsure how to implement something**
-
-#### Create Reverse-Integration Notes:
-**📝 MANDATORY: When you reference the implementations to solve a problem:**
-
-1. **Add a note to `REVERSE-INTEGRATION-NOTES.md`** in this project
-2. **Use this format**:
-   ```markdown
-   ## REVERSE-INTEGRATION NOTE #[NUMBER]
-
-   **Date**: YYYY-MM-DD
-   **Issue**: [What problem did you encounter?]
-   **Solution**: [How did you solve it by referencing the implementations?]
-   **Reference**: [Link to specific file/line in reference implementation]
-   **Genesis Gap**: [What's missing from Genesis that caused this?]
-   **Recommendation**: [What should be added/updated in Genesis?]
-   **Files to Update**: [List Genesis files that need changes]
-   **Priority**: [CRITICAL / HIGH / MEDIUM / LOW]
-   ```
-
-3. **Why this matters**: Every note helps improve Genesis for the next project. This creates a continuous improvement cycle.
-
-**Rule**: If you reference the implementations more than once for the same issue, Genesis is missing something. Document it!
 
 ---
 
@@ -349,7 +270,6 @@ npm run lint:fix
 ## 📐 Coding Standards
 
 ### JavaScript Style Guide
-**Reference**: `genesis/integration/CODE_STYLE_STANDARDS.md`
 
 **Key Rules**:
 - Use ES6+ features (const/let, arrow functions, async/await)
@@ -359,17 +279,6 @@ npm run lint:fix
 - Descriptive variable names (no single letters except loop counters)
 - JSDoc comments for all functions
 - Defensive coding (validate inputs, handle errors)
-
-### Shell Script Style Guide
-**Reference**: `genesis/integration/SHELL_SCRIPT_STANDARDS.md`
-
-**Key Rules**:
-- Bash shebang: `#!/usr/bin/env bash`
-- `set -euo pipefail` for safety
-- Compact mode for user-facing scripts
-- Help flags (--help, -h, --verbose, -v)
-- Smart caching for setup scripts
-- Shellcheck compliance
 
 ### Testing Standards
 - ≥70% code coverage (≥85% for production apps)
