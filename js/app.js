@@ -5,11 +5,14 @@
 
 const { initializeTheme, showToast } = require("./ui.js");
 const { storage } = require("./storage.js");
+const { generatePhase1Draft } = require("./ai-mock.js");
+const { renderPhase1Form } = require("./views.js");
 
 class App {
   constructor() {
     this.currentProject = null;
     this.projects = [];
+    this.isEditingProject = false;
   }
 
   async init() {
@@ -164,8 +167,119 @@ class App {
   async openProject(id) {
     this.currentProject = await storage.getProject(id);
     if (this.currentProject) {
-      // TODO: Render project editor
-      showToast(`Opened: ${this.currentProject.title}`, "success");
+      this.isEditingProject = true;
+      await this.renderPhase1Form();
+    }
+  }
+
+  async renderPhase1Form() {
+    const container = document.getElementById("app-container");
+    container.innerHTML = renderPhase1Form(this.currentProject);
+
+    // Attach event listeners
+    this.setupPhase1Handlers();
+  }
+
+  setupPhase1Handlers() {
+    // Back button
+    const backBtn = document.getElementById("back-to-list-btn");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        this.isEditingProject = false;
+        this.renderProjectList();
+      });
+    }
+
+    // Save button
+    const saveBtn = document.getElementById("save-phase1-btn");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => this.savePhase1Data());
+    }
+
+    // Generate AI button
+    const generateBtn = document.getElementById("generate-ai-btn");
+    if (generateBtn) {
+      generateBtn.addEventListener("click", () => this.generatePhase1AI());
+    }
+
+    // Delete button
+    const deleteBtn = document.getElementById("delete-project-btn");
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+    }
+  }
+
+  async savePhase1Data() {
+    const title = document.getElementById("title-input").value.trim();
+    const context = document.getElementById("context-textarea").value.trim();
+    const decision = document.getElementById("decision-textarea").value.trim();
+    const consequences = document.getElementById("consequences-textarea").value.trim();
+    const rationale = document.getElementById("rationale-textarea").value.trim();
+    const status = document.getElementById("status-select").value;
+
+    if (!title || !context) {
+      showToast("Title and Context are required", "error");
+      return;
+    }
+
+    const updatedProject = {
+      ...this.currentProject,
+      title,
+      context,
+      decision,
+      consequences,
+      rationale,
+      status,
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      await storage.saveProject(updatedProject);
+      this.currentProject = updatedProject;
+      showToast("Project saved successfully", "success");
+    } catch (error) {
+      console.error("Save failed:", error);
+      showToast("Failed to save project", "error");
+    }
+  }
+
+  async generatePhase1AI() {
+    const title = document.getElementById("title-input").value.trim();
+    const context = document.getElementById("context-textarea").value.trim();
+
+    if (!title || !context) {
+      showToast("Please fill in Title and Context first", "error");
+      return;
+    }
+
+    try {
+      showToast("Generating with AI...", "info");
+      const aiResult = await generatePhase1Draft(title, context);
+
+      document.getElementById("decision-textarea").value = aiResult.decision;
+      document.getElementById("consequences-textarea").value = aiResult.consequences;
+      document.getElementById("rationale-textarea").value = aiResult.rationale;
+
+      showToast("AI draft generated successfully", "success");
+    } catch (error) {
+      console.error("AI generation failed:", error);
+      showToast("Failed to generate AI draft", "error");
+    }
+  }
+
+  async deleteCurrentProject() {
+    if (!window.confirm("Are you sure you want to delete this project?")) {
+      return;
+    }
+
+    try {
+      await storage.deleteProject(this.currentProject.id);
+      showToast("Project deleted", "success");
+      await this.loadProjects();
+      await this.renderProjectList();
+    } catch (error) {
+      console.error("Delete failed:", error);
+      showToast("Failed to delete project", "error");
     }
   }
 
