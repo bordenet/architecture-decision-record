@@ -1,0 +1,72 @@
+# Test artifacts and scaffolding
+setup-test.log
+backend.log
+frontend.log
+git_reset.log
+.setup-cache/
+
+# Project data directories (keep directory structure but ignore contents)
+outputs/*
+!outputs/.gitkeep
+inputs/*
+!inputs/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Node.js / JavaScript
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+coverage.out
+test-results/
+
+# Build artifacts
+build/
+dist/
+*.log
+
+################################################################################
+# GitHub Pages Architecture B: Serving from root (/)
+################################################################################
+# When GitHub Pages serves from root, docs/ should ONLY contain documentation,
+# NOT copies of app files. This prevents drift between root and docs/.
+docs/js/
+docs/css/
+docs/index.html
+docs/data/
+docs/*.html
+!docs/*.md
