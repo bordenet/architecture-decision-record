@@ -38,18 +38,67 @@ test.describe("Architecture Decision Record Assistant", () => {
     expect(btnType).toBe("button");
   });
 
+  test("should close privacy notice and persist state", async ({ page }) => {
+    const privacyNotice = await page.locator("#privacy-notice");
+    await expect(privacyNotice).toBeVisible();
+    
+    const closeBtn = await page.locator("#close-privacy-notice");
+    
+    // Click the close button
+    await closeBtn.click();
+    
+    // Wait for any animations
+    await page.waitForTimeout(200);
+    
+    // Verify the notice is hidden
+    const isHidden = await privacyNotice.evaluate(el => 
+      el.classList.contains("hidden")
+    );
+    expect(isHidden).toBe(true);
+    
+    // Verify localStorage was set to remember this
+    const hiddenStatus = await page.evaluate(() => 
+      localStorage.getItem("hiddenPrivacyNotice")
+    );
+    expect(hiddenStatus).toBe("true");
+    
+    // Reload page and verify notice stays hidden
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    
+    const reloadedNotice = await page.locator("#privacy-notice");
+    const stillHidden = await reloadedNotice.evaluate(el => 
+      el.classList.contains("hidden")
+    );
+    expect(stillHidden).toBe(true);
+  });
+
   test("should toggle dark mode", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+    
     const themeToggle = await page.locator("[id*='theme']").first();
     const htmlElement = await page.locator("html");
 
-    // Initial state
-    let classes = await htmlElement.getAttribute("class");
-    const initialDark = classes?.includes("dark") ?? false;
+    // Get initial dark mode state
+    let initialClasses = await htmlElement.getAttribute("class") || "";
+    const initialDark = initialClasses.includes("dark");
 
-    // This test may need adjustment based on actual theme toggle implementation
-    // For now, we verify dark mode settings can be accessed
+    // Click the theme toggle button
+    await themeToggle.click();
+    
+    // Wait for state change
+    await page.waitForTimeout(100);
+    
+    // Get updated dark mode state
+    let updatedClasses = await htmlElement.getAttribute("class") || "";
+    const updatedDark = updatedClasses.includes("dark");
+
+    // Verify the dark class was toggled
+    expect(initialDark).not.toBe(updatedDark);
+    
+    // Verify localStorage was updated
     const darkModeSetting = await page.evaluate(() => localStorage.getItem("darkMode"));
-    expect(darkModeSetting === null || darkModeSetting === "false" || darkModeSetting === "true").toBeTruthy();
+    expect(darkModeSetting === "true" || darkModeSetting === "false").toBeTruthy();
   });
 
   test("should create a new project", async ({ page }) => {

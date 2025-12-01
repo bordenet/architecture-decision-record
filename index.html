@@ -6,17 +6,9 @@
     <title>Architecture Decision Record Assistant</title>
     <meta name="description" content="An AI-assisted tool for drafting architecture decision records (ADRs) using the standard GitHub template format - 100% client-side, privacy-first">
     
-    <!-- Tailwind CSS with dark mode configuration -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // CRITICAL: Configure Tailwind dark mode AFTER script loads
-        // Without this, dark mode toggle won't work (defaults to 'media' mode)
-        // Reference: https://github.com/bordenet/product-requirements-assistant
-        tailwind.config = {
-            darkMode: 'class'
-        }
-    </script>
-
+    <!-- Tailwind CSS (built with PostCSS) -->
+    <link rel="stylesheet" href="css/tailwind.css">
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
     
