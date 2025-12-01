@@ -177,9 +177,8 @@ class App {
       title: "",
       status: "Proposed",
       context: "",
-      decision: "",
-      consequences: "",
-      rationale: "",
+      phase1Response: "",
+      phase2Review: "",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       phase: 1
@@ -380,53 +379,90 @@ class App {
       saveBtn.addEventListener("click", () => this.savePhase2Data());
     }
 
-    // Generate review button
+    // Generate prompt button
     const generateBtn = document.getElementById("generate-phase2-prompt-btn");
     if (generateBtn) {
       generateBtn.addEventListener("click", () => this.generatePhase2Prompt());
     }
 
+    // Next phase button
+    const nextBtn = document.getElementById("next-phase3-btn");
+    if (nextBtn) {
+      nextBtn.addEventListener("click", async () => {
+        await this.savePhase2Data();
+        this.currentProject.phase = 3;
+        await storage.saveProject(this.currentProject);
+        this.renderPhase3Form();
+      });
+    }
+
     // Skip button
     const skipBtn = document.getElementById("skip-phase2-btn");
     if (skipBtn) {
-      skipBtn.addEventListener("click", () => {
+      skipBtn.addEventListener("click", async () => {
         this.currentProject.phase = 3;
-        this.savePhase2Data();
+        await storage.saveProject(this.currentProject);
+        this.renderPhase3Form();
+      });
+    }
+
+    // View prompt button (modal)
+    const viewPromptBtn = document.getElementById("view-phase2-prompt-btn");
+    if (viewPromptBtn) {
+      viewPromptBtn.addEventListener("click", () => {
+        const modal = document.getElementById("phase2-prompt-modal");
+        if (modal) modal.classList.remove("hidden");
+      });
+    }
+
+    // Close modal button
+    const closeModalBtn = document.getElementById("close-phase2-modal-btn");
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener("click", () => {
+        const modal = document.getElementById("phase2-prompt-modal");
+        if (modal) modal.classList.add("hidden");
+      });
+    }
+
+    // Copy prompt from modal
+    const copyPromptBtn = document.getElementById("copy-phase2-prompt-btn");
+    if (copyPromptBtn) {
+      copyPromptBtn.addEventListener("click", async () => {
+        if (this.currentProject.phase2Prompt) {
+          await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
+          showToast("Prompt copied to clipboard!", "success");
+        }
       });
     }
   }
 
   async generatePhase2Prompt() {
+    // Check if Phase 1 response exists
+    if (!this.currentProject.phase1Response) {
+      showToast("Please complete Phase 1 first", "error");
+      return;
+    }
+
     try {
       // Load prompt template
       let promptTemplate = await loadPrompt(2);
       
-      // Get Phase 1 output
-      const phase1Output = `## Title
-${this.currentProject.title}
-
-## Context
-${this.currentProject.context}
-
-## Decision
-${this.currentProject.decision}
-
-## Consequences
-${this.currentProject.consequences}
-
-## Rationale
-${this.currentProject.rationale}`;
+      // Use the Phase 1 response directly (it's the complete ADR from Claude)
+      const phase1Output = this.currentProject.phase1Response;
       
       // Replace variables
       promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
       
-      // Display prompt in review textarea (we'll update UI to show this properly)
-      const reviewTextarea = document.getElementById("review-textarea");
-      if (reviewTextarea) {
-        reviewTextarea.value = "PROMPT FOR GEMINI:\n\n" + promptTemplate + "\n\n--- Paste Gemini's response below this line ---\n\n";
-      }
+      // Save prompt to project
+      this.currentProject.phase2Prompt = promptTemplate;
+      await storage.saveProject(this.currentProject);
       
-      showToast("Prompt generated! Copy it and paste to Gemini", "success");
+      // Copy to clipboard
+      await navigator.clipboard.writeText(promptTemplate);
+      showToast("Prompt copied to clipboard! Paste it to Gemini", "success");
+      
+      // Re-render to show prompt preview
+      this.renderPhase2Form();
     } catch (error) {
       console.error("Failed to generate Phase 2 prompt:", error);
       showToast("Failed to generate prompt", "error");
@@ -434,7 +470,7 @@ ${this.currentProject.rationale}`;
   }
 
   async savePhase2Data() {
-    const review = document.getElementById("review-textarea").value.trim();
+    const review = document.getElementById("phase2-response-textarea").value.trim();
 
     const updatedProject = {
       ...this.currentProject,
@@ -475,10 +511,10 @@ ${this.currentProject.rationale}`;
       });
     }
 
-    // Synthesize button
-    const synthesizeBtn = document.getElementById("generate-phase3-prompt-btn");
-    if (synthesizeBtn) {
-      synthesizeBtn.addEventListener("click", () => this.generatePhase3Prompt());
+    // Generate prompt button
+    const generateBtn = document.getElementById("generate-phase3-prompt-btn");
+    if (generateBtn) {
+      generateBtn.addEventListener("click", () => this.generatePhase3Prompt());
     }
 
     // Export button
@@ -492,43 +528,78 @@ ${this.currentProject.rationale}`;
     if (saveBtn) {
       saveBtn.addEventListener("click", () => this.savePhase3Data());
     }
+
+    // Back to list button
+    const backToListBtn = document.getElementById("back-to-list-btn");
+    if (backToListBtn) {
+      backToListBtn.addEventListener("click", () => {
+        this.isEditingProject = false;
+        this.currentProject = null;
+        this.renderProjectList();
+      });
+    }
+
+    // View prompt button (modal)
+    const viewPromptBtn = document.getElementById("view-phase3-prompt-btn");
+    if (viewPromptBtn) {
+      viewPromptBtn.addEventListener("click", () => {
+        const modal = document.getElementById("phase3-prompt-modal");
+        if (modal) modal.classList.remove("hidden");
+      });
+    }
+
+    // Close modal button
+    const closeModalBtn = document.getElementById("close-phase3-modal-btn");
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener("click", () => {
+        const modal = document.getElementById("phase3-prompt-modal");
+        if (modal) modal.classList.add("hidden");
+      });
+    }
+
+    // Copy prompt from modal
+    const copyPromptBtn = document.getElementById("copy-phase3-prompt-btn");
+    if (copyPromptBtn) {
+      copyPromptBtn.addEventListener("click", async () => {
+        if (this.currentProject.phase3Prompt) {
+          await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
+          showToast("Prompt copied to clipboard!", "success");
+        }
+      });
+    }
   }
 
   async generatePhase3Prompt() {
+    // Check if Phase 1 and Phase 2 responses exist
+    if (!this.currentProject.phase1Response) {
+      showToast("Please complete Phase 1 first", "error");
+      return;
+    }
+
     try {
       // Load prompt template
       let promptTemplate = await loadPrompt(3);
       
-      // Get Phase 1 output
-      const phase1Output = `## Title
-${this.currentProject.title}
-
-## Context
-${this.currentProject.context}
-
-## Decision
-${this.currentProject.decision}
-
-## Consequences
-${this.currentProject.consequences}
-
-## Rationale
-${this.currentProject.rationale}`;
+      // Use the Phase 1 response directly (it's the complete ADR from Claude)
+      const phase1Output = this.currentProject.phase1Response;
       
-      // Get Phase 2 output (Gemini's review)
-      const phase2Output = this.currentProject.review || "[No review provided]";
+      // Get Phase 2 review (Gemini's feedback)
+      const phase2Review = this.currentProject.phase2Review || "[No review provided]";
       
       // Replace variables
       promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
-      promptTemplate = promptTemplate.replace(/{phase2_output}/g, phase2Output);
+      promptTemplate = promptTemplate.replace(/{phase2_review}/g, phase2Review);
       
-      // Display prompt in synthesis textarea
-      const synthesisTextarea = document.getElementById("synthesis-textarea");
-      if (synthesisTextarea) {
-        synthesisTextarea.value = "PROMPT FOR CLAUDE:\n\n" + promptTemplate + "\n\n--- Paste Claude's synthesis below this line ---\n\n";
-      }
+      // Save prompt to project
+      this.currentProject.phase3Prompt = promptTemplate;
+      await storage.saveProject(this.currentProject);
       
-      showToast("Prompt generated! Copy it and paste to Claude.ai", "success");
+      // Copy to clipboard
+      await navigator.clipboard.writeText(promptTemplate);
+      showToast("Prompt copied to clipboard! Paste it to Claude.ai", "success");
+      
+      // Re-render to show prompt preview
+      this.renderPhase3Form();
     } catch (error) {
       console.error("Failed to generate Phase 3 prompt:", error);
       showToast("Failed to generate prompt", "error");
@@ -536,7 +607,7 @@ ${this.currentProject.rationale}`;
   }
 
   async exportADR() {
-    const adrContent = document.getElementById("final-adr-textarea").value.trim();
+    const adrContent = document.getElementById("phase3-response-textarea").value.trim();
 
     if (!adrContent) {
       showToast("Please synthesize the ADR first", "error");
@@ -554,7 +625,7 @@ ${this.currentProject.rationale}`;
   }
 
   async savePhase3Data() {
-    const finalADR = document.getElementById("final-adr-textarea").value.trim();
+    const finalADR = document.getElementById("phase3-response-textarea").value.trim();
 
     const updatedProject = {
       ...this.currentProject,

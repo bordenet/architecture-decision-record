@@ -8,11 +8,10 @@ You are reviewing an Architecture Decision Record (ADR) for completeness and qua
 
 Provide critical feedback on this ADR. Analyze:
 
-1. **Decision Completeness**: Is the decision specific and actionable? What's missing?
-2. **Context Validity**: Is the context sufficient to justify the decision? What additional context is needed?
-3. **Consequences Realism**: Are the consequences realistic and comprehensive? What consequences were overlooked?
-4. **Rationale Strength**: Is the rationale convincing? What alternatives should be considered?
-5. **Best Practices**: Does this align with modern architectural best practices?
+1. **Decision Clarity**: Is the decision specific and actionable? Could someone implement it?
+2. **Context Completeness**: Is the problem statement clear? Are constraints identified?
+3. **Consequences Balance**: Are BOTH positive AND negative consequences listed?
+4. **Feasibility**: Is this decision realistic given typical organizational constraints?
 
 ## Output Format
 
@@ -21,16 +20,16 @@ Provide your feedback in this structure:
 ### Strengths
 [What works well in this ADR]
 
-### Weaknesses
-[What needs improvement]
+### Weaknesses  
+[What needs improvement - be specific]
 
-### Missing Considerations
-[Important factors that weren't addressed]
+### Missing Elements
+[What's absent that should be included]
 
 ### Suggested Improvements
-[Specific recommendations to strengthen this ADR]
+[Concrete recommendations to strengthen the ADR]
 
 ### Alternative Approaches
-[Other architectural decisions that should be considered]
+[Other options the team should consider]
 
-Be direct and critical. The goal is to improve the ADR, not to validate it.
+Be constructive but critical. The goal is to improve the ADR, not to validate it.
