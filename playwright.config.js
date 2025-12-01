@@ -9,6 +9,7 @@ export default {
   webServer: {
     command: "npm run serve",
     port: 8000,
-    reuseExistingServer: !process.env.CI
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000
   }
 };
