@@ -7,7 +7,8 @@ const { initializeTheme, showToast } = require("./ui.js");
 const { storage } = require("./storage.js");
 const { generatePhase1Draft } = require("./ai-mock.js");
 const { generatePhase2Review } = require("./phase2-review.js");
-const { renderPhase1Form, renderPhase2Form } = require("./views.js");
+const { synthesizeADR, exportAsMarkdown } = require("./phase3-synthesis.js");
+const { renderPhase1Form, renderPhase2Form, renderPhase3Form } = require("./views.js");
 
 class App {
   constructor() {
@@ -377,7 +378,92 @@ class App {
 
   async renderPhase3Form() {
     const container = document.getElementById("app-container");
-    container.innerHTML = "<div class='text-center py-12'>Phase 3 Coming Soon</div>";
+    container.innerHTML = renderPhase3Form(this.currentProject);
+
+    // Attach event listeners
+    this.setupPhase3Handlers();
+  }
+
+  setupPhase3Handlers() {
+    // Back button
+    const backBtn = document.getElementById("back-to-phase2-btn");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        this.currentProject.phase = 2;
+        this.renderPhase2Form();
+      });
+    }
+
+    // Synthesize button
+    const synthesizeBtn = document.getElementById("synthesize-btn");
+    if (synthesizeBtn) {
+      synthesizeBtn.addEventListener("click", () => this.synthesizeADR());
+    }
+
+    // Export button
+    const exportBtn = document.getElementById("export-adr-btn");
+    if (exportBtn) {
+      exportBtn.addEventListener("click", () => this.exportADR());
+    }
+
+    // Save button
+    const saveBtn = document.getElementById("save-phase3-btn");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => this.savePhase3Data());
+    }
+  }
+
+  async synthesizeADR() {
+    try {
+      showToast("Synthesizing final ADR...", "info");
+      const finalADR = synthesizeADR(this.currentProject);
+
+      document.getElementById("final-adr-textarea").value = finalADR;
+      this.currentProject.finalADR = finalADR;
+
+      showToast("ADR synthesized successfully", "success");
+    } catch (error) {
+      console.error("Synthesis failed:", error);
+      showToast("Failed to synthesize ADR", "error");
+    }
+  }
+
+  async exportADR() {
+    const adrContent = document.getElementById("final-adr-textarea").value.trim();
+
+    if (!adrContent) {
+      showToast("Please synthesize the ADR first", "error");
+      return;
+    }
+
+    try {
+      const filename = `ADR-${this.currentProject.title.replace(/\s+/g, "-")}.md`;
+      exportAsMarkdown(adrContent, filename);
+      showToast("ADR exported as Markdown", "success");
+    } catch (error) {
+      console.error("Export failed:", error);
+      showToast("Failed to export ADR", "error");
+    }
+  }
+
+  async savePhase3Data() {
+    const finalADR = document.getElementById("final-adr-textarea").value.trim();
+
+    const updatedProject = {
+      ...this.currentProject,
+      finalADR,
+      phase: 3,
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      await storage.saveProject(updatedProject);
+      this.currentProject = updatedProject;
+      showToast("Final ADR saved successfully", "success");
+    } catch (error) {
+      console.error("Save failed:", error);
+      showToast("Failed to save ADR", "error");
+    }
   }
 
   async deleteCurrentProject() {
