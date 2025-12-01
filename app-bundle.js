@@ -150,7 +150,13 @@
   // js/ai-mock.js
   var require_ai_mock = __commonJS({
     "js/ai-mock.js"(exports, module) {
-      var AI_MODE = process.env.AI_MODE || "mock";
+      var getAIMode = () => {
+        if (typeof process !== "undefined" && process.env && process.env.AI_MODE) {
+          return process.env.AI_MODE;
+        }
+        return "mock";
+      };
+      var AI_MODE = getAIMode();
       async function generatePhase1Draft(title, context) {
         return {
           decision: `Based on the context provided, we recommend the following architectural approach:
