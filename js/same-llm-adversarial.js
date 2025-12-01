@@ -33,7 +33,7 @@ const SAME_LLM_CONFIG = {
   enabled: true
 };
 
-module.exports = {
+export {
   detectSameLLM,
   getAdversarialStrategy,
   applyAdversarialPrompt,

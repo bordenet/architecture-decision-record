@@ -27,4 +27,4 @@ class ProjectView {
   }
 }
 
-module.exports = { ProjectView };
+export { ProjectView };

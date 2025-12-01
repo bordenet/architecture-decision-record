@@ -122,7 +122,7 @@ function handleValidationError(errors, showToast) {
   };
 }
 
-module.exports = {
+export {
   getErrorMessage,
   handleStorageError,
   handleValidationError,

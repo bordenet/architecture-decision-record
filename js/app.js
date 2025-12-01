@@ -3,13 +3,13 @@
  * Architecture Decision Record Assistant
  */
 
-const { initializeTheme, setupThemeToggle, showToast } = require("./ui.js");
-const { storage } = require("./storage.js");
-const { generatePhase1Draft } = require("./ai-mock.js");
-const { generatePhase2Review } = require("./phase2-review.js");
-const { synthesizeADR, exportAsMarkdown } = require("./phase3-synthesis.js");
-const { renderPhase1Form, renderPhase2Form, renderPhase3Form } = require("./views.js");
-const { setupKeyboardShortcuts } = require("./keyboard-shortcuts.js");
+import { initializeTheme, setupThemeToggle, showToast } from './ui.js';
+import { storage } from './storage.js';
+import { generatePhase1Draft } from './ai-mock.js';
+import { generatePhase2Review } from './phase2-review.js';
+import { synthesizeADR, exportAsMarkdown } from './phase3-synthesis.js';
+import { renderPhase1Form, renderPhase2Form, renderPhase3Form } from './views.js';
+import { setupKeyboardShortcuts } from './keyboard-shortcuts.js';
 
 class App {
   constructor() {
@@ -554,4 +554,4 @@ const app = new App();
 app.init();
 window.app = app;
 
-module.exports = { App, app };
+export { App, app };

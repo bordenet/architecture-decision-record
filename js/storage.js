@@ -136,4 +136,4 @@ class Storage {
 
 const storage = new Storage();
 
-module.exports = { storage };
+export { storage };

@@ -17,4 +17,4 @@ function renderAIPanel() {
   `;
 }
 
-module.exports = { showMockAIResponse, renderAIPanel };
+export { showMockAIResponse, renderAIPanel };
