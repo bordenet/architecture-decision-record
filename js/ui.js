@@ -29,4 +29,11 @@ function setupThemeToggle() {
   }
 }
 
-export { initializeTheme, showToast, toggleTheme, setupThemeToggle };
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+export { initializeTheme, showToast, toggleTheme, setupThemeToggle, escapeHtml };
