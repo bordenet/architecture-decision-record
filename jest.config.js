@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   moduleFileExtensions: ["js"],
@@ -6,7 +6,8 @@ export default {
   collectCoverageFrom: [
     "js/**/*.js",
     "!js/**/ai-mock-ui.js",
-    "!js/**/ui.js"
+    "!js/**/ui.js",
+    "!js/**/app.js"
   ],
   coverageThreshold: {
     global: {

@@ -43,16 +43,42 @@ Based on the [architecture-decision-record](https://github.com/joelparkerhenders
 
 ---
 
-## Workflow
+## The 3-Phase Workflow
+
+The assistant guides you through a structured 3-phase process for creating comprehensive ADRs:
 
 ### Phase 1: Initial Draft (Mock Mode)
-User fills form with decision details → AI generates structured ADR draft (client-side)
+1. Fill in the ADR form with your decision context
+2. AI generates a structured initial ADR draft
+3. Review and refine the generated draft
+4. Save your draft and proceed to Phase 2
 
-### Phase 2: Review & Critique (Manual Mode)
-User copies ADR to external AI (Claude, ChatGPT, Gemini) → Incorporates feedback
+**What happens**: The system takes your inputs and organizes them into a formal ADR structure, creating a foundation for review.
+
+### Phase 2: Adversarial Review (Manual Mode)
+1. Copy the Phase 1 ADR to an external AI (Claude, ChatGPT, Gemini)
+2. Ask the AI to critique the decision from different angles
+3. Paste the AI feedback back into the tool
+4. Review how the original ADR holds up under scrutiny
+
+**What happens**: The external AI provides challenging questions and alternative perspectives to strengthen your decision. The tool automatically detects if you're using the same AI model as Phase 1 and applies adversarial strategies to maintain tension.
 
 ### Phase 3: Final Synthesis (Mock Mode)
-AI combines Phase 1 draft + Phase 2 feedback → Final polished ADR
+1. The system synthesizes Phase 1 draft and Phase 2 feedback
+2. Produces a final, polished ADR incorporating all insights
+3. Export as markdown for GitHub or JSON for storage
+4. Archive the complete decision history
+
+**What happens**: The final ADR reflects both your original thinking and critical review, resulting in a more robust architectural decision document.
+
+---
+
+## Key Features
+
+- **Same-LLM Detection**: When Phase 1 and Phase 2 use the same AI model, the tool automatically applies adversarial strategies to maintain quality and challenge your assumptions
+- **Multiple Projects**: Create and manage multiple ADRs in the same session
+- **Full History**: Each project maintains complete history through all 3 phases
+- **Privacy-First**: All processing happens in your browser—no data leaves your device
 
 ---
 
@@ -121,21 +147,53 @@ npm run lint:fix
 
 ## Deployment
 
-### Deploy to GitHub Pages
+### Automated Deployment
+
+This project uses GitHub Actions for continuous deployment. Every push to `main` triggers:
+1. Linting checks
+2. Unit tests
+3. Test coverage verification
+4. Automatic deployment to GitHub Pages
+
+**Live Site**: https://bordenet.github.io/architecture-decision-record/
+
+### Manual Deployment (Local)
+
+To deploy changes from your local machine:
 
 ```bash
 ./scripts/deploy-web.sh
 ```
 
 The script will:
-1. Run linting checks
-2. Run all tests
-3. Verify test coverage
-4. Commit and push to GitHub
-5. Verify GitHub Pages deployment
+1. Run linting checks (`npm run lint`)
+2. Run all unit tests (`npm test`)
+3. Verify test coverage meets requirements
+4. Commit changes with timestamp
+5. Push to GitHub (triggers CI/CD)
+6. Monitor deployment status
 
-**After deployment:**
-- Visit: https://bordenet.github.io/architecture-decision-record/
+### Deployment Workflow
+
+```
+Your changes
+    ↓
+npm run lint (automated)
+    ↓
+npm test (automated)
+    ↓
+git commit + push (automated)
+    ↓
+GitHub Actions CI/CD
+    ├─ Quality Gates
+    │  ├─ Linting
+    │  ├─ Tests
+    │  └─ Coverage
+    ↓
+GitHub Pages Deploy
+    ↓
+https://bordenet.github.io/architecture-decision-record/ (live)
+```
 
 ---
 
