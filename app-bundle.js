@@ -655,15 +655,71 @@ As discussed in the adversarial review phase, the following alternatives were co
     }
   });
 
+  // js/keyboard-shortcuts.js
+  var require_keyboard_shortcuts = __commonJS({
+    "js/keyboard-shortcuts.js"(exports, module) {
+      function setupKeyboardShortcuts() {
+        document.addEventListener("keydown", (event) => {
+          const isMeta = event.metaKey || event.ctrlKey;
+          if (isMeta && event.key === "s") {
+            event.preventDefault();
+            const saveBtn = document.querySelector("[id*='save']");
+            if (saveBtn) {
+              saveBtn.click();
+              showToast("Project saved", "success");
+            }
+          }
+          if (isMeta && event.key === "e") {
+            event.preventDefault();
+            const exportBtn = document.getElementById("export-all-btn");
+            if (exportBtn) {
+              exportBtn.click();
+              showToast("Exporting project...", "success");
+            }
+          }
+          if (event.key === "Escape") {
+            const privacyNotice = document.getElementById("privacy-notice");
+            const closeBtn = document.getElementById("close-privacy-notice");
+            if (privacyNotice && !privacyNotice.classList.contains("hidden")) {
+              closeBtn?.click();
+            }
+            const dropdownMenu = document.getElementById("related-projects-menu");
+            if (dropdownMenu && !dropdownMenu.classList.contains("hidden")) {
+              dropdownMenu.classList.add("hidden");
+            }
+          }
+        });
+      }
+      function showToast(message, type = "info") {
+        const container = document.getElementById("toast-container");
+        if (!container) return;
+        const toast = document.createElement("div");
+        const bgColor = {
+          success: "bg-green-500",
+          error: "bg-red-500",
+          info: "bg-blue-500"
+        }[type] || "bg-gray-500";
+        toast.className = `${bgColor} text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.remove();
+        }, 3e3);
+      }
+      module.exports = { setupKeyboardShortcuts, showToast };
+    }
+  });
+
   // js/app.js
   var require_app = __commonJS({
     "js/app.js"(exports, module) {
-      var { initializeTheme, showToast, setupThemeToggle } = require_ui();
+      var { initializeTheme, setupThemeToggle, showToast } = require_ui();
       var { storage } = require_storage();
       var { generatePhase1Draft } = require_ai_mock();
       var { generatePhase2Review } = require_phase2_review();
       var { synthesizeADR, exportAsMarkdown } = require_phase3_synthesis();
       var { renderPhase1Form, renderPhase2Form, renderPhase3Form } = require_views();
+      var { setupKeyboardShortcuts } = require_keyboard_shortcuts();
       var App = class {
         constructor() {
           this.currentProject = null;
@@ -676,6 +732,8 @@ As discussed in the adversarial review phase, the following alternatives were co
             initializeTheme();
             setupThemeToggle();
             console.log("Theme initialized");
+            setupKeyboardShortcuts();
+            console.log("Keyboard shortcuts configured");
             await this.loadProjects();
             console.log("Projects loaded:", this.projects.length);
             this.setupEventListeners();
