@@ -39,7 +39,7 @@ function isLiveMode() {
   return AI_MODE === "live";
 }
 
-module.exports = {
+export {
   AI_MODE,
   generatePhase1Draft,
   generatePhase3Synthesis,

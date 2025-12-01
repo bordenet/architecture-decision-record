@@ -29,4 +29,4 @@ function setupThemeToggle() {
   }
 }
 
-module.exports = { initializeTheme, showToast, toggleTheme, setupThemeToggle };
+export { initializeTheme, showToast, toggleTheme, setupThemeToggle };

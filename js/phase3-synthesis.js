@@ -114,4 +114,4 @@ function exportAsJSON(project) {
   URL.revokeObjectURL(url);
 }
 
-module.exports = { synthesizeADR, exportAsMarkdown, exportAsJSON };
+export { synthesizeADR, exportAsMarkdown, exportAsJSON };

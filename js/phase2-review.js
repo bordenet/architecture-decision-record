@@ -3,7 +3,7 @@
  * Generates adversarial reviews using same-LLM detection
  */
 
-const { getAdversarialStrategy } = require("./same-llm-adversarial.js");
+import { getAdversarialStrategy } from './same-llm-adversarial.js';
 
 async function generatePhase2Review(title, context, decision, currentModel = "Claude") {
   const strategy = getAdversarialStrategy(currentModel);
@@ -60,4 +60,4 @@ This adversarial review intentionally highlights potential weaknesses to ensure 
   return review;
 }
 
-module.exports = { generatePhase2Review };
+export { generatePhase2Review };

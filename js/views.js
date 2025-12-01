@@ -256,4 +256,4 @@ function renderPhase3Form(project) {
   `;
 }
 
-module.exports = { renderPhase1Form, renderPhase2Form, renderPhase3Form };
+export { renderPhase1Form, renderPhase2Form, renderPhase3Form };

@@ -33,4 +33,4 @@ class ProjectManager {
   }
 }
 
-module.exports = { ProjectManager };
+export { ProjectManager };

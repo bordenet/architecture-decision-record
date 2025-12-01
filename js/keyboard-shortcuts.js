@@ -76,4 +76,4 @@ function showToast(message, type = "info") {
   }, 3000);
 }
 
-module.exports = { setupKeyboardShortcuts, showToast };
+export { setupKeyboardShortcuts, showToast };

@@ -67,4 +67,4 @@ async function loadPrompt(phase) {
   }
 }
 
-module.exports = { Workflow, PHASES, PHASE_NAMES, PHASE_DESCRIPTIONS, loadPrompt };
+export { Workflow, PHASES, PHASE_NAMES, PHASE_DESCRIPTIONS, loadPrompt };
