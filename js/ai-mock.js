@@ -3,7 +3,17 @@
  * Provides mock AI responses for testing and demo
  */
 
-const AI_MODE = process.env.AI_MODE || "mock";
+// Safely access process.env in both browser and Node.js environments
+const getAIMode = () => {
+  // In Node.js (Jest/Node): process.env is available
+  if (typeof process !== "undefined" && process.env && process.env.AI_MODE) {
+    return process.env.AI_MODE;
+  }
+  // In browser: process is undefined, default to "mock"
+  return "mock";
+};
+
+const AI_MODE = getAIMode();
 
 async function generatePhase1Draft(title, context) {
   return {
