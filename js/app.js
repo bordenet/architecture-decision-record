@@ -6,7 +6,8 @@
 const { initializeTheme, showToast } = require("./ui.js");
 const { storage } = require("./storage.js");
 const { generatePhase1Draft } = require("./ai-mock.js");
-const { renderPhase1Form } = require("./views.js");
+const { generatePhase2Review } = require("./phase2-review.js");
+const { renderPhase1Form, renderPhase2Form } = require("./views.js");
 
 class App {
   constructor() {
@@ -207,6 +208,32 @@ class App {
     if (deleteBtn) {
       deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
     }
+
+    // Next phase button
+    const nextPhaseBtn = document.getElementById("next-phase-btn");
+    if (nextPhaseBtn) {
+      nextPhaseBtn.addEventListener("click", () => this.advanceToPhase2());
+    }
+  }
+
+  async advanceToPhase2() {
+    const title = document.getElementById("title-input").value.trim();
+    const context = document.getElementById("context-textarea").value.trim();
+
+    if (!title || !context) {
+      showToast("Please fill in Title and Context first", "error");
+      return;
+    }
+
+    // Save current data first
+    await this.savePhase1Data();
+
+    // Update project phase
+    this.currentProject.phase = 2;
+    await storage.saveProject(this.currentProject);
+
+    // Render Phase 2
+    this.renderPhase2Form();
   }
 
   async savePhase1Data() {
@@ -265,6 +292,92 @@ class App {
       console.error("AI generation failed:", error);
       showToast("Failed to generate AI draft", "error");
     }
+  }
+
+  async renderPhase2Form() {
+    const container = document.getElementById("app-container");
+    container.innerHTML = renderPhase2Form(this.currentProject);
+
+    // Attach event listeners
+    this.setupPhase2Handlers();
+  }
+
+  setupPhase2Handlers() {
+    // Back button
+    const backBtn = document.getElementById("back-to-phase1-btn");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        this.currentProject.phase = 1;
+        this.renderPhase1Form();
+      });
+    }
+
+    // Save button
+    const saveBtn = document.getElementById("save-phase2-btn");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => this.savePhase2Data());
+    }
+
+    // Generate review button
+    const generateBtn = document.getElementById("generate-review-btn");
+    if (generateBtn) {
+      generateBtn.addEventListener("click", () => this.generatePhase2Review());
+    }
+
+    // Skip button
+    const skipBtn = document.getElementById("skip-phase2-btn");
+    if (skipBtn) {
+      skipBtn.addEventListener("click", () => {
+        this.currentProject.phase = 3;
+        this.savePhase2Data();
+      });
+    }
+  }
+
+  async generatePhase2Review() {
+    try {
+      showToast("Generating adversarial critique...", "info");
+      const review = await generatePhase2Review(
+        this.currentProject.title,
+        this.currentProject.context,
+        this.currentProject.decision
+      );
+
+      document.getElementById("review-textarea").value = review;
+      showToast("Critique generated successfully", "success");
+    } catch (error) {
+      console.error("Review generation failed:", error);
+      showToast("Failed to generate critique", "error");
+    }
+  }
+
+  async savePhase2Data() {
+    const review = document.getElementById("review-textarea").value.trim();
+
+    const updatedProject = {
+      ...this.currentProject,
+      phase2Review: review,
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      await storage.saveProject(updatedProject);
+      this.currentProject = updatedProject;
+      showToast("Phase 2 saved", "success");
+
+      // If phase is 3, advance to Phase 3
+      if (this.currentProject.phase === 3) {
+        this.renderPhase3Form();
+      }
+    } catch (error) {
+      console.error("Save failed:", error);
+      showToast("Failed to save", "error");
+    }
+  }
+
+  async renderPhase3Form() {
+    const container = document.getElementById("app-container");
+    container.innerHTML = "<div class='text-center py-12'>Phase 3 Coming Soon</div>";
   }
 
   async deleteCurrentProject() {

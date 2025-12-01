@@ -1,4 +1,4 @@
-const { renderPhase1Form, renderPhase2, renderPhase3 } = require("../js/views.js");
+const { renderPhase1Form, renderPhase2Form, renderPhase3 } = require("../js/views.js");
 
 describe("Views Module", () => {
   const testProject = {
@@ -17,10 +17,10 @@ describe("Views Module", () => {
     expect(result).toContain("title-input");
   });
 
-  test("should render phase 2", () => {
-    const result = renderPhase2(testProject);
+  test("should render phase 2 form", () => {
+    const result = renderPhase2Form(testProject);
     expect(result).toContain("Phase 2: Review & Critique");
-    expect(result).toContain("Test decision");
+    expect(result).toContain("review-textarea");
   });
 
   test("should render phase 3", () => {
