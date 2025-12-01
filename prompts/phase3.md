@@ -1,4 +1,4 @@
-You are synthesizing an Architecture Decision Record (ADR) based on the original draft and critical feedback.
+You are synthesizing a final Architecture Decision Record (ADR) based on the original draft and critical feedback.
 
 ## Original ADR
 
@@ -11,37 +11,38 @@ You are synthesizing an Architecture Decision Record (ADR) based on the original
 ## Your Task
 
 Create a final, polished ADR that:
+
 1. Incorporates valid feedback from the review
 2. Addresses weaknesses identified
-3. Adds missing considerations
-4. Strengthens the rationale
-5. Maintains the core decision (unless feedback reveals fatal flaws)
+3. Adds any missing elements
+4. Maintains the standard ADR format (Title, Status, Context, Decision, Consequences)
 
 ## Output Format
 
 Return a complete, final ADR in this format:
 
 ```markdown
-## Title
-[Refined title]
+# [Title]
 
 ## Status
-[Status: Proposed, Accepted, Deprecated, Superseded]
+[Status]
 
 ## Context
-[Enhanced context incorporating feedback]
+[Improved context incorporating feedback]
 
 ## Decision
-[Refined decision statement]
+[Refined decision that addresses feedback]
 
 ## Consequences
-[Comprehensive consequences including points from feedback]
-
-## Rationale
-[Strengthened rationale addressing reviewer concerns]
-
-## Alternatives Considered
-[Document alternatives mentioned in feedback]
+[Comprehensive list of positive AND negative consequences]
 ```
 
-The output should be production-ready markdown that can be committed to a repository.
+## Guidelines
+
+1. Keep what works from the original
+2. Fix what the review identified as weak
+3. Add anything that was missing
+4. Ensure consequences include BOTH positive and negative impacts
+5. Make the final ADR production-ready for a repository
+
+Return only the final ADR in markdown format.
