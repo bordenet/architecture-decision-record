@@ -18,20 +18,37 @@ class App {
   }
 
   async init() {
-    // Initialize theme
-    initializeTheme();
-    setupThemeToggle();
+    try {
+      // eslint-disable-next-line no-console
+      console.log("App initialization started");
 
-    // Load projects
-    await this.loadProjects();
+      // Initialize theme
+      initializeTheme();
+      setupThemeToggle();
+      // eslint-disable-next-line no-console
+      console.log("Theme initialized");
 
-    // Setup event listeners
-    this.setupEventListeners();
+      // Load projects
+      await this.loadProjects();
+      // eslint-disable-next-line no-console
+      console.log("Projects loaded:", this.projects.length);
 
-    // Render initial view
-    await this.renderProjectList();
+      // Setup event listeners
+      this.setupEventListeners();
+      // eslint-disable-next-line no-console
+      console.log("Event listeners set up");
 
-    showToast("Application loaded successfully", "success");
+      // Render initial view
+      await this.renderProjectList();
+      // eslint-disable-next-line no-console
+      console.log("Project list rendered");
+
+      showToast("Application loaded successfully", "success");
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("App initialization error:", error);
+      showToast("Failed to initialize application", "error");
+    }
   }
 
   async loadProjects() {

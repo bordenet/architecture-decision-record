@@ -17,31 +17,46 @@ class Storage {
    */
   async init() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      try {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        this.db = request.result;
-        resolve();
-      };
+        request.onerror = () => {
+          // eslint-disable-next-line no-console
+          console.error("IndexedDB open error:", request.error);
+          reject(request.error);
+        };
 
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
+        request.onsuccess = () => {
+          this.db = request.result;
+          // eslint-disable-next-line no-console
+          console.log("IndexedDB initialized successfully");
+          resolve();
+        };
 
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          const projectStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-          projectStore.createIndex("updatedAt", "updatedAt", { unique: false });
-          projectStore.createIndex("title", "title", { unique: false });
-        }
+        request.onupgradeneeded = (event) => {
+          // eslint-disable-next-line no-console
+          console.log("IndexedDB upgrade needed");
+          const db = event.target.result;
 
-        if (!db.objectStoreNames.contains("prompts")) {
-          db.createObjectStore("prompts", { keyPath: "phase" });
-        }
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            const projectStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+            projectStore.createIndex("updatedAt", "updatedAt", { unique: false });
+            projectStore.createIndex("title", "title", { unique: false });
+          }
 
-        if (!db.objectStoreNames.contains("settings")) {
-          db.createObjectStore("settings", { keyPath: "key" });
-        }
-      };
+          if (!db.objectStoreNames.contains("prompts")) {
+            db.createObjectStore("prompts", { keyPath: "phase" });
+          }
+
+          if (!db.objectStoreNames.contains("settings")) {
+            db.createObjectStore("settings", { keyPath: "key" });
+          }
+        };
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("IndexedDB init error:", error);
+        reject(error);
+      }
     });
   }
 
