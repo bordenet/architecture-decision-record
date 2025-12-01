@@ -45,26 +45,36 @@
          */
         async init() {
           return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => {
-              this.db = request.result;
-              resolve();
-            };
-            request.onupgradeneeded = (event) => {
-              const db = event.target.result;
-              if (!db.objectStoreNames.contains(STORE_NAME)) {
-                const projectStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-                projectStore.createIndex("updatedAt", "updatedAt", { unique: false });
-                projectStore.createIndex("title", "title", { unique: false });
-              }
-              if (!db.objectStoreNames.contains("prompts")) {
-                db.createObjectStore("prompts", { keyPath: "phase" });
-              }
-              if (!db.objectStoreNames.contains("settings")) {
-                db.createObjectStore("settings", { keyPath: "key" });
-              }
-            };
+            try {
+              const request = indexedDB.open(DB_NAME, DB_VERSION);
+              request.onerror = () => {
+                console.error("IndexedDB open error:", request.error);
+                reject(request.error);
+              };
+              request.onsuccess = () => {
+                this.db = request.result;
+                console.log("IndexedDB initialized successfully");
+                resolve();
+              };
+              request.onupgradeneeded = (event) => {
+                console.log("IndexedDB upgrade needed");
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                  const projectStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+                  projectStore.createIndex("updatedAt", "updatedAt", { unique: false });
+                  projectStore.createIndex("title", "title", { unique: false });
+                }
+                if (!db.objectStoreNames.contains("prompts")) {
+                  db.createObjectStore("prompts", { keyPath: "phase" });
+                }
+                if (!db.objectStoreNames.contains("settings")) {
+                  db.createObjectStore("settings", { keyPath: "key" });
+                }
+              };
+            } catch (error) {
+              console.error("IndexedDB init error:", error);
+              reject(error);
+            }
           });
         }
         /**
@@ -655,12 +665,22 @@ As discussed in the adversarial review phase, the following alternatives were co
           this.isEditingProject = false;
         }
         async init() {
-          initializeTheme();
-          setupThemeToggle();
-          await this.loadProjects();
-          this.setupEventListeners();
-          await this.renderProjectList();
-          showToast("Application loaded successfully", "success");
+          try {
+            console.log("App initialization started");
+            initializeTheme();
+            setupThemeToggle();
+            console.log("Theme initialized");
+            await this.loadProjects();
+            console.log("Projects loaded:", this.projects.length);
+            this.setupEventListeners();
+            console.log("Event listeners set up");
+            await this.renderProjectList();
+            console.log("Project list rendered");
+            showToast("Application loaded successfully", "success");
+          } catch (error) {
+            console.error("App initialization error:", error);
+            showToast("Failed to initialize application", "error");
+          }
         }
         async loadProjects() {
           try {
