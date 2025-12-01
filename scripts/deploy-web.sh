@@ -76,6 +76,14 @@ if ! git diff-index --quiet HEAD --; then
 fi
 print_success "Working directory clean"
 
+# Build the application bundle
+print_header "Building application bundle"
+if ! npm run build; then
+  print_error "Build failed"
+  exit 1
+fi
+print_success "Build completed"
+
 # Linting
 print_header "Running linting"
 if ! npm run lint; then
