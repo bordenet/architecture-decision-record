@@ -22,4 +22,11 @@ function toggleTheme() {
   localStorage.setItem("darkMode", isDark);
 }
 
-module.exports = { initializeTheme, showToast, toggleTheme };
+function setupThemeToggle() {
+  const themeToggle = document.getElementById("theme-toggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme);
+  }
+}
+
+module.exports = { initializeTheme, showToast, toggleTheme, setupThemeToggle };

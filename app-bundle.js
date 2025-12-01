@@ -20,7 +20,13 @@
         const isDark = document.documentElement.classList.toggle("dark");
         localStorage.setItem("darkMode", isDark);
       }
-      module.exports = { initializeTheme, showToast, toggleTheme };
+      function setupThemeToggle() {
+        const themeToggle = document.getElementById("theme-toggle");
+        if (themeToggle) {
+          themeToggle.addEventListener("click", toggleTheme);
+        }
+      }
+      module.exports = { initializeTheme, showToast, toggleTheme, setupThemeToggle };
     }
   });
 
@@ -636,7 +642,7 @@ As discussed in the adversarial review phase, the following alternatives were co
   // js/app.js
   var require_app = __commonJS({
     "js/app.js"(exports, module) {
-      var { initializeTheme, showToast } = require_ui();
+      var { initializeTheme, showToast, setupThemeToggle } = require_ui();
       var { storage } = require_storage();
       var { generatePhase1Draft } = require_ai_mock();
       var { generatePhase2Review } = require_phase2_review();
@@ -650,6 +656,7 @@ As discussed in the adversarial review phase, the following alternatives were co
         }
         async init() {
           initializeTheme();
+          setupThemeToggle();
           await this.loadProjects();
           this.setupEventListeners();
           await this.renderProjectList();
