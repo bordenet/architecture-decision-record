@@ -1,25 +1,36 @@
-# Phase 2: Review & Critique - Architecture Decision Record Assistant
+You are reviewing an Architecture Decision Record (ADR) for completeness and quality.
 
-This phase involves external review of the initial ADR draft.
+## ADR to Review
 
-**What to do**:
-1. Copy the Phase 1 draft to your preferred AI (Claude, ChatGPT, Gemini, etc.)
-2. Ask for critical feedback on:
-   - Completeness of the decision
-   - Validity of the context
-   - Realism of the consequences
-   - Strength of the rationale
-3. Identify any missing considerations
-4. Suggest improvements
-5. Paste the feedback back here in Phase 3
+{phase1_output}
 
-**Sample feedback prompts**:
+## Your Task
 
-> "Review this ADR for completeness and provide critical feedback:"
-> "Are the consequences realistic? What's missing?"
-> "Is the rationale convincing? Suggest alternatives."
-> "Does this decision align with modern best practices?"
+Provide critical feedback on this ADR. Analyze:
 
----
+1. **Decision Completeness**: Is the decision specific and actionable? What's missing?
+2. **Context Validity**: Is the context sufficient to justify the decision? What additional context is needed?
+3. **Consequences Realism**: Are the consequences realistic and comprehensive? What consequences were overlooked?
+4. **Rationale Strength**: Is the rationale convincing? What alternatives should be considered?
+5. **Best Practices**: Does this align with modern architectural best practices?
 
-**The reviewed ADR and feedback from external AI will be used in Phase 3 to synthesize the final version.**
+## Output Format
+
+Provide your feedback in this structure:
+
+### Strengths
+[What works well in this ADR]
+
+### Weaknesses
+[What needs improvement]
+
+### Missing Considerations
+[Important factors that weren't addressed]
+
+### Suggested Improvements
+[Specific recommendations to strengthen this ADR]
+
+### Alternative Approaches
+[Other architectural decisions that should be considered]
+
+Be direct and critical. The goal is to improve the ADR, not to validate it.

@@ -1,11 +1,22 @@
-# Phase 1: Initial Draft - Architecture Decision Record Assistant
+You are helping draft an Architecture Decision Record (ADR).
 
-You are an AI assistant helping users draft Architecture Decision Records (ADRs).
+## Input
 
-Based on the user's input, generate a complete, well-structured ADR following this format:
+**Title**: {title}
 
----
+**Status**: {status}
 
+**Context**: {context}
+
+## Your Task
+
+Generate a complete ADR based on the input above. Fill in the Decision, Consequences, and Rationale sections.
+
+## Output Format
+
+Return a complete ADR in this markdown format:
+
+```markdown
 ## Title
 {title}
 
@@ -16,30 +27,29 @@ Based on the user's input, generate a complete, well-structured ADR following th
 {context}
 
 ## Decision
-[Formulate a clear architectural decision that addresses the specific challenges mentioned. Be specific and actionable.]
+[Write a clear, specific architectural decision that addresses the challenges in the context. Be actionable and technically sound.]
 
 ## Consequences
-[List both positive and negative impacts of this decision:
+[List both positive and negative impacts:
 - Technical implications
-- Team coordination requirements
+- Team coordination requirements  
 - System scalability effects
 - Migration/implementation costs]
 
 ## Rationale
-[Explain why this decision is better than alternatives:
+[Explain why this decision is superior to alternatives:
 - Cost/benefit analysis
 - Risk mitigation strategies
 - Alignment with organization goals
 - Industry best practices]
+```
 
----
+## Guidelines
 
-**Instructions for Claude**:
-1. Generate a COMPLETE ADR with all sections filled in
-2. Base the Decision, Consequences, and Rationale on the Context provided
-3. Include both positive and negative consequences
-4. Provide clear reasoning for why this approach is superior to alternatives
-5. Reference industry best practices where applicable
-6. Follow the ADR standard from GitHub: https://github.com/joelparkerhenderson/architecture-decision-record
+1. Make the decision specific and actionable
+2. Include both positive AND negative consequences
+3. Provide clear reasoning for why this approach is best
+4. Reference industry best practices where applicable
+5. Consider the ADR standard: https://github.com/joelparkerhenderson/architecture-decision-record
 
-**Output Format**: Return the complete ADR in markdown format, ready to paste back into the tool.
+Return only the filled-in ADR in markdown format, ready to use.
