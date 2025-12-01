@@ -58,7 +58,7 @@ class Workflow {
 
 async function loadPrompt(phase) {
   try {
-    const response = await fetch(`/prompts/phase${phase}.md`);
+    const response = await fetch(`./prompts/phase${phase}.md`);
     if (!response.ok) throw new Error("Prompt not found");
     return await response.text();
   } catch (error) {
