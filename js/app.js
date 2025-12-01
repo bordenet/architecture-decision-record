@@ -3,12 +3,13 @@
  * Architecture Decision Record Assistant
  */
 
-const { initializeTheme, showToast, setupThemeToggle } = require("./ui.js");
+const { initializeTheme, setupThemeToggle, showToast } = require("./ui.js");
 const { storage } = require("./storage.js");
 const { generatePhase1Draft } = require("./ai-mock.js");
 const { generatePhase2Review } = require("./phase2-review.js");
 const { synthesizeADR, exportAsMarkdown } = require("./phase3-synthesis.js");
 const { renderPhase1Form, renderPhase2Form, renderPhase3Form } = require("./views.js");
+const { setupKeyboardShortcuts } = require("./keyboard-shortcuts.js");
 
 class App {
   constructor() {
@@ -27,6 +28,11 @@ class App {
       setupThemeToggle();
       // eslint-disable-next-line no-console
       console.log("Theme initialized");
+
+      // Setup keyboard shortcuts
+      setupKeyboardShortcuts();
+      // eslint-disable-next-line no-console
+      console.log("Keyboard shortcuts configured");
 
       // Load projects
       await this.loadProjects();
