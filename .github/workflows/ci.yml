@@ -34,6 +34,9 @@ jobs:
     - name: Run ESLint
       run: npm run lint
 
+    - name: Validate Documentation Hygiene
+      run: bash ./scripts/lib/validate-docs.sh
+
   test:
     name: Test
     runs-on: ubuntu-latest

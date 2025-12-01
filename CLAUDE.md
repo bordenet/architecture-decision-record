@@ -149,6 +149,19 @@ Don't make the user ask "what's left?" multiple times.
 - [ ] Let script handle linting, testing, coverage, commit, push
 - [ ] Verify deployment URL after script completes
 
+### Documentation Hygiene (Automatic)
+Documentation validation runs automatically on every push via GitHub Actions:
+- ✅ SESSION-CHECKPOINT.md must be deleted if project is complete
+- ✅ No extensive "completed work" listings in documentation
+- ✅ No references to deleted files or directories
+- ✅ CLAUDE.md should stay focused (not exceed 600 lines)
+- ✅ No TODO lists in projects marked as complete
+
+To validate locally before pushing:
+```bash
+npm run validate:docs
+```
+
 ### When Adding Dependencies
 - [ ] **MANDATORY**: Update `./scripts/setup-macos.sh` FIRST
 - [ ] Update `./scripts/setup-linux.sh` if project supports Linux
