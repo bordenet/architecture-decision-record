@@ -1,4 +1,4 @@
-const { ProjectView } = require("../js/project-view.js");
+import { ProjectView } from "../js/project-view.js";
 
 describe("ProjectView Module", () => {
   const testProject = {

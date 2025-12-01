@@ -1,4 +1,4 @@
-const { detectSameLLM, getAdversarialStrategy } = require("../js/same-llm-adversarial.js");
+import { detectSameLLM, getAdversarialStrategy } from "../js/same-llm-adversarial.js";
 
 describe("Same-LLM Adversarial Module", () => {
   test("should detect same Claude model", () => {

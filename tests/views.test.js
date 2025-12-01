@@ -1,4 +1,4 @@
-const { renderPhase1Form, renderPhase2Form, renderPhase3Form } = require("../js/views.js");
+import { renderPhase1Form, renderPhase2Form, renderPhase3Form } from "../js/views.js";
 
 describe("Views Module", () => {
   const testProject = {

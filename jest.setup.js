@@ -1,4 +1,5 @@
-require("fake-indexeddb/auto");
+import "fake-indexeddb/auto";
+import { jest } from '@jest/globals';
 
 // Polyfill structuredClone for fake-indexeddb
 if (!global.structuredClone) {

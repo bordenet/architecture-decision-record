@@ -1,4 +1,4 @@
-const { initializeTheme, showToast, toggleTheme } = require("../js/ui.js");
+import { initializeTheme, showToast, toggleTheme } from "../js/ui.js";
 
 describe("UI Module", () => {
   beforeEach(() => {

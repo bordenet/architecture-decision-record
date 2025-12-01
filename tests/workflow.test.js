@@ -1,4 +1,4 @@
-const { Workflow, PHASES, PHASE_NAMES } = require("../js/workflow.js");
+import { Workflow, PHASES, PHASE_NAMES } from "../js/workflow.js";
 
 describe("Workflow Module", () => {
   test("should initialize with phase 1", () => {

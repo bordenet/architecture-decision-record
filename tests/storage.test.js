@@ -1,4 +1,4 @@
-const { storage } = require("../js/storage.js");
+import { storage } from "../js/storage.js";
 
 describe("Storage Module", () => {
   beforeEach(async () => {

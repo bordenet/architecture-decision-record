@@ -1,4 +1,4 @@
-const { generatePhase2Review } = require("../js/phase2-review.js");
+import { generatePhase2Review } from "../js/phase2-review.js";
 
 describe("Phase 2 Review Module", () => {
   test("should generate phase 2 review", async () => {
