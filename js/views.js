@@ -106,10 +106,13 @@ function renderPhase1Form(project) {
       <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
         <div class="space-x-3">
           <button id="save-phase1-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Save & Continue
+            Save
           </button>
           <button id="generate-ai-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
             ✨ Generate with AI
+          </button>
+          <button id="next-phase-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            → Phase 2
           </button>
         </div>
         <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
@@ -120,11 +123,72 @@ function renderPhase1Form(project) {
   `;
 }
 
-function renderPhase2(project) {
+function renderPhase2Form(project) {
   return `
-    <div class="phase-2">
-      <h2>Phase 2: Review & Critique</h2>
-      <p>${project.decision || "No decision provided"}</p>
+    <div class="phase-2-form space-y-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 2: Review & Critique</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Get adversarial feedback from external AI review
+          </p>
+        </div>
+        <button id="back-to-phase1-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          ← Back
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Original Decision -->
+        <div class="lg:col-span-1">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Your Decision</h3>
+          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+              <p class="text-gray-900 dark:text-white font-medium">${project.title || "Untitled"}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Context</label>
+              <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">${project.context || "No context"}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Decision</label>
+              <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">${project.decision || "No decision"}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adversarial Review -->
+        <div class="lg:col-span-1">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Adversarial Critique</h3>
+          <div>
+            <label for="review-textarea" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              AI Critical Feedback
+            </label>
+            <textarea 
+              id="review-textarea"
+              rows="12"
+              placeholder="Generate adversarial feedback..."
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            >${project.phase2Review || ""}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="space-x-3">
+          <button id="save-phase2-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Save & Continue
+          </button>
+          <button id="generate-review-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+            ✨ Generate Critique
+          </button>
+        </div>
+        <button id="skip-phase2-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          Skip to Phase 3
+        </button>
+      </div>
     </div>
   `;
 }
@@ -138,4 +202,4 @@ function renderPhase3(project) {
   `;
 }
 
-module.exports = { renderPhase1Form, renderPhase2, renderPhase3 };
+module.exports = { renderPhase1Form, renderPhase2Form, renderPhase3 };
