@@ -193,13 +193,67 @@ function renderPhase2Form(project) {
   `;
 }
 
-function renderPhase3(project) {
+function renderPhase3Form(project) {
   return `
-    <div class="phase-3">
-      <h2>Phase 3: Final Synthesis</h2>
-      <p>${project.rationale || "No rationale provided"}</p>
+    <div class="phase-3-form space-y-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 3: Final Synthesis</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Synthesize your decision with expert feedback
+          </p>
+        </div>
+        <button id="back-to-phase2-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          ← Back
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Left Column: Original and Feedback -->
+        <div class="lg:col-span-1 space-y-6">
+          <!-- Original Decision -->
+          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+            <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Your Original Decision</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">${project.decision || "No decision"}</p>
+          </div>
+
+          <!-- Adversarial Feedback -->
+          <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+            <h3 class="font-semibold text-yellow-900 dark:text-yellow-200 mb-3">Adversarial Feedback</h3>
+            <p class="text-sm text-yellow-800 dark:text-yellow-300 whitespace-pre-wrap max-h-48 overflow-y-auto">
+              ${project.phase2Review || "No feedback yet"}
+            </p>
+          </div>
+        </div>
+
+        <!-- Right Column: Final ADR -->
+        <div class="lg:col-span-1">
+          <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Final ADR Document</h3>
+          <textarea 
+            id="final-adr-textarea"
+            rows="20"
+            placeholder="Final synthesized ADR will appear here..."
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
+          >${project.finalADR || ""}</textarea>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="space-x-3">
+          <button id="synthesize-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+            ✨ Synthesize & Generate
+          </button>
+          <button id="export-adr-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            📥 Export ADR
+          </button>
+        </div>
+        <button id="save-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          Save
+        </button>
+      </div>
     </div>
   `;
 }
 
-module.exports = { renderPhase1Form, renderPhase2Form, renderPhase3 };
+module.exports = { renderPhase1Form, renderPhase2Form, renderPhase3Form };
