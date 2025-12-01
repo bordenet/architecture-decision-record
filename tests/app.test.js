@@ -4,37 +4,6 @@
  * Full testing is covered by E2E tests
  */
 
-// Mock the DOM and dependencies
-jest.mock("../js/storage.js", () => ({
-  storage: {
-    getAllProjects: jest.fn(() => Promise.resolve([])),
-    saveProject: jest.fn(),
-    getProject: jest.fn(),
-    deleteProject: jest.fn(),
-    init: jest.fn()
-  }
-}));
-
-jest.mock("../js/ui.js", () => ({
-  initializeTheme: jest.fn(),
-  showToast: jest.fn(),
-  toggleTheme: jest.fn()
-}));
-
-jest.mock("../js/ai-mock.js", () => ({
-  generatePhase1Draft: jest.fn(() => Promise.resolve({
-    decision: "Test decision",
-    consequences: "Test consequences",
-    rationale: "Test rationale"
-  }))
-}));
-
-jest.mock("../js/views.js", () => ({
-  renderPhase1Form: jest.fn(() => "<div>Phase 1 Form</div>"),
-  renderPhase2: jest.fn(() => "<div>Phase 2</div>"),
-  renderPhase3: jest.fn(() => "<div>Phase 3</div>")
-}));
-
 describe("App Module", () => {
   beforeEach(() => {
     document.body.innerHTML = `

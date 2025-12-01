@@ -1,9 +1,10 @@
-const {
+import { jest } from "@jest/globals";
+import {
   getErrorMessage,
   handleStorageError,
   handleValidationError,
   ERROR_MESSAGES
-} = require("../js/error-handler.js");
+} from "../js/error-handler.js";
 
 describe("Error Handler Module", () => {
   test("should have predefined error messages", () => {

@@ -1,4 +1,4 @@
-const { isMockMode, isLiveMode, generatePhase1Draft } = require("../js/ai-mock.js");
+import { isMockMode, isLiveMode, generatePhase1Draft } from "../js/ai-mock.js";
 
 describe("AI Mock Module", () => {
   test("should be in mock mode by default", () => {
