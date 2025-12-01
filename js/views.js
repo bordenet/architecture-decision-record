@@ -108,12 +108,33 @@ function renderPhase1Form(project) {
           <button id="save-phase1-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             Save
           </button>
-          <button id="generate-ai-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-            ✨ Generate with AI
+          <button id="generate-prompt-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+            📋 Generate Prompt for Claude
           </button>
           <button id="next-phase-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
             → Phase 2
           </button>
+        </div>
+
+        <!-- Prompt Display Area (hidden by default) -->
+        <div id="prompt-display" class="hidden mt-6 p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">📋 Prompt for Claude</h3>
+            <button id="copy-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              📋 Copy Prompt
+            </button>
+          </div>
+          <pre id="prompt-text" class="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 p-4 rounded border border-gray-300 dark:border-gray-600 max-h-96 overflow-y-auto"></pre>
+          <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded">
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Next steps:</strong><br>
+              1. Click "Copy Prompt" above<br>
+              2. Open Claude.ai in a new tab<br>
+              3. Paste the prompt and get Claude's response<br>
+              4. Paste Claude's response into the Decision, Consequences, and Rationale fields above<br>
+              5. Click "Save" and proceed to Phase 2
+            </p>
+          </div>
         </div>
         <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
           Delete
@@ -181,7 +202,7 @@ function renderPhase2Form(project) {
           <button id="save-phase2-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             Save & Continue
           </button>
-          <button id="generate-review-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          <button id="generate-phase2-prompt-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
             ✨ Generate Critique
           </button>
         </div>
@@ -241,8 +262,8 @@ function renderPhase3Form(project) {
       <!-- Action Buttons -->
       <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
         <div class="space-x-3">
-          <button id="synthesize-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-            ✨ Synthesize & Generate
+          <button id="generate-phase3-prompt-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+            📋 Generate Prompt for Claude
           </button>
           <button id="export-adr-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
             📥 Export ADR
