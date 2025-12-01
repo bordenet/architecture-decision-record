@@ -4,10 +4,11 @@
  */
 
 import { initializeTheme, setupThemeToggle, showToast } from "./ui.js";
+import { loadPrompt } from "./workflow.js";
 import { storage } from "./storage.js";
-import { generatePhase1Draft } from "./ai-mock.js";
-import { generatePhase2Review } from "./phase2-review.js";
-import { synthesizeADR, exportAsMarkdown } from "./phase3-synthesis.js";
+// Removed: import { generatePhase1Draft } from "./ai-mock.js"; - using prompts instead
+// Removed: import { generatePhase2Review } from "./phase2-review.js"; - using prompts instead
+import { exportAsMarkdown } from "./phase3-synthesis.js";
 import { renderPhase1Form, renderPhase2Form, renderPhase3Form } from "./views.js";
 import { setupKeyboardShortcuts } from "./keyboard-shortcuts.js";
 
@@ -223,9 +224,9 @@ class App {
     }
 
     // Generate AI button
-    const generateBtn = document.getElementById("generate-ai-btn");
+    const generateBtn = document.getElementById("generate-prompt-btn");
     if (generateBtn) {
-      generateBtn.addEventListener("click", () => this.generatePhase1AI());
+      generateBtn.addEventListener("click", () => this.generatePhase1Prompt());
     }
 
     // Delete button
@@ -295,7 +296,7 @@ class App {
     }
   }
 
-  async generatePhase1AI() {
+  async generatePhase1Prompt() {
     const title = document.getElementById("title-input").value.trim();
     const context = document.getElementById("context-textarea").value.trim();
 
@@ -305,17 +306,34 @@ class App {
     }
 
     try {
-      showToast("Generating with AI...", "info");
-      const aiResult = await generatePhase1Draft(title, context);
-
-      document.getElementById("decision-textarea").value = aiResult.decision;
-      document.getElementById("consequences-textarea").value = aiResult.consequences;
-      document.getElementById("rationale-textarea").value = aiResult.rationale;
-
-      showToast("AI draft generated successfully", "success");
+      // Load prompt template
+      let promptTemplate = await loadPrompt(1);
+      
+      // Replace variables
+      promptTemplate = promptTemplate.replace(/{title}/g, title);
+      promptTemplate = promptTemplate.replace(/{context}/g, context);
+      promptTemplate = promptTemplate.replace(/{status}/g, this.currentProject.status || "Proposed");
+      promptTemplate = promptTemplate.replace(/{decision}/g, this.currentProject.decision || "[To be filled by Claude]");
+      promptTemplate = promptTemplate.replace(/{consequences}/g, this.currentProject.consequences || "[To be filled by Claude]");
+      promptTemplate = promptTemplate.replace(/{rationale}/g, this.currentProject.rationale || "[To be filled by Claude]");
+      
+      // Display prompt
+      const promptDisplay = document.getElementById("prompt-display");
+      const promptText = document.getElementById("prompt-text");
+      promptText.textContent = promptTemplate;
+      promptDisplay.classList.remove("hidden");
+      
+      // Setup copy button
+      const copyBtn = document.getElementById("copy-prompt-btn");
+      copyBtn.onclick = async() => {
+        await navigator.clipboard.writeText(promptTemplate);
+        showToast("Prompt copied to clipboard!", "success");
+      };
+      
+      showToast("Prompt generated! Copy it and paste to Claude.ai", "success");
     } catch (error) {
-      console.error("AI generation failed:", error);
-      showToast("Failed to generate AI draft", "error");
+      console.error("Failed to generate prompt:", error);
+      showToast("Failed to generate prompt", "error");
     }
   }
 
@@ -344,9 +362,9 @@ class App {
     }
 
     // Generate review button
-    const generateBtn = document.getElementById("generate-review-btn");
+    const generateBtn = document.getElementById("generate-phase2-prompt-btn");
     if (generateBtn) {
-      generateBtn.addEventListener("click", () => this.generatePhase2Review());
+      generateBtn.addEventListener("click", () => this.generatePhase2Prompt());
     }
 
     // Skip button
@@ -359,20 +377,40 @@ class App {
     }
   }
 
-  async generatePhase2Review() {
+  async generatePhase2Prompt() {
     try {
-      showToast("Generating adversarial critique...", "info");
-      const review = await generatePhase2Review(
-        this.currentProject.title,
-        this.currentProject.context,
-        this.currentProject.decision
-      );
+      // Load prompt template
+      let promptTemplate = await loadPrompt(2);
+      
+      // Get Phase 1 output
+      const phase1Output = `## Title
+${this.currentProject.title}
 
-      document.getElementById("review-textarea").value = review;
-      showToast("Critique generated successfully", "success");
+## Context
+${this.currentProject.context}
+
+## Decision
+${this.currentProject.decision}
+
+## Consequences
+${this.currentProject.consequences}
+
+## Rationale
+${this.currentProject.rationale}`;
+      
+      // Replace variables
+      promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
+      
+      // Display prompt in review textarea (we'll update UI to show this properly)
+      const reviewTextarea = document.getElementById("review-textarea");
+      if (reviewTextarea) {
+        reviewTextarea.value = "PROMPT FOR GEMINI:\n\n" + promptTemplate + "\n\n--- Paste Gemini's response below this line ---\n\n";
+      }
+      
+      showToast("Prompt generated! Copy it and paste to Gemini", "success");
     } catch (error) {
-      console.error("Review generation failed:", error);
-      showToast("Failed to generate critique", "error");
+      console.error("Failed to generate Phase 2 prompt:", error);
+      showToast("Failed to generate prompt", "error");
     }
   }
 
@@ -419,9 +457,9 @@ class App {
     }
 
     // Synthesize button
-    const synthesizeBtn = document.getElementById("synthesize-btn");
+    const synthesizeBtn = document.getElementById("generate-phase3-prompt-btn");
     if (synthesizeBtn) {
-      synthesizeBtn.addEventListener("click", () => this.synthesizeADR());
+      synthesizeBtn.addEventListener("click", () => this.generatePhase3Prompt());
     }
 
     // Export button
@@ -437,18 +475,44 @@ class App {
     }
   }
 
-  async synthesizeADR() {
+  async generatePhase3Prompt() {
     try {
-      showToast("Synthesizing final ADR...", "info");
-      const finalADR = synthesizeADR(this.currentProject);
+      // Load prompt template
+      let promptTemplate = await loadPrompt(3);
+      
+      // Get Phase 1 output
+      const phase1Output = `## Title
+${this.currentProject.title}
 
-      document.getElementById("final-adr-textarea").value = finalADR;
-      this.currentProject.finalADR = finalADR;
+## Context
+${this.currentProject.context}
 
-      showToast("ADR synthesized successfully", "success");
+## Decision
+${this.currentProject.decision}
+
+## Consequences
+${this.currentProject.consequences}
+
+## Rationale
+${this.currentProject.rationale}`;
+      
+      // Get Phase 2 output (Gemini's review)
+      const phase2Output = this.currentProject.review || "[No review provided]";
+      
+      // Replace variables
+      promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
+      promptTemplate = promptTemplate.replace(/{phase2_output}/g, phase2Output);
+      
+      // Display prompt in synthesis textarea
+      const synthesisTextarea = document.getElementById("synthesis-textarea");
+      if (synthesisTextarea) {
+        synthesisTextarea.value = "PROMPT FOR CLAUDE:\n\n" + promptTemplate + "\n\n--- Paste Claude's synthesis below this line ---\n\n";
+      }
+      
+      showToast("Prompt generated! Copy it and paste to Claude.ai", "success");
     } catch (error) {
-      console.error("Synthesis failed:", error);
-      showToast("Failed to synthesize ADR", "error");
+      console.error("Failed to generate Phase 3 prompt:", error);
+      showToast("Failed to generate prompt", "error");
     }
   }
 
