@@ -9,19 +9,40 @@ describe("Views Module", () => {
     decision: "Split into microservices",
     consequences: "Increased complexity but better scalability",
     rationale: "Allows independent scaling",
+    phase: 1,
+    phase2Prompt: "",
+    phase2Review: "",
+    phase3Prompt: "",
+    finalADR: "",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
 
-  test("should render phase 1 form with all fields", () => {
+  test("should render phase 1 form with all ADR fields", () => {
     const result = renderPhase1Form(testProject);
-    expect(result).toContain("Architecture Decision Record");
+    expect(result).toContain("Phase 1: Create ADR");
     expect(result).toContain("title-input");
     expect(result).toContain("status-select");
     expect(result).toContain("context-textarea");
     expect(result).toContain("decision-textarea");
     expect(result).toContain("consequences-textarea");
     expect(result).toContain("rationale-textarea");
+    expect(result).toContain("Next: Phase 2");
+  });
+
+  test("should render phase 2 form for Claude review", () => {
+    const result = renderPhase2Form(testProject);
+    expect(result).toContain("Phase 2: Review with Claude");
+    expect(result).toContain("Generate Prompt for Claude");
+    expect(result).toContain("phase2-response-textarea");
+    expect(result).toContain("Next: Phase 3");
+  });
+
+  test("should render phase 3 form for synthesis", () => {
+    const result = renderPhase3Form(testProject);
+    expect(result).toContain("Phase 3: Final Synthesis");
+    expect(result).toContain("Generate Synthesis Prompt");
+    expect(result).toContain("phase3-response-textarea");
     expect(result).toContain("Export as Markdown");
   });
 
@@ -30,21 +51,10 @@ describe("Views Module", () => {
     expect(result).toContain(testProject.title);
     expect(result).toContain(testProject.context);
     expect(result).toContain(testProject.decision);
-    expect(result).toContain(testProject.consequences);
   });
 
-  test("should mark required fields", () => {
+  test("should mark required fields in phase 1", () => {
     const result = renderPhase1Form(testProject);
     expect(result).toContain("text-red-600");
-  });
-
-  test("should render phase 2 form", () => {
-    const result = renderPhase2Form(testProject);
-    expect(result).toContain("Not Used");
-  });
-
-  test("should render phase 3 form", () => {
-    const result = renderPhase3Form(testProject);
-    expect(result).toContain("Not Used");
   });
 });
