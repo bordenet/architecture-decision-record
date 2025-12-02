@@ -20,6 +20,20 @@
     }
   }
 
+  // js/workflow.js
+  async function loadPrompt(phase) {
+    try {
+      const response = await fetch(`./prompts/phase${phase}.md`);
+      if (!response.ok) throw new Error("Prompt not found");
+      return await response.text();
+    } catch (error) {
+      console.error(`Failed to load phase ${phase} prompt:`, error);
+      return `# Phase ${phase} Prompt
+
+Prompt loading failed.`;
+    }
+  }
+
   // js/storage.js
   var DB_NAME = "adr-assistant";
   var DB_VERSION = 1;
@@ -149,9 +163,9 @@
     <div class="phase-1-form space-y-6">
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Architecture Decision Record</h2>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 1: Create ADR</h2>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Complete the ADR following the GitHub standard template
+            Fill in the ADR form following GitHub standard
           </p>
         </div>
         <button id="back-to-list-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
@@ -253,13 +267,191 @@
           <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
             Save
           </button>
-          <button id="export-adr-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Export as Markdown
+          <button id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Next: Phase 2
           </button>
         </div>
         <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
           Delete
         </button>
+      </div>
+    </div>
+  `;
+  }
+  function renderPhase2Form(project) {
+    return `
+    <div class="phase-2-form space-y-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 2: Review with Claude</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Get adversarial feedback from Claude
+          </p>
+        </div>
+        <button id="back-to-phase1-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          Back
+        </button>
+      </div>
+
+      <!-- Step 1: Generate Prompt -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 1: Copy Prompt to Claude
+        </h3>
+        <button id="generate-phase2-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          Generate Prompt for Claude
+        </button>
+        ${project.phase2Prompt ? `
+          <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
+              <button id="view-phase2-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                View Full
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+              ${(project.phase2Prompt || "").substring(0, 200)}...
+            </p>
+          </div>
+        ` : ""}
+      </div>
+
+      <!-- Step 2: Paste Response -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 2: Paste Claude's Response
+        </h3>
+        <textarea
+          id="phase2-response-textarea"
+          rows="12"
+          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
+          placeholder="Paste Claude's entire critique here..."
+        >${project.phase2Review || ""}</textarea>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Paste Claude's full response - the critical feedback on your ADR
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex gap-3">
+          <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            Save
+          </button>
+          <button id="next-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Next: Phase 3
+          </button>
+        </div>
+        <button id="skip-phase2-btn" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          Skip to Phase 3
+        </button>
+      </div>
+
+      <!-- Prompt Modal -->
+      <div id="phase2-prompt-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 2 Prompt</h3>
+            <button id="close-phase2-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              X
+            </button>
+          </div>
+          <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase2Prompt || "No prompt generated yet"}</pre>
+          <div class="mt-4 flex justify-end">
+            <button id="copy-phase2-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Copy to Clipboard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  }
+  function renderPhase3Form(project) {
+    return `
+    <div class="phase-3-form space-y-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 3: Final Synthesis</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Synthesize final ADR with Claude
+          </p>
+        </div>
+        <button id="back-to-phase2-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          Back
+        </button>
+      </div>
+
+      <!-- Step 1: Generate Prompt -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 1: Copy Synthesis Prompt to Claude
+        </h3>
+        <button id="generate-phase3-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          Generate Synthesis Prompt
+        </button>
+        ${project.phase3Prompt ? `
+          <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
+              <button id="view-phase3-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                View Full
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+              ${(project.phase3Prompt || "").substring(0, 200)}...
+            </p>
+          </div>
+        ` : ""}
+      </div>
+
+      <!-- Step 2: Paste Response -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 2: Paste Claude's Final ADR
+        </h3>
+        <textarea
+          id="phase3-response-textarea"
+          rows="16"
+          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
+          placeholder="Paste Claude's final synthesized ADR here..."
+        >${project.finalADR || ""}</textarea>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Paste Claude's complete final ADR
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex gap-3">
+          <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            Save
+          </button>
+          <button id="export-adr-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+            Export as Markdown
+          </button>
+        </div>
+        <button id="back-to-list-btn" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          Back to Projects
+        </button>
+      </div>
+
+      <!-- Prompt Modal -->
+      <div id="phase3-prompt-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 3 Prompt</h3>
+            <button id="close-phase3-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              X
+            </button>
+          </div>
+          <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase3Prompt || "No prompt generated yet"}</pre>
+          <div class="mt-4 flex justify-end">
+            <button id="copy-phase3-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Copy to Clipboard
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -397,7 +589,7 @@
               </p>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">${p.context || "No context"}</p>
               <p class="text-xs text-gray-400 dark:text-gray-500 mt-3">
-                Updated: ${new Date(p.updatedAt).toLocaleDateString()}
+                Phase ${p.phase || 1} - Updated: ${new Date(p.updatedAt).toLocaleDateString()}
               </p>
             </div>
           `).join("")}
@@ -428,6 +620,11 @@
         decision: "",
         consequences: "",
         rationale: "",
+        phase: 1,
+        phase2Prompt: "",
+        phase2Review: "",
+        phase3Prompt: "",
+        finalADR: "",
         createdAt: (/* @__PURE__ */ new Date()).toISOString(),
         updatedAt: (/* @__PURE__ */ new Date()).toISOString()
       };
@@ -439,15 +636,24 @@
     async openProject(id) {
       this.currentProject = await storage.getProject(id);
       if (this.currentProject) {
-        await this.renderForm();
+        this.renderCurrentPhase();
       }
     }
-    async renderForm() {
+    renderCurrentPhase() {
+      const phase = this.currentProject.phase || 1;
       const container = document.getElementById("app-container");
-      container.innerHTML = renderPhase1Form(this.currentProject);
-      this.setupHandlers();
+      if (phase === 1) {
+        container.innerHTML = renderPhase1Form(this.currentProject);
+        this.setupPhase1Handlers();
+      } else if (phase === 2) {
+        container.innerHTML = renderPhase2Form(this.currentProject);
+        this.setupPhase2Handlers();
+      } else {
+        container.innerHTML = renderPhase3Form(this.currentProject);
+        this.setupPhase3Handlers();
+      }
     }
-    setupHandlers() {
+    setupPhase1Handlers() {
       const backBtn = document.getElementById("back-to-list-btn");
       if (backBtn) {
         backBtn.addEventListener("click", () => {
@@ -457,18 +663,18 @@
       }
       const saveBtn = document.getElementById("save-phase1-btn");
       if (saveBtn) {
-        saveBtn.addEventListener("click", () => this.saveData());
+        saveBtn.addEventListener("click", () => this.savePhase1Data());
       }
-      const exportBtn = document.getElementById("export-adr-btn");
-      if (exportBtn) {
-        exportBtn.addEventListener("click", () => this.exportADR());
+      const nextBtn = document.getElementById("next-phase-btn");
+      if (nextBtn) {
+        nextBtn.addEventListener("click", () => this.advanceToPhase2());
       }
       const deleteBtn = document.getElementById("delete-project-btn");
       if (deleteBtn) {
         deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
       }
     }
-    async saveData() {
+    async savePhase1Data() {
       const title = document.getElementById("title-input").value.trim();
       const status = document.getElementById("status-select").value;
       const context = document.getElementById("context-textarea").value.trim();
@@ -492,56 +698,237 @@
       try {
         await storage.saveProject(updatedProject);
         this.currentProject = updatedProject;
-        showToast("ADR saved successfully", "success");
+        showToast("Phase 1 saved successfully", "success");
       } catch (error) {
         console.error("Save failed:", error);
-        showToast("Failed to save ADR", "error");
+        showToast("Failed to save", "error");
       }
     }
-    async exportADR() {
+    async advanceToPhase2() {
       const title = document.getElementById("title-input").value.trim();
-      const status = document.getElementById("status-select").value;
       const context = document.getElementById("context-textarea").value.trim();
       const decision = document.getElementById("decision-textarea").value.trim();
       const consequences = document.getElementById("consequences-textarea").value.trim();
-      const rationale = document.getElementById("rationale-textarea").value.trim();
       if (!title || !context || !decision || !consequences) {
         showToast("Please fill in all required fields first", "error");
         return;
       }
-      let markdown = `# ${title}
+      await this.savePhase1Data();
+      this.currentProject.phase = 2;
+      await storage.saveProject(this.currentProject);
+      this.renderCurrentPhase();
+    }
+    setupPhase2Handlers() {
+      const backBtn = document.getElementById("back-to-phase1-btn");
+      if (backBtn) {
+        backBtn.addEventListener("click", () => {
+          this.currentProject.phase = 1;
+          this.renderCurrentPhase();
+        });
+      }
+      const generateBtn = document.getElementById("generate-phase2-prompt-btn");
+      if (generateBtn) {
+        generateBtn.addEventListener("click", () => this.generatePhase2Prompt());
+      }
+      const saveBtn = document.getElementById("save-phase2-btn");
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => this.savePhase2Data());
+      }
+      const nextBtn = document.getElementById("next-phase3-btn");
+      if (nextBtn) {
+        nextBtn.addEventListener("click", async () => {
+          await this.savePhase2Data();
+          this.currentProject.phase = 3;
+          await storage.saveProject(this.currentProject);
+          this.renderCurrentPhase();
+        });
+      }
+      const skipBtn = document.getElementById("skip-phase2-btn");
+      if (skipBtn) {
+        skipBtn.addEventListener("click", async () => {
+          this.currentProject.phase = 3;
+          await storage.saveProject(this.currentProject);
+          this.renderCurrentPhase();
+        });
+      }
+      const viewBtn = document.getElementById("view-phase2-prompt-btn");
+      if (viewBtn) {
+        viewBtn.addEventListener("click", () => {
+          const modal = document.getElementById("phase2-prompt-modal");
+          if (modal) modal.classList.remove("hidden");
+        });
+      }
+      const closeBtn = document.getElementById("close-phase2-modal-btn");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+          const modal = document.getElementById("phase2-prompt-modal");
+          if (modal) modal.classList.add("hidden");
+        });
+      }
+      const copyBtn = document.getElementById("copy-phase2-prompt-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", async () => {
+          if (this.currentProject.phase2Prompt) {
+            await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
+            showToast("Copied to clipboard!", "success");
+          }
+        });
+      }
+    }
+    async generatePhase2Prompt() {
+      try {
+        let promptTemplate = await loadPrompt(2);
+        const adr = `# ${this.currentProject.title}
 
-`;
-      markdown += `## Status
+## Status
+${this.currentProject.status}
 
-${status}
+## Context
+${this.currentProject.context}
 
-`;
-      markdown += `## Context
+## Decision
+${this.currentProject.decision}
 
-${context}
+## Consequences
+${this.currentProject.consequences}${this.currentProject.rationale ? `
 
-`;
-      markdown += `## Decision
+## Rationale
+${this.currentProject.rationale}` : ""}`;
+        promptTemplate = promptTemplate.replace(/{adr}/g, adr);
+        this.currentProject.phase2Prompt = promptTemplate;
+        await storage.saveProject(this.currentProject);
+        await navigator.clipboard.writeText(promptTemplate);
+        showToast("Prompt copied to clipboard! Paste it to Claude", "success");
+        this.renderCurrentPhase();
+      } catch (error) {
+        console.error("Failed to generate prompt:", error);
+        showToast("Failed to generate prompt", "error");
+      }
+    }
+    async savePhase2Data() {
+      const review = document.getElementById("phase2-response-textarea").value.trim();
+      const updatedProject = {
+        ...this.currentProject,
+        phase2Review: review,
+        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      try {
+        await storage.saveProject(updatedProject);
+        this.currentProject = updatedProject;
+        showToast("Phase 2 saved", "success");
+      } catch (error) {
+        console.error("Save failed:", error);
+        showToast("Failed to save", "error");
+      }
+    }
+    setupPhase3Handlers() {
+      const backBtn = document.getElementById("back-to-phase2-btn");
+      if (backBtn) {
+        backBtn.addEventListener("click", () => {
+          this.currentProject.phase = 2;
+          this.renderCurrentPhase();
+        });
+      }
+      const generateBtn = document.getElementById("generate-phase3-prompt-btn");
+      if (generateBtn) {
+        generateBtn.addEventListener("click", () => this.generatePhase3Prompt());
+      }
+      const saveBtn = document.getElementById("save-phase3-btn");
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => this.savePhase3Data());
+      }
+      const exportBtn = document.getElementById("export-adr-btn");
+      if (exportBtn) {
+        exportBtn.addEventListener("click", () => this.exportADR());
+      }
+      const backToListBtn = document.getElementById("back-to-list-btn");
+      if (backToListBtn) {
+        backToListBtn.addEventListener("click", () => {
+          this.currentProject = null;
+          this.renderProjectList();
+        });
+      }
+      const viewBtn = document.getElementById("view-phase3-prompt-btn");
+      if (viewBtn) {
+        viewBtn.addEventListener("click", () => {
+          const modal = document.getElementById("phase3-prompt-modal");
+          if (modal) modal.classList.remove("hidden");
+        });
+      }
+      const closeBtn = document.getElementById("close-phase3-modal-btn");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+          const modal = document.getElementById("phase3-prompt-modal");
+          if (modal) modal.classList.add("hidden");
+        });
+      }
+      const copyBtn = document.getElementById("copy-phase3-prompt-btn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", async () => {
+          if (this.currentProject.phase3Prompt) {
+            await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
+            showToast("Copied to clipboard!", "success");
+          }
+        });
+      }
+    }
+    async generatePhase3Prompt() {
+      try {
+        let promptTemplate = await loadPrompt(3);
+        const adr = `# ${this.currentProject.title}
 
-${decision}
+## Status
+${this.currentProject.status}
 
-`;
-      markdown += `## Consequences
+## Context
+${this.currentProject.context}
 
-${consequences}
+## Decision
+${this.currentProject.decision}
 
-`;
-      if (rationale) {
-        markdown += `## Rationale
+## Consequences
+${this.currentProject.consequences}${this.currentProject.rationale ? `
 
-${rationale}
-
-`;
+## Rationale
+${this.currentProject.rationale}` : ""}`;
+        const feedback = this.currentProject.phase2Review || "[No Phase 2 feedback provided]";
+        promptTemplate = promptTemplate.replace(/{adr}/g, adr);
+        promptTemplate = promptTemplate.replace(/{feedback}/g, feedback);
+        this.currentProject.phase3Prompt = promptTemplate;
+        await storage.saveProject(this.currentProject);
+        await navigator.clipboard.writeText(promptTemplate);
+        showToast("Prompt copied to clipboard! Paste it to Claude", "success");
+        this.renderCurrentPhase();
+      } catch (error) {
+        console.error("Failed to generate prompt:", error);
+        showToast("Failed to generate prompt", "error");
+      }
+    }
+    async savePhase3Data() {
+      const finalADR = document.getElementById("phase3-response-textarea").value.trim();
+      const updatedProject = {
+        ...this.currentProject,
+        finalADR,
+        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      try {
+        await storage.saveProject(updatedProject);
+        this.currentProject = updatedProject;
+        showToast("Phase 3 saved", "success");
+      } catch (error) {
+        console.error("Save failed:", error);
+        showToast("Failed to save", "error");
+      }
+    }
+    async exportADR() {
+      const adrContent = document.getElementById("phase3-response-textarea").value.trim();
+      if (!adrContent) {
+        showToast("Please enter the final ADR content first", "error");
+        return;
       }
       try {
-        const filename = `${title.replace(/\s+/g, "-")}.md`;
-        exportAsMarkdown(markdown, filename);
+        const filename = `${this.currentProject.title.replace(/\s+/g, "-")}.md`;
+        exportAsMarkdown(adrContent, filename);
         showToast("ADR exported as Markdown", "success");
       } catch (error) {
         console.error("Export failed:", error);

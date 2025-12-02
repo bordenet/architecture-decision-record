@@ -1,6 +1,6 @@
 /**
  * Views Module
- * Handles view rendering for ADR form
+ * Handles view rendering for 3-phase ADR workflow
  */
 
 function renderPhase1Form(project) {
@@ -8,9 +8,9 @@ function renderPhase1Form(project) {
     <div class="phase-1-form space-y-6">
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Architecture Decision Record</h2>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 1: Create ADR</h2>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Complete the ADR following the GitHub standard template
+            Fill in the ADR form following GitHub standard
           </p>
         </div>
         <button id="back-to-list-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
@@ -112,8 +112,8 @@ function renderPhase1Form(project) {
           <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
             Save
           </button>
-          <button id="export-adr-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Export as Markdown
+          <button id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Next: Phase 2
           </button>
         </div>
         <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
@@ -124,24 +124,180 @@ function renderPhase1Form(project) {
   `;
 }
 
-function renderPhase2Form() {
+function renderPhase2Form(project) {
   return `
     <div class="phase-2-form space-y-6">
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Not Used</h2>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 2: Review with Claude</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Get adversarial feedback from Claude
+          </p>
+        </div>
+        <button id="back-to-phase1-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          Back
+        </button>
+      </div>
+
+      <!-- Step 1: Generate Prompt -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 1: Copy Prompt to Claude
+        </h3>
+        <button id="generate-phase2-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          Generate Prompt for Claude
+        </button>
+        ${project.phase2Prompt ? `
+          <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
+              <button id="view-phase2-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                View Full
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+              ${(project.phase2Prompt || "").substring(0, 200)}...
+            </p>
+          </div>
+        ` : ""}
+      </div>
+
+      <!-- Step 2: Paste Response -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 2: Paste Claude's Response
+        </h3>
+        <textarea
+          id="phase2-response-textarea"
+          rows="12"
+          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
+          placeholder="Paste Claude's entire critique here..."
+        >${project.phase2Review || ""}</textarea>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Paste Claude's full response - the critical feedback on your ADR
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex gap-3">
+          <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            Save
+          </button>
+          <button id="next-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Next: Phase 3
+          </button>
+        </div>
+        <button id="skip-phase2-btn" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          Skip to Phase 3
+        </button>
+      </div>
+
+      <!-- Prompt Modal -->
+      <div id="phase2-prompt-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 2 Prompt</h3>
+            <button id="close-phase2-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              X
+            </button>
+          </div>
+          <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase2Prompt || "No prompt generated yet"}</pre>
+          <div class="mt-4 flex justify-end">
+            <button id="copy-phase2-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Copy to Clipboard
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `;
 }
 
-function renderPhase3Form() {
+function renderPhase3Form(project) {
   return `
     <div class="phase-3-form space-y-6">
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Not Used</h2>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 3: Final Synthesis</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Synthesize final ADR with Claude
+          </p>
+        </div>
+        <button id="back-to-phase2-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+          Back
+        </button>
+      </div>
+
+      <!-- Step 1: Generate Prompt -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 1: Copy Synthesis Prompt to Claude
+        </h3>
+        <button id="generate-phase3-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+          Generate Synthesis Prompt
+        </button>
+        ${project.phase3Prompt ? `
+          <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
+              <button id="view-phase3-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                View Full
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+              ${(project.phase3Prompt || "").substring(0, 200)}...
+            </p>
+          </div>
+        ` : ""}
+      </div>
+
+      <!-- Step 2: Paste Response -->
+      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Step 2: Paste Claude's Final ADR
+        </h3>
+        <textarea
+          id="phase3-response-textarea"
+          rows="16"
+          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
+          placeholder="Paste Claude's final synthesized ADR here..."
+        >${project.finalADR || ""}</textarea>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Paste Claude's complete final ADR
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex gap-3">
+          <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            Save
+          </button>
+          <button id="export-adr-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+            Export as Markdown
+          </button>
+        </div>
+        <button id="back-to-list-btn" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          Back to Projects
+        </button>
+      </div>
+
+      <!-- Prompt Modal -->
+      <div id="phase3-prompt-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 3 Prompt</h3>
+            <button id="close-phase3-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              X
+            </button>
+          </div>
+          <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase3Prompt || "No prompt generated yet"}</pre>
+          <div class="mt-4 flex justify-end">
+            <button id="copy-phase3-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Copy to Clipboard
+            </button>
+          </div>
         </div>
       </div>
     </div>
