@@ -4,19 +4,15 @@
  */
 
 import { initializeTheme, setupThemeToggle, showToast } from "./ui.js";
-import { loadPrompt } from "./workflow.js";
 import { storage } from "./storage.js";
-// Removed: import { generatePhase1Draft } from "./ai-mock.js"; - using prompts instead
-// Removed: import { generatePhase2Review } from "./phase2-review.js"; - using prompts instead
 import { exportAsMarkdown } from "./phase3-synthesis.js";
-import { renderPhase1Form, renderPhase2Form, renderPhase3Form } from "./views.js";
+import { renderPhase1Form } from "./views.js";
 import { setupKeyboardShortcuts } from "./keyboard-shortcuts.js";
 
 class App {
   constructor() {
     this.currentProject = null;
     this.projects = [];
-    this.isEditingProject = false;
   }
 
   async init() {
@@ -125,9 +121,9 @@ class App {
     if (this.projects.length === 0) {
       container.innerHTML = `
         <div class="text-center py-12">
-          <p class="text-gray-500 dark:text-gray-400 mb-6">No projects yet</p>
+          <p class="text-gray-500 dark:text-gray-400 mb-6">No ADRs yet</p>
           <button id="create-first-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            + Create Your First Project
+            + Create Your First ADR
           </button>
         </div>
       `;
@@ -143,6 +139,9 @@ class App {
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-lg transition-shadow cursor-pointer"
                  onclick="app.openProject('${p.id}')">
               <h3 class="font-bold text-lg text-gray-900 dark:text-white truncate">${p.title || "Untitled"}</h3>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                <span class="inline-block px-2 py-1 rounded bg-gray-200 dark:bg-gray-700">${p.status || "Proposed"}</span>
+              </p>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">${p.context || "No context"}</p>
               <p class="text-xs text-gray-400 dark:text-gray-500 mt-3">
                 Updated: ${new Date(p.updatedAt).toLocaleDateString()}
@@ -151,7 +150,7 @@ class App {
           `).join("")}
         </div>
         <button id="new-project-btn" class="mt-6 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
-          + New Project
+          + New ADR
         </button>
       `;
 
@@ -167,7 +166,7 @@ class App {
     const total = (estimate.quota / (1024 * 1024)).toFixed(2);
     const storageInfo = document.getElementById("storage-info");
     if (storageInfo) {
-      storageInfo.textContent = `${this.projects.length} projects • ${used}MB used of ${total}MB`;
+      storageInfo.textContent = `${this.projects.length} ADRs • ${used}MB used of ${total}MB`;
     }
   }
 
@@ -177,11 +176,11 @@ class App {
       title: "",
       status: "Proposed",
       context: "",
-      phase1Response: "",
-      phase2Review: "",
+      decision: "",
+      consequences: "",
+      rationale: "",
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      phase: 1
+      updatedAt: new Date().toISOString()
     };
 
     await storage.saveProject(project);
@@ -193,25 +192,24 @@ class App {
   async openProject(id) {
     this.currentProject = await storage.getProject(id);
     if (this.currentProject) {
-      this.isEditingProject = true;
-      await this.renderPhase1Form();
+      await this.renderForm();
     }
   }
 
-  async renderPhase1Form() {
+  async renderForm() {
     const container = document.getElementById("app-container");
     container.innerHTML = renderPhase1Form(this.currentProject);
 
     // Attach event listeners
-    this.setupPhase1Handlers();
+    this.setupHandlers();
   }
 
-  setupPhase1Handlers() {
+  setupHandlers() {
     // Back button
     const backBtn = document.getElementById("back-to-list-btn");
     if (backBtn) {
       backBtn.addEventListener("click", () => {
-        this.isEditingProject = false;
+        this.currentProject = null;
         this.renderProjectList();
       });
     }
@@ -219,302 +217,7 @@ class App {
     // Save button
     const saveBtn = document.getElementById("save-phase1-btn");
     if (saveBtn) {
-      saveBtn.addEventListener("click", () => this.savePhase1Data());
-    }
-
-    // Generate AI button
-    const generateBtn = document.getElementById("generate-prompt-btn");
-    if (generateBtn) {
-      generateBtn.addEventListener("click", () => this.generatePhase1Prompt());
-    }
-
-    // Delete button
-    const deleteBtn = document.getElementById("delete-project-btn");
-    if (deleteBtn) {
-      deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
-    }
-
-    // Next phase button
-    const nextPhaseBtn = document.getElementById("next-phase-btn");
-    if (nextPhaseBtn) {
-      nextPhaseBtn.addEventListener("click", () => this.advanceToPhase2());
-    }
-
-    // View prompt button (shows modal)
-    const viewPromptBtn = document.getElementById("view-prompt-btn");
-    if (viewPromptBtn) {
-      viewPromptBtn.addEventListener("click", () => {
-        const modal = document.getElementById("prompt-modal");
-        const promptText = document.getElementById("prompt-text");
-        promptText.textContent = this.currentProject.phase1Prompt || "";
-        modal.classList.remove("hidden");
-      });
-    }
-
-    // Close modal button
-    const closeModalBtn = document.getElementById("close-modal-btn");
-    if (closeModalBtn) {
-      closeModalBtn.addEventListener("click", () => {
-        const modal = document.getElementById("prompt-modal");
-        modal.classList.add("hidden");
-      });
-    }
-
-    // Close modal on background click
-    const modal = document.getElementById("prompt-modal");
-    if (modal) {
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
-          modal.classList.add("hidden");
-        }
-      });
-    }
-  }
-
-  async advanceToPhase2() {
-    const title = document.getElementById("title-input").value.trim();
-    const context = document.getElementById("context-textarea").value.trim();
-
-    if (!title || !context) {
-      showToast("Please fill in Title and Context first", "error");
-      return;
-    }
-
-    // Save current data first
-    await this.savePhase1Data();
-
-    // Update project phase
-    this.currentProject.phase = 2;
-    await storage.saveProject(this.currentProject);
-
-    // Render Phase 2
-    this.renderPhase2Form();
-  }
-
-  async savePhase1Data() {
-    const title = document.getElementById("title-input").value.trim();
-    const context = document.getElementById("context-textarea").value.trim();
-    const phase1Response = document.getElementById("phase1-response-textarea").value.trim();
-    const status = document.getElementById("status-select").value;
-
-    if (!title || !context) {
-      showToast("Title and Context are required", "error");
-      return;
-    }
-
-    const updatedProject = {
-      ...this.currentProject,
-      title,
-      context,
-      phase1Response,
-      status,
-      updatedAt: new Date().toISOString()
-    };
-
-    try {
-      await storage.saveProject(updatedProject);
-      this.currentProject = updatedProject;
-      showToast("Project saved successfully", "success");
-    } catch (error) {
-      console.error("Save failed:", error);
-      showToast("Failed to save project", "error");
-    }
-  }
-
-  async generatePhase1Prompt() {
-    const title = document.getElementById("title-input").value.trim();
-    const context = document.getElementById("context-textarea").value.trim();
-
-    if (!title || !context) {
-      showToast("Please fill in Title and Context first", "error");
-      return;
-    }
-
-    try {
-      // Load prompt template
-      let promptTemplate = await loadPrompt(1);
-      
-      // Replace variables
-      promptTemplate = promptTemplate.replace(/{title}/g, title);
-      promptTemplate = promptTemplate.replace(/{context}/g, context);
-      promptTemplate = promptTemplate.replace(/{status}/g, this.currentProject.status || "Proposed");
-      
-      // Save prompt to project
-      this.currentProject.phase1Prompt = promptTemplate;
-      await storage.saveProject(this.currentProject);
-      
-      // Copy to clipboard
-      await navigator.clipboard.writeText(promptTemplate);
-      showToast("Prompt copied to clipboard! Paste it to Claude.ai", "success");
-      
-      // Re-render to show prompt preview
-      this.renderPhase1Form();
-    } catch (error) {
-      console.error("Failed to generate prompt:", error);
-      showToast("Failed to generate prompt", "error");
-    }
-  }
-
-  async renderPhase2Form() {
-    const container = document.getElementById("app-container");
-    container.innerHTML = renderPhase2Form(this.currentProject);
-
-    // Attach event listeners
-    this.setupPhase2Handlers();
-  }
-
-  setupPhase2Handlers() {
-    // Back button
-    const backBtn = document.getElementById("back-to-phase1-btn");
-    if (backBtn) {
-      backBtn.addEventListener("click", () => {
-        this.currentProject.phase = 1;
-        this.renderPhase1Form();
-      });
-    }
-
-    // Save button
-    const saveBtn = document.getElementById("save-phase2-btn");
-    if (saveBtn) {
-      saveBtn.addEventListener("click", () => this.savePhase2Data());
-    }
-
-    // Generate prompt button
-    const generateBtn = document.getElementById("generate-phase2-prompt-btn");
-    if (generateBtn) {
-      generateBtn.addEventListener("click", () => this.generatePhase2Prompt());
-    }
-
-    // Next phase button
-    const nextBtn = document.getElementById("next-phase3-btn");
-    if (nextBtn) {
-      nextBtn.addEventListener("click", async () => {
-        await this.savePhase2Data();
-        this.currentProject.phase = 3;
-        await storage.saveProject(this.currentProject);
-        this.renderPhase3Form();
-      });
-    }
-
-    // Skip button
-    const skipBtn = document.getElementById("skip-phase2-btn");
-    if (skipBtn) {
-      skipBtn.addEventListener("click", async () => {
-        this.currentProject.phase = 3;
-        await storage.saveProject(this.currentProject);
-        this.renderPhase3Form();
-      });
-    }
-
-    // View prompt button (modal)
-    const viewPromptBtn = document.getElementById("view-phase2-prompt-btn");
-    if (viewPromptBtn) {
-      viewPromptBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase2-prompt-modal");
-        if (modal) modal.classList.remove("hidden");
-      });
-    }
-
-    // Close modal button
-    const closeModalBtn = document.getElementById("close-phase2-modal-btn");
-    if (closeModalBtn) {
-      closeModalBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase2-prompt-modal");
-        if (modal) modal.classList.add("hidden");
-      });
-    }
-
-    // Copy prompt from modal
-    const copyPromptBtn = document.getElementById("copy-phase2-prompt-btn");
-    if (copyPromptBtn) {
-      copyPromptBtn.addEventListener("click", async () => {
-        if (this.currentProject.phase2Prompt) {
-          await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
-          showToast("Prompt copied to clipboard!", "success");
-        }
-      });
-    }
-  }
-
-  async generatePhase2Prompt() {
-    // Check if Phase 1 response exists
-    if (!this.currentProject.phase1Response) {
-      showToast("Please complete Phase 1 first", "error");
-      return;
-    }
-
-    try {
-      // Load prompt template
-      let promptTemplate = await loadPrompt(2);
-      
-      // Use the Phase 1 response directly (it's the complete ADR from Claude)
-      const phase1Output = this.currentProject.phase1Response;
-      
-      // Replace variables
-      promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
-      
-      // Save prompt to project
-      this.currentProject.phase2Prompt = promptTemplate;
-      await storage.saveProject(this.currentProject);
-      
-      // Copy to clipboard
-      await navigator.clipboard.writeText(promptTemplate);
-      showToast("Prompt copied to clipboard! Paste it to Gemini", "success");
-      
-      // Re-render to show prompt preview
-      this.renderPhase2Form();
-    } catch (error) {
-      console.error("Failed to generate Phase 2 prompt:", error);
-      showToast("Failed to generate prompt", "error");
-    }
-  }
-
-  async savePhase2Data() {
-    const review = document.getElementById("phase2-response-textarea").value.trim();
-
-    const updatedProject = {
-      ...this.currentProject,
-      phase2Review: review,
-      updatedAt: new Date().toISOString()
-    };
-
-    try {
-      await storage.saveProject(updatedProject);
-      this.currentProject = updatedProject;
-      showToast("Phase 2 saved", "success");
-
-      // If phase is 3, advance to Phase 3
-      if (this.currentProject.phase === 3) {
-        this.renderPhase3Form();
-      }
-    } catch (error) {
-      console.error("Save failed:", error);
-      showToast("Failed to save", "error");
-    }
-  }
-
-  async renderPhase3Form() {
-    const container = document.getElementById("app-container");
-    container.innerHTML = renderPhase3Form(this.currentProject);
-
-    // Attach event listeners
-    this.setupPhase3Handlers();
-  }
-
-  setupPhase3Handlers() {
-    // Back button
-    const backBtn = document.getElementById("back-to-phase2-btn");
-    if (backBtn) {
-      backBtn.addEventListener("click", () => {
-        this.currentProject.phase = 2;
-        this.renderPhase2Form();
-      });
-    }
-
-    // Generate prompt button
-    const generateBtn = document.getElementById("generate-phase3-prompt-btn");
-    if (generateBtn) {
-      generateBtn.addEventListener("click", () => this.generatePhase3Prompt());
+      saveBtn.addEventListener("click", () => this.saveData());
     }
 
     // Export button
@@ -523,100 +226,73 @@ class App {
       exportBtn.addEventListener("click", () => this.exportADR());
     }
 
-    // Save button
-    const saveBtn = document.getElementById("save-phase3-btn");
-    if (saveBtn) {
-      saveBtn.addEventListener("click", () => this.savePhase3Data());
-    }
-
-    // Back to list button
-    const backToListBtn = document.getElementById("back-to-list-btn");
-    if (backToListBtn) {
-      backToListBtn.addEventListener("click", () => {
-        this.isEditingProject = false;
-        this.currentProject = null;
-        this.renderProjectList();
-      });
-    }
-
-    // View prompt button (modal)
-    const viewPromptBtn = document.getElementById("view-phase3-prompt-btn");
-    if (viewPromptBtn) {
-      viewPromptBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase3-prompt-modal");
-        if (modal) modal.classList.remove("hidden");
-      });
-    }
-
-    // Close modal button
-    const closeModalBtn = document.getElementById("close-phase3-modal-btn");
-    if (closeModalBtn) {
-      closeModalBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase3-prompt-modal");
-        if (modal) modal.classList.add("hidden");
-      });
-    }
-
-    // Copy prompt from modal
-    const copyPromptBtn = document.getElementById("copy-phase3-prompt-btn");
-    if (copyPromptBtn) {
-      copyPromptBtn.addEventListener("click", async () => {
-        if (this.currentProject.phase3Prompt) {
-          await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
-          showToast("Prompt copied to clipboard!", "success");
-        }
-      });
+    // Delete button
+    const deleteBtn = document.getElementById("delete-project-btn");
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
     }
   }
 
-  async generatePhase3Prompt() {
-    // Check if Phase 1 and Phase 2 responses exist
-    if (!this.currentProject.phase1Response) {
-      showToast("Please complete Phase 1 first", "error");
+  async saveData() {
+    const title = document.getElementById("title-input").value.trim();
+    const status = document.getElementById("status-select").value;
+    const context = document.getElementById("context-textarea").value.trim();
+    const decision = document.getElementById("decision-textarea").value.trim();
+    const consequences = document.getElementById("consequences-textarea").value.trim();
+    const rationale = document.getElementById("rationale-textarea").value.trim();
+
+    if (!title || !context || !decision || !consequences) {
+      showToast("Title, Context, Decision, and Consequences are required", "error");
       return;
     }
 
+    const updatedProject = {
+      ...this.currentProject,
+      title,
+      status,
+      context,
+      decision,
+      consequences,
+      rationale,
+      updatedAt: new Date().toISOString()
+    };
+
     try {
-      // Load prompt template
-      let promptTemplate = await loadPrompt(3);
-      
-      // Use the Phase 1 response directly (it's the complete ADR from Claude)
-      const phase1Output = this.currentProject.phase1Response;
-      
-      // Get Phase 2 review (Gemini's feedback)
-      const phase2Review = this.currentProject.phase2Review || "[No review provided]";
-      
-      // Replace variables
-      promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
-      promptTemplate = promptTemplate.replace(/{phase2_review}/g, phase2Review);
-      
-      // Save prompt to project
-      this.currentProject.phase3Prompt = promptTemplate;
-      await storage.saveProject(this.currentProject);
-      
-      // Copy to clipboard
-      await navigator.clipboard.writeText(promptTemplate);
-      showToast("Prompt copied to clipboard! Paste it to Claude.ai", "success");
-      
-      // Re-render to show prompt preview
-      this.renderPhase3Form();
+      await storage.saveProject(updatedProject);
+      this.currentProject = updatedProject;
+      showToast("ADR saved successfully", "success");
     } catch (error) {
-      console.error("Failed to generate Phase 3 prompt:", error);
-      showToast("Failed to generate prompt", "error");
+      console.error("Save failed:", error);
+      showToast("Failed to save ADR", "error");
     }
   }
 
   async exportADR() {
-    const adrContent = document.getElementById("phase3-response-textarea").value.trim();
+    const title = document.getElementById("title-input").value.trim();
+    const status = document.getElementById("status-select").value;
+    const context = document.getElementById("context-textarea").value.trim();
+    const decision = document.getElementById("decision-textarea").value.trim();
+    const consequences = document.getElementById("consequences-textarea").value.trim();
+    const rationale = document.getElementById("rationale-textarea").value.trim();
 
-    if (!adrContent) {
-      showToast("Please synthesize the ADR first", "error");
+    if (!title || !context || !decision || !consequences) {
+      showToast("Please fill in all required fields first", "error");
       return;
     }
 
+    // Build markdown content
+    let markdown = `# ${title}\n\n`;
+    markdown += `## Status\n\n${status}\n\n`;
+    markdown += `## Context\n\n${context}\n\n`;
+    markdown += `## Decision\n\n${decision}\n\n`;
+    markdown += `## Consequences\n\n${consequences}\n\n`;
+    if (rationale) {
+      markdown += `## Rationale\n\n${rationale}\n\n`;
+    }
+
     try {
-      const filename = `ADR-${this.currentProject.title.replace(/\s+/g, "-")}.md`;
-      exportAsMarkdown(adrContent, filename);
+      const filename = `${title.replace(/\s+/g, "-")}.md`;
+      exportAsMarkdown(markdown, filename);
       showToast("ADR exported as Markdown", "success");
     } catch (error) {
       console.error("Export failed:", error);
@@ -624,39 +300,19 @@ class App {
     }
   }
 
-  async savePhase3Data() {
-    const finalADR = document.getElementById("phase3-response-textarea").value.trim();
-
-    const updatedProject = {
-      ...this.currentProject,
-      finalADR,
-      phase: 3,
-      updatedAt: new Date().toISOString()
-    };
-
-    try {
-      await storage.saveProject(updatedProject);
-      this.currentProject = updatedProject;
-      showToast("Final ADR saved successfully", "success");
-    } catch (error) {
-      console.error("Save failed:", error);
-      showToast("Failed to save ADR", "error");
-    }
-  }
-
   async deleteCurrentProject() {
-    if (!window.confirm("Are you sure you want to delete this project?")) {
+    if (!window.confirm("Are you sure you want to delete this ADR?")) {
       return;
     }
 
     try {
       await storage.deleteProject(this.currentProject.id);
-      showToast("Project deleted", "success");
+      showToast("ADR deleted", "success");
       await this.loadProjects();
       await this.renderProjectList();
     } catch (error) {
       console.error("Delete failed:", error);
-      showToast("Failed to delete project", "error");
+      showToast("Failed to delete ADR", "error");
     }
   }
 
@@ -676,7 +332,7 @@ class App {
     a.click();
     URL.revokeObjectURL(url);
 
-    showToast(`Exported ${this.projects.length} projects`, "success");
+    showToast(`Exported ${this.projects.length} ADRs`, "success");
   }
 
   async importFile(event) {
@@ -693,11 +349,11 @@ class App {
         }
         await this.loadProjects();
         await this.renderProjectList();
-        showToast(`Imported ${data.projects.length} projects`, "success");
+        showToast(`Imported ${data.projects.length} ADRs`, "success");
       }
     } catch (error) {
       console.error("Import failed:", error);
-      showToast("Failed to import projects", "error");
+      showToast("Failed to import ADRs", "error");
     }
 
     event.target.value = "";
