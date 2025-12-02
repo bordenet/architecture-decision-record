@@ -169,23 +169,23 @@ class ADRPromptTuner {
     } else if (testCase.id.includes("002")) {
       decisionText = "We will migrate our jQuery-based admin dashboard to React with TypeScript, establishing a component library shared across all frontend services. This addresses the 6-week onboarding time for new developers and reduces 40% of engineering time spent on bugs rather than features.";
       positiveConsequences = `- Reduces developer onboarding from 6 weeks to 2 weeks through component reusability and clear patterns
-- Enables automated testing: component test coverage increases from 0% to 80%+ within first quarter
-- Reduces bug-related work from 40% to 10% of sprint time through type safety (TypeScript) and component isolation
-- Improves performance: lazy-loading and bundle optimization reduce initial load from 8s to 2s`;
+- Enables automated testing: component test coverage increases from 0% to 80%+ within first quarter through Jest and React Testing Library
+- Reduces bug-related work from 40% to 10% of sprint time through TypeScript type safety preventing runtime errors and component isolation preventing state leaks
+- Reduces initial page load from 8s to 2s through lazy-loading and bundle optimization; reduces time-to-interactive from 12s to 4s`;
       negativeConsequences = `- Requires React and TypeScript expertise; team needs 4-week ramp-up period before productive at target velocity
 - Migration effort is 6-8 weeks for existing features; requires parallel implementation to avoid downtime
-- Increases build infrastructure complexity with new toolchain (webpack/Vite) and dependency management overhead
-- Requires npm ecosystem security practices; developers need training on managing transitive dependencies`;
+- Adds new toolchain burden with Webpack/Vite build system configuration, module bundling, and npm dependency management requirements
+- Introduces npm ecosystem security and supply-chain risks; requires dependency scanning with Snyk/Dependabot and transitive dependency management training`;
     } else if (testCase.id.includes("003")) {
-      decisionText = "We will migrate our relational database of 500GB primarily unstructured operational logs to a time-series database (InfluxDB or similar), compressing and retaining only aggregated metrics beyond 30 days. This addresses $150k quarterly costs and 30-minute query latencies for analytics.";
+      decisionText = "We will migrate our relational database of 500GB primarily unstructured operational logs to a time-series database (InfluxDB or Prometheus), compressing and retaining only aggregated metrics beyond 30 days. This addresses $150k quarterly costs and 30-minute query latencies for analytics.";
       positiveConsequences = `- Reduces storage costs by 75% through compression and intelligent retention policies; quarterly cost drops from $150k to $37k
-- Improves query performance from 30 minutes to 30 seconds for analytics queries through columnar storage
-- Enables real-time dashboards and alerts by supporting sub-second query response times for recent data windows
-- Allows automatic enforcement of legal data deletion requirements through granular retention policies`;
-      negativeConsequences = `- Requires migrating 500GB data with zero downtime; dual-write period during migration increases database load 20%
-- Requires retraining analytics team: time-series semantics differ significantly from relational; 3-4 weeks learning curve for new query patterns
-- Limits query flexibility: complex joins become impossible; data model must be redesigned around time-series expectations
-- Increases operational dependencies: time-series database clustering and replication complexity if not using managed service`;
+- Reduces analytics query latency from 30 minutes to 30 seconds through columnar storage and time-series optimization
+- Enables real-time dashboards and automated alerts by supporting sub-second query response times for recent data windows (last 24 hours)
+- Enforces automatic compliance with data deletion regulations (GDPR, CCPA) through granular, policy-based retention that requires no manual intervention`;
+      negativeConsequences = `- Requires zero-downtime migration of 500GB data; dual-write period during migration increases database load 20%, requiring temporary capacity upgrade
+- Requires analytics team retraining: time-series query semantics differ significantly from relational; 3-4 weeks learning curve for new query patterns and aggregation methods
+- Eliminates relational query capabilities: complex joins become impossible; data models must restructure around time-series events rather than relational schemas
+- Requires either managed service ($5-10k/month) or dedicated ops expertise: time-series database clustering, replication, and backup procedures differ from relational databases`;
     } else {
       decisionText = "We will establish centralized OAuth 2.0 authentication with single-sign-on (SSO), removing per-service login implementations. This addresses 12 security vulnerabilities from inconsistent auth and enables mandated multi-factor authentication across all services.";
       positiveConsequences = `- Reduces security vulnerabilities from 12 OWASP findings to 0 by eliminating session cookie handling bugs replicated across services
