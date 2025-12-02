@@ -305,9 +305,14 @@ Prompt loading failed.`;
           <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between mb-2">
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
-              <button id="view-phase2-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
-                View Full
-              </button>
+              <div class="flex gap-2">
+                <button id="copy-phase2-prompt-quick-btn" class="text-green-600 dark:text-green-400 hover:underline text-sm font-medium">
+                  Copy
+                </button>
+                <button id="view-phase2-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                  View Full
+                </button>
+              </div>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
               ${(project.phase2Prompt || "").substring(0, 200)}...
@@ -394,9 +399,14 @@ Prompt loading failed.`;
           <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between mb-2">
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
-              <button id="view-phase3-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
-                View Full
-              </button>
+              <div class="flex gap-2">
+                <button id="copy-phase3-prompt-quick-btn" class="text-green-600 dark:text-green-400 hover:underline text-sm font-medium">
+                  Copy
+                </button>
+                <button id="view-phase3-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                  View Full
+                </button>
+              </div>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
               ${(project.phase3Prompt || "").substring(0, 200)}...
@@ -774,6 +784,15 @@ Prompt loading failed.`;
           }
         });
       }
+      const quickCopyBtn = document.getElementById("copy-phase2-prompt-quick-btn");
+      if (quickCopyBtn) {
+        quickCopyBtn.addEventListener("click", async () => {
+          if (this.currentProject.phase2Prompt) {
+            await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
+            showToast("Copied to clipboard!", "success");
+          }
+        });
+      }
     }
     async generatePhase2Prompt() {
       try {
@@ -865,6 +884,15 @@ ${this.currentProject.rationale}` : ""}`;
       const copyBtn = document.getElementById("copy-phase3-prompt-btn");
       if (copyBtn) {
         copyBtn.addEventListener("click", async () => {
+          if (this.currentProject.phase3Prompt) {
+            await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
+            showToast("Copied to clipboard!", "success");
+          }
+        });
+      }
+      const quickCopyBtn = document.getElementById("copy-phase3-prompt-quick-btn");
+      if (quickCopyBtn) {
+        quickCopyBtn.addEventListener("click", async () => {
           if (this.currentProject.phase3Prompt) {
             await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
             showToast("Copied to clipboard!", "success");

@@ -364,10 +364,21 @@ class App {
       });
     }
 
-    // Copy prompt button
+    // Copy prompt button (from modal)
     const copyBtn = document.getElementById("copy-phase2-prompt-btn");
     if (copyBtn) {
       copyBtn.addEventListener("click", async() => {
+        if (this.currentProject.phase2Prompt) {
+          await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
+          showToast("Copied to clipboard!", "success");
+        }
+      });
+    }
+
+    // Quick copy button (from preview)
+    const quickCopyBtn = document.getElementById("copy-phase2-prompt-quick-btn");
+    if (quickCopyBtn) {
+      quickCopyBtn.addEventListener("click", async() => {
         if (this.currentProject.phase2Prompt) {
           await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
           showToast("Copied to clipboard!", "success");
@@ -474,10 +485,21 @@ class App {
       });
     }
 
-    // Copy prompt button
+    // Copy prompt button (from modal)
     const copyBtn = document.getElementById("copy-phase3-prompt-btn");
     if (copyBtn) {
       copyBtn.addEventListener("click", async() => {
+        if (this.currentProject.phase3Prompt) {
+          await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
+          showToast("Copied to clipboard!", "success");
+        }
+      });
+    }
+
+    // Quick copy button (from preview)
+    const quickCopyBtn = document.getElementById("copy-phase3-prompt-quick-btn");
+    if (quickCopyBtn) {
+      quickCopyBtn.addEventListener("click", async() => {
         if (this.currentProject.phase3Prompt) {
           await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
           showToast("Copied to clipboard!", "success");
