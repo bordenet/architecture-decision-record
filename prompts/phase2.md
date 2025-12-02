@@ -24,6 +24,7 @@ Review the ADR across these dimensions and produce an improved version:
 - Do consequences include specific, measurable impacts (not generic statements)?
 - Are three dimensions covered: technical, organizational, operational?
 - Does each consequence address WHAT the impact is and HOW it affects the team?
+- **Are team factors explicitly addressed** (training needs, skill gaps, hiring, team structure)?
 - **Are subsequent ADRs triggered by this decision mentioned** (e.g., "This necessitates decisions on X, Y, Z")?
 - **Is after-action review timing specified** (e.g., "Review in 30 days" not "monitor later")?
 
@@ -76,6 +77,14 @@ Return ONLY the improved ADR in this markdown format (no explanation, no preambl
 
 ### Recommended Review Timing
 [Specify clear checkpoints for after-action review]
+
+## If This ADR Is Updated Later
+
+This is a **living document**. If circumstances change, add a dated amendment instead of modifying the original:
+
+### Amendment - YYYY-MM-DD
+[What changed]: [Description]
+Impact on decision: [Does this affect the original decision? Still valid?]
 ```
 
 ## Quality Checklist Before Returning
@@ -85,6 +94,7 @@ Return ONLY the improved ADR in this markdown format (no explanation, no preambl
 - ✅ **Decision is grounded in business drivers** (cost, time-to-market, capability, risk)
 - ✅ 3+ positive consequences listed with concrete specifics
 - ✅ 3+ negative consequences listed with concrete specifics
+- ✅ **Team factors explicitly addressed** (training needs, skill gaps, hiring requirements)
 - ✅ No vague words (complexity, overhead, improve, optimize, better)
 - ✅ Specific technical implications (latency, patterns, technology requirements)
 - ✅ Organizational impact addressed (training, team coordination, expertise)
@@ -92,5 +102,6 @@ Return ONLY the improved ADR in this markdown format (no explanation, no preambl
 - ✅ Each consequence is a substantive sentence, not a phrase
 - ✅ **Subsequent ADRs section present** (lists 2-3 triggered decisions)
 - ✅ **Recommended Review Timing present** (specific checkpoints, not vague timelines)
+- ✅ **Living document guidance included** (amendment pattern shown)
 
 Return the complete, refined ADR above. This version will feed into final synthesis.

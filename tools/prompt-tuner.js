@@ -166,8 +166,8 @@ class ADRPromptTuner {
 - Reduces team wait times on shared infrastructure; teams no longer block each other on database schema changes or deployment coordination`;
       negativeConsequences = `- Requires implementing distributed systems patterns: eventual consistency replaces ACID transactions, requiring event-driven architecture and compensation logic
 - Increases network latency: inter-service calls add 50-100ms per hop, requiring caching strategies and circuit breakers throughout the system
-- Requires new expertise in message queues (Kafka, RabbitMQ), distributed tracing (Jaeger), and service mesh; estimated 6-8 weeks team training
-- Increases operational complexity: surface area grows from 1 deployment artifact to 10+, requiring Kubernetes orchestration and observability infrastructure`;
+- Team must develop expertise in message queues (Kafka, RabbitMQ), distributed tracing (Jaeger), and service mesh infrastructure; current team of 12 engineers requires 6-8 weeks structured training; may need to hire 2-3 distributed systems specialists
+- Increases operational complexity: surface area grows from 1 deployment artifact to 10+, requiring Kubernetes orchestration and observability infrastructure; DevOps team will need 4-6 weeks to build new monitoring/observability capabilities`;
       subsequentADRs = "- Service mesh selection (Istio vs. Linkerd for inter-service communication)\n- Distributed tracing implementation (Jaeger vs. Zipkin for observability)\n- API gateway strategy (Kong vs. AWS API Gateway for public interfaces)";
       reviewTiming = "Review in 30 days to validate deployment time improvements against 5-minute target and measure inter-service latency vs. 50-100ms assumption.";
     } else if (testCase.id.includes("002")) {
@@ -176,10 +176,10 @@ class ADRPromptTuner {
 - Enables automated testing: component test coverage increases from 0% to 80%+ within first quarter through Jest and React Testing Library
 - Reduces bug-related work from 40% to 10% of sprint time through TypeScript type safety preventing runtime errors and component isolation preventing state leaks
 - Reduces initial page load from 8s to 2s through lazy-loading and bundle optimization; reduces time-to-interactive from 12s to 4s`;
-      negativeConsequences = `- Requires React and TypeScript expertise; team needs 4-week ramp-up period before productive at target velocity
-- Migration effort is 6-8 weeks for existing features; requires parallel implementation to avoid downtime
-- Adds new toolchain burden with Webpack/Vite build system configuration, module bundling, and npm dependency management requirements
-- Introduces npm ecosystem security and supply-chain risks; requires dependency scanning with Snyk/Dependabot and transitive dependency management training`;
+      negativeConsequences = `- Current jQuery experts (team of 8) will require 4-week intensive React/TypeScript training; new hires will need different skill set, potentially requiring recruiter focus on React market; existing team members may resist change
+- Migration effort spans 6-8 weeks of parallel development; requires maintaining both jQuery and React codebases simultaneously, increasing sprint planning complexity and dividing team attention
+- Adds new toolchain burden with Webpack/Vite build system configuration, module bundling, and npm dependency management; team must learn tree-shaking, code-splitting, and bundle optimization concepts (estimated 2 weeks learning)
+- Introduces npm ecosystem security and supply-chain risks; requires dependency scanning infrastructure (Snyk/Dependabot), security audit practices, and quarterly update cycles; one team member must own dependency security`;
       subsequentADRs = "- Component library strategy (Storybook setup and maintenance patterns)\n- State management approach (Redux vs. Zustand vs. React Context)\n- Frontend testing framework (Jest + React Testing Library vs. Cypress for E2E)";
       reviewTiming = "Review after first 3 quarterly feature releases to compare actual onboarding time against 2-week target and measure bug reduction impact.";
     } else if (testCase.id.includes("003")) {
