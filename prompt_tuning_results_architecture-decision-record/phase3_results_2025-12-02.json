@@ -1,0 +1,637 @@
+[
+  {
+    "testCaseId": "test_001",
+    "testCaseName": "Monolithic to Microservices Migration",
+    "phase": "phase3",
+    "output": "# Monolithic to Microservices Migration\n\n## Status\nProposed\n\n## Context\nOur e-commerce platform is built as a monolith with growing scalability issues. \n        Customer base has grown 300% in 18 months, causing database bottlenecks and slow deployments.\n        The system has tight coupling between order processing, inventory management, and payment processing.\n        Deployments take 45 minutes and lock the database, causing 2-3 hour outages weekly.\n        Our team now spans 5 domains with conflicting deployment schedules.\n\nThe current situation presents both challenges and opportunities for structural improvement.\n\n## Decision\nWe will reorganize our system around service boundaries, \nestablishing clear ownership and enabling independent deployment. This allows each team to move at its natural pace\nwhile maintaining system cohesion through well-defined interfaces.\n\nWe are choosing this approach because it directly addresses our deployment bottlenecks and team coordination challenges,\nwhile being implementable within our current technical and organizational constraints.\n\n## Consequences\n\n### Positive Consequences\n- **Independent Deployment**: Each team can deploy on their own schedule without coordinating database changes\n- **Reduced Cognitive Load**: Clear boundaries make the system easier to understand for new team members  \n- **Technology Autonomy**: Teams can adopt the right tool for their specific domain rather than standardizing globally\n- **Horizontal Scalability**: Services can be scaled independently based on actual demand patterns\n- **Faster Feature Development**: Teams no longer block each other on shared resource constraints\n\n### Negative Consequences\n- **Distributed System Complexity**: We now need to manage communication between services, adding failure modes\n- **Data Consistency Challenges**: Distributed transactions become harder; we need event-driven patterns\n- **Operational Overhead**: More services means more monitoring, logging, and alerting infrastructure\n- **Team Coordination Required**: Despite independence, teams still need to coordinate on interface changes and dependencies\n- **Network Latency**: Service-to-service communication introduces new performance considerations we don't have today",
+    "score": 2.7456582633053217,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": true
+        },
+        {
+          "name": "Has Context section",
+          "passed": true
+        },
+        {
+          "name": "Has Decision section",
+          "passed": true
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": true
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": true
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": false
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": false
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": true
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  },
+  {
+    "testCaseId": "test_002",
+    "testCaseName": "Frontend Framework Migration",
+    "phase": "phase3",
+    "output": "# Frontend Framework Migration\n\n## Status\nProposed\n\n## Context\nOur 5-year-old jQuery-based admin dashboard has become unmaintainable.\n        It takes new developers 6 weeks to become productive. The codebase has no tests.\n        We're losing features to competitors with better UX. Customer feedback shows frustration with performance.\n        Our team of 8 frontend developers spends 40% of time on bug fixes rather than features.\n        Modern frameworks offer better component reusability and testing support.\n\nThe current situation presents both challenges and opportunities for structural improvement.\n\n## Decision\nWe will reorganize our system around component domains, \nestablishing clear ownership and enabling independent deployment. This allows each team to move at its natural pace\nwhile maintaining system cohesion through well-defined interfaces.\n\nWe are choosing this approach because it directly addresses our deployment bottlenecks and team coordination challenges,\nwhile being implementable within our current technical and organizational constraints.\n\n## Consequences\n\n### Positive Consequences\n- **Independent Deployment**: Each team can deploy on their own schedule without coordinating database changes\n- **Reduced Cognitive Load**: Clear boundaries make the system easier to understand for new team members  \n- **Technology Autonomy**: Teams can adopt the right tool for their specific domain rather than standardizing globally\n- **Horizontal Scalability**: Services can be scaled independently based on actual demand patterns\n- **Faster Feature Development**: Teams no longer block each other on shared resource constraints\n\n### Negative Consequences\n- **Distributed System Complexity**: We now need to manage communication between services, adding failure modes\n- **Data Consistency Challenges**: Distributed transactions become harder; we need event-driven patterns\n- **Operational Overhead**: More services means more monitoring, logging, and alerting infrastructure\n- **Team Coordination Required**: Despite independence, teams still need to coordinate on interface changes and dependencies\n- **Network Latency**: Service-to-service communication introduces new performance considerations we don't have today",
+    "score": 2.8689075630252097,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": true
+        },
+        {
+          "name": "Has Context section",
+          "passed": true
+        },
+        {
+          "name": "Has Decision section",
+          "passed": true
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": true
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": true
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": false
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": false
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": true
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "testCaseId": "test_003",
+    "testCaseName": "Database Technology Selection",
+    "phase": "phase3",
+    "output": "# Database Technology Selection\n\n## Status\nProposed\n\n## Context\nOur relational database stores 500GB of primarily unstructured operational logs and events.\n        Queries for analytics take 30+ minutes. Compliance requires we retain data for 7 years.\n        We're running out of disk space despite aggressive archiving.\n        Data structure is mostly key-value pairs with variable attributes.\n        Current quarterly costs are $150k for database infrastructure alone.\n\nThe current situation presents both challenges and opportunities for structural improvement.\n\n## Decision\nWe will reorganize our system around component domains, \nestablishing clear ownership and enabling independent deployment. This allows each team to move at its natural pace\nwhile maintaining system cohesion through well-defined interfaces.\n\nWe are choosing this approach because it directly addresses our deployment bottlenecks and team coordination challenges,\nwhile being implementable within our current technical and organizational constraints.\n\n## Consequences\n\n### Positive Consequences\n- **Independent Deployment**: Each team can deploy on their own schedule without coordinating database changes\n- **Reduced Cognitive Load**: Clear boundaries make the system easier to understand for new team members  \n- **Technology Autonomy**: Teams can adopt the right tool for their specific domain rather than standardizing globally\n- **Horizontal Scalability**: Services can be scaled independently based on actual demand patterns\n- **Faster Feature Development**: Teams no longer block each other on shared resource constraints\n\n### Negative Consequences\n- **Distributed System Complexity**: We now need to manage communication between services, adding failure modes\n- **Data Consistency Challenges**: Distributed transactions become harder; we need event-driven patterns\n- **Operational Overhead**: More services means more monitoring, logging, and alerting infrastructure\n- **Team Coordination Required**: Despite independence, teams still need to coordinate on interface changes and dependencies\n- **Network Latency**: Service-to-service communication introduces new performance considerations we don't have today",
+    "score": 2.7456582633053217,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": true
+        },
+        {
+          "name": "Has Context section",
+          "passed": true
+        },
+        {
+          "name": "Has Decision section",
+          "passed": true
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": true
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": true
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": false
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": false
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": true
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  },
+  {
+    "testCaseId": "test_004",
+    "testCaseName": "Authentication Strategy",
+    "phase": "phase3",
+    "output": "# Authentication Strategy\n\n## Status\nProposed\n\n## Context\nCurrently, each service manages its own user authentication using session cookies.\n        This causes inconsistent security policies and hard-to-audit login attempts.\n        We have 8 different services with 8 different password policies.\n        Security audit flagged 12 vulnerabilities related to inconsistent auth implementation.\n        New compliance requirement mandates multi-factor authentication across all services.\n\nThe current situation presents both challenges and opportunities for structural improvement.\n\n## Decision\nWe will reorganize our system around component domains, \nestablishing clear ownership and enabling independent deployment. This allows each team to move at its natural pace\nwhile maintaining system cohesion through well-defined interfaces.\n\nWe are choosing this approach because it directly addresses our deployment bottlenecks and team coordination challenges,\nwhile being implementable within our current technical and organizational constraints.\n\n## Consequences\n\n### Positive Consequences\n- **Independent Deployment**: Each team can deploy on their own schedule without coordinating database changes\n- **Reduced Cognitive Load**: Clear boundaries make the system easier to understand for new team members  \n- **Technology Autonomy**: Teams can adopt the right tool for their specific domain rather than standardizing globally\n- **Horizontal Scalability**: Services can be scaled independently based on actual demand patterns\n- **Faster Feature Development**: Teams no longer block each other on shared resource constraints\n\n### Negative Consequences\n- **Distributed System Complexity**: We now need to manage communication between services, adding failure modes\n- **Data Consistency Challenges**: Distributed transactions become harder; we need event-driven patterns\n- **Operational Overhead**: More services means more monitoring, logging, and alerting infrastructure\n- **Team Coordination Required**: Despite independence, teams still need to coordinate on interface changes and dependencies\n- **Network Latency**: Service-to-service communication introduces new performance considerations we don't have today",
+    "score": 2.7456582633053217,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": true
+        },
+        {
+          "name": "Has Context section",
+          "passed": true
+        },
+        {
+          "name": "Has Decision section",
+          "passed": true
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": true
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": true
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": false
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": false
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": true
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  },
+  {
+    "testCaseId": "test_005",
+    "testCaseName": "API Versioning Strategy",
+    "phase": "phase3",
+    "output": "# API Versioning Strategy\n\n## Status\nProposed\n\n## Context\nOur public API has 1,200 active integrations with third-party developers.\n        We need to make breaking changes to support new business requirements.\n        We've deprecated v1 twice already, each time causing partner outages and support burden.\n        Current approach of maintaining multiple endpoint versions causes code duplication and inconsistency.\n        Partners request longer deprecation timelines (currently 6 months, asking for 18 months).\n\nThe current situation presents both challenges and opportunities for structural improvement.\n\n## Decision\nWe will reorganize our system around component domains, \nestablishing clear ownership and enabling independent deployment. This allows each team to move at its natural pace\nwhile maintaining system cohesion through well-defined interfaces.\n\nWe are choosing this approach because it directly addresses our deployment bottlenecks and team coordination challenges,\nwhile being implementable within our current technical and organizational constraints.\n\n## Consequences\n\n### Positive Consequences\n- **Independent Deployment**: Each team can deploy on their own schedule without coordinating database changes\n- **Reduced Cognitive Load**: Clear boundaries make the system easier to understand for new team members  \n- **Technology Autonomy**: Teams can adopt the right tool for their specific domain rather than standardizing globally\n- **Horizontal Scalability**: Services can be scaled independently based on actual demand patterns\n- **Faster Feature Development**: Teams no longer block each other on shared resource constraints\n\n### Negative Consequences\n- **Distributed System Complexity**: We now need to manage communication between services, adding failure modes\n- **Data Consistency Challenges**: Distributed transactions become harder; we need event-driven patterns\n- **Operational Overhead**: More services means more monitoring, logging, and alerting infrastructure\n- **Team Coordination Required**: Despite independence, teams still need to coordinate on interface changes and dependencies\n- **Network Latency**: Service-to-service communication introduces new performance considerations we don't have today",
+    "score": 2.8577030812324926,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": true
+        },
+        {
+          "name": "Has Context section",
+          "passed": true
+        },
+        {
+          "name": "Has Decision section",
+          "passed": true
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": true
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": true
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": false
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": false
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": true
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": true
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  }
+]

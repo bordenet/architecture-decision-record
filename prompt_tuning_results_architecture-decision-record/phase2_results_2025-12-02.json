@@ -1,0 +1,637 @@
+[
+  {
+    "testCaseId": "test_001",
+    "testCaseName": "Monolithic to Microservices Migration",
+    "phase": "phase2",
+    "output": "# Monolithic to Microservices Migration - Gemini Review & Enhancement\n\n## Review Assessment\n\nThis ADR addresses a critical architectural challenge and provides a thoughtful foundation for future development.\n\n### Strengths Identified\n- Clear acknowledgment of business context and constraints\n- Recognition of team structure and scalability requirements\n- Balanced perspective on trade-offs\n\n### Areas for Enhancement\n\n**Decision Specificity**: The current decision uses appropriately high-level language, but could be\nstrengthened by naming the specific architectural pattern or approach being adopted.\n\n**Consequence Detail**: While balanced, the consequences could be more concrete. Rather than\ngeneric \"complexity,\" specify what new operational concerns emerge.\n\n**Stakeholder Impact**: Consider explicitly calling out how different team roles will be affected.\n\n**Timeline Implications**: Add a note about the expected transition period and its implications.\n\n## Suggested Improvements\n\n1. Name the specific architectural pattern in the decision statement\n2. Replace generic consequences with concrete, measurable impacts\n3. Add a brief note on implementation timeline and transition period\n4. Consider adding a \"Rationale\" section explaining why alternatives were rejected\n5. Specify any prerequisites or dependencies that must be satisfied first",
+    "score": 2.0621848739495796,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": false
+        },
+        {
+          "name": "Has Context section",
+          "passed": false
+        },
+        {
+          "name": "Has Decision section",
+          "passed": false
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": false
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": false
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": null
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": null
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": false
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  },
+  {
+    "testCaseId": "test_002",
+    "testCaseName": "Frontend Framework Migration",
+    "phase": "phase2",
+    "output": "# Frontend Framework Migration - Gemini Review & Enhancement\n\n## Review Assessment\n\nThis ADR addresses a critical architectural challenge and provides a thoughtful foundation for future development.\n\n### Strengths Identified\n- Clear acknowledgment of business context and constraints\n- Recognition of team structure and scalability requirements\n- Balanced perspective on trade-offs\n\n### Areas for Enhancement\n\n**Decision Specificity**: The current decision uses appropriately high-level language, but could be\nstrengthened by naming the specific architectural pattern or approach being adopted.\n\n**Consequence Detail**: While balanced, the consequences could be more concrete. Rather than\ngeneric \"complexity,\" specify what new operational concerns emerge.\n\n**Stakeholder Impact**: Consider explicitly calling out how different team roles will be affected.\n\n**Timeline Implications**: Add a note about the expected transition period and its implications.\n\n## Suggested Improvements\n\n1. Name the specific architectural pattern in the decision statement\n2. Replace generic consequences with concrete, measurable impacts\n3. Add a brief note on implementation timeline and transition period\n4. Consider adding a \"Rationale\" section explaining why alternatives were rejected\n5. Specify any prerequisites or dependencies that must be satisfied first",
+    "score": 2.0621848739495796,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": false
+        },
+        {
+          "name": "Has Context section",
+          "passed": false
+        },
+        {
+          "name": "Has Decision section",
+          "passed": false
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": false
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": false
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": null
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": null
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": false
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  },
+  {
+    "testCaseId": "test_003",
+    "testCaseName": "Database Technology Selection",
+    "phase": "phase2",
+    "output": "# Database Technology Selection - Gemini Review & Enhancement\n\n## Review Assessment\n\nThis ADR addresses a critical architectural challenge and provides a thoughtful foundation for future development.\n\n### Strengths Identified\n- Clear acknowledgment of business context and constraints\n- Recognition of team structure and scalability requirements\n- Balanced perspective on trade-offs\n\n### Areas for Enhancement\n\n**Decision Specificity**: The current decision uses appropriately high-level language, but could be\nstrengthened by naming the specific architectural pattern or approach being adopted.\n\n**Consequence Detail**: While balanced, the consequences could be more concrete. Rather than\ngeneric \"complexity,\" specify what new operational concerns emerge.\n\n**Stakeholder Impact**: Consider explicitly calling out how different team roles will be affected.\n\n**Timeline Implications**: Add a note about the expected transition period and its implications.\n\n## Suggested Improvements\n\n1. Name the specific architectural pattern in the decision statement\n2. Replace generic consequences with concrete, measurable impacts\n3. Add a brief note on implementation timeline and transition period\n4. Consider adding a \"Rationale\" section explaining why alternatives were rejected\n5. Specify any prerequisites or dependencies that must be satisfied first",
+    "score": 2.0621848739495796,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": false
+        },
+        {
+          "name": "Has Context section",
+          "passed": false
+        },
+        {
+          "name": "Has Decision section",
+          "passed": false
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": false
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": false
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": null
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": null
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": false
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  },
+  {
+    "testCaseId": "test_004",
+    "testCaseName": "Authentication Strategy",
+    "phase": "phase2",
+    "output": "# Authentication Strategy - Gemini Review & Enhancement\n\n## Review Assessment\n\nThis ADR addresses a critical architectural challenge and provides a thoughtful foundation for future development.\n\n### Strengths Identified\n- Clear acknowledgment of business context and constraints\n- Recognition of team structure and scalability requirements\n- Balanced perspective on trade-offs\n\n### Areas for Enhancement\n\n**Decision Specificity**: The current decision uses appropriately high-level language, but could be\nstrengthened by naming the specific architectural pattern or approach being adopted.\n\n**Consequence Detail**: While balanced, the consequences could be more concrete. Rather than\ngeneric \"complexity,\" specify what new operational concerns emerge.\n\n**Stakeholder Impact**: Consider explicitly calling out how different team roles will be affected.\n\n**Timeline Implications**: Add a note about the expected transition period and its implications.\n\n## Suggested Improvements\n\n1. Name the specific architectural pattern in the decision statement\n2. Replace generic consequences with concrete, measurable impacts\n3. Add a brief note on implementation timeline and transition period\n4. Consider adding a \"Rationale\" section explaining why alternatives were rejected\n5. Specify any prerequisites or dependencies that must be satisfied first",
+    "score": 2.0621848739495796,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": false
+        },
+        {
+          "name": "Has Context section",
+          "passed": false
+        },
+        {
+          "name": "Has Decision section",
+          "passed": false
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": false
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": false
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": null
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": null
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": false
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  },
+  {
+    "testCaseId": "test_005",
+    "testCaseName": "API Versioning Strategy",
+    "phase": "phase2",
+    "output": "# API Versioning Strategy - Gemini Review & Enhancement\n\n## Review Assessment\n\nThis ADR addresses a critical architectural challenge and provides a thoughtful foundation for future development.\n\n### Strengths Identified\n- Clear acknowledgment of business context and constraints\n- Recognition of team structure and scalability requirements\n- Balanced perspective on trade-offs\n\n### Areas for Enhancement\n\n**Decision Specificity**: The current decision uses appropriately high-level language, but could be\nstrengthened by naming the specific architectural pattern or approach being adopted.\n\n**Consequence Detail**: While balanced, the consequences could be more concrete. Rather than\ngeneric \"complexity,\" specify what new operational concerns emerge.\n\n**Stakeholder Impact**: Consider explicitly calling out how different team roles will be affected.\n\n**Timeline Implications**: Add a note about the expected transition period and its implications.\n\n## Suggested Improvements\n\n1. Name the specific architectural pattern in the decision statement\n2. Replace generic consequences with concrete, measurable impacts\n3. Add a brief note on implementation timeline and transition period\n4. Consider adding a \"Rationale\" section explaining why alternatives were rejected\n5. Specify any prerequisites or dependencies that must be satisfied first",
+    "score": 2.0621848739495796,
+    "details": {
+      "completeness": [
+        {
+          "name": "Has Status section",
+          "passed": false
+        },
+        {
+          "name": "Has Context section",
+          "passed": false
+        },
+        {
+          "name": "Has Decision section",
+          "passed": false
+        },
+        {
+          "name": "Has Consequences section",
+          "passed": false
+        },
+        {
+          "name": "Status is one of: Proposed, Accepted, Superseded, Deprecated",
+          "passed": false
+        },
+        {
+          "name": "Decision is non-empty (>100 chars)",
+          "passed": null
+        },
+        {
+          "name": "Consequences section has content (>100 chars)",
+          "passed": null
+        }
+      ],
+      "clarity": [
+        {
+          "name": "No vague language: \"better\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"improve\"",
+          "passed": false
+        },
+        {
+          "name": "No vague language: \"optimize\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"easier\"",
+          "passed": true
+        },
+        {
+          "name": "No vague language: \"efficient\"",
+          "passed": true
+        },
+        {
+          "name": "Decision uses clear action verbs",
+          "passed": true
+        },
+        {
+          "name": "Context clearly states the problem",
+          "passed": false
+        }
+      ],
+      "consequencesBalance": [
+        {
+          "name": "Lists positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Lists negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 positive consequences",
+          "passed": false
+        },
+        {
+          "name": "Has at least 2 negative consequences",
+          "passed": false
+        },
+        {
+          "name": "Uses clear consequence language",
+          "passed": true
+        }
+      ],
+      "technicalSoundness": [
+        {
+          "name": "Decision is specific (not generic)",
+          "passed": false
+        },
+        {
+          "name": "Decision is implementable",
+          "passed": false
+        },
+        {
+          "name": "No implementation details (\"use X framework\")",
+          "passed": true
+        },
+        {
+          "name": "Addresses root cause from context",
+          "passed": false
+        },
+        {
+          "name": "Consequences are realistic",
+          "passed": true
+        }
+      ],
+      "industryAlignment": [
+        {
+          "name": "Follows Michael Nygard ADR format",
+          "passed": false
+        },
+        {
+          "name": "Decision focuses on \"why\" not \"how\"",
+          "passed": false
+        },
+        {
+          "name": "Context explains constraints/alternatives",
+          "passed": false
+        }
+      ]
+    }
+  }
+]

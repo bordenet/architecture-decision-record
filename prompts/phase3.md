@@ -1,27 +1,58 @@
-You are synthesizing a final Architecture Decision Record (ADR) based on the original draft and critical feedback.
+You are synthesizing a final, production-ready Architecture Decision Record (ADR).
 
-Reference the standard ADR format: https://github.com/joelparkerhenderson/architecture-decision-record
+Your job is to combine the best of the original draft with critical feedback to create the definitive ADR.
 
-## Original ADR
+Reference the official ADR format: https://github.com/joelparkerhenderson/architecture-decision-record
+
+## Original ADR (Phase 1 - Initial Draft)
 
 {phase1_output}
 
-## Critical Feedback Received
+## Critical Feedback (Phase 2 - Review)
 
 {phase2_review}
 
-## Your Task
+## Your Synthesis Task
 
-Create a final, polished ADR that:
+Create the final ADR by:
 
-1. Incorporates valid feedback from the review
-2. Addresses weaknesses identified
-3. Adds any missing elements
-4. Maintains the standard ADR format (Title, Status, Context, Decision, Consequences)
+1. **Keeping what works**: Don't change sections that are already strong
+2. **Fixing what's weak**: Address all identified gaps and vague language
+3. **Adding missing elements**: Incorporate feedback about missing considerations
+4. **Maintaining balance**: Ensure consequences remain honestly balanced (not weighted to positives)
+5. **Improving specificity**: Replace vague language with concrete details
+
+## Synthesis Decision Rules
+
+When deciding between Phase 1 and feedback suggestions:
+- **If Phase 1 is specific and concrete**: Keep it (don't weaken it)
+- **If feedback suggests better specificity**: Adopt the specific version
+- **If Phase 1 is vague**: Replace with the concrete suggestion from Phase 2
+- **Don't average or water down**: Choose the clearer, more concrete version each time
+
+## Critical Requirements for Final ADR
+
+### Decision Section Must:
+- Name the specific architectural approach chosen (not vague principles)
+- Explain the RATIONALE (why this approach over alternatives)
+- Include specific numbers/constraints from context where relevant
+- Use decisive language ("will", "shall", "implements")
+
+### Consequences Section Must:
+- Include MINIMUM 3 positive consequences (specific, not generic)
+- Include MINIMUM 3 negative consequences (honest, specific)
+- Address three dimensions: technical, organizational, operational
+- Each consequence should be one substantive sentence, not a phrase
+- Avoid generic words: "complexity", "overhead" - be specific about WHAT is complex
+
+### Context Section Should:
+- Reference specific numbers/facts that drive the decision
+- Clearly state the problem that this decision solves
+- Identify key constraints or trade-offs
 
 ## Output Format
 
-Return a complete, final ADR in this format:
+Return ONLY the final ADR (no explanation, no preamble):
 
 ```markdown
 # [Title]
@@ -30,21 +61,28 @@ Return a complete, final ADR in this format:
 [Status]
 
 ## Context
-[Improved context incorporating feedback]
+[Improved context addressing feedback]
 
 ## Decision
-[Refined decision that addresses feedback]
+[Polished decision incorporating specificity feedback]
 
 ## Consequences
-[Comprehensive list of positive AND negative consequences]
+
+### Positive Consequences
+[3+ specific positive impacts with details]
+
+### Negative Consequences
+[3+ specific negative impacts with honest assessment]
 ```
 
-## Guidelines
+## Quality Checklist Before Returning
+- ✅ Decision names a specific approach (microservices, monorepo, event-driven, etc.)
+- ✅ Decision explains why, not how
+- ✅ 3+ positive consequences listed with specifics
+- ✅ 3+ negative consequences listed with specifics
+- ✅ Negative consequences are honest and realistic
+- ✅ No vague words (improve, optimize, better, enhance, complexity)
+- ✅ Specific technical implications (network latency, event-driven patterns, etc.)
+- ✅ Organizational impact addressed (training needs, team coordination, etc.)
 
-1. Keep what works from the original
-2. Fix what the review identified as weak
-3. Add anything that was missing
-4. Ensure consequences include BOTH positive and negative impacts
-5. Make the final ADR production-ready for a repository
-
-Return only the final ADR in markdown format.
+Return the complete, production-ready ADR above. This is the version that will be published.
