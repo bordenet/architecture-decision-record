@@ -797,7 +797,7 @@ Prompt loading failed.`;
     async generatePhase2Prompt() {
       try {
         let promptTemplate = await loadPrompt(2);
-        const adr = `# ${this.currentProject.title}
+        const phase1Output = `# ${this.currentProject.title}
 
 ## Status
 ${this.currentProject.status}
@@ -813,7 +813,7 @@ ${this.currentProject.consequences}${this.currentProject.rationale ? `
 
 ## Rationale
 ${this.currentProject.rationale}` : ""}`;
-        promptTemplate = promptTemplate.replace(/{adr}/g, adr);
+        promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
         this.currentProject.phase2Prompt = promptTemplate;
         await storage.saveProject(this.currentProject);
         await navigator.clipboard.writeText(promptTemplate);
@@ -903,7 +903,7 @@ ${this.currentProject.rationale}` : ""}`;
     async generatePhase3Prompt() {
       try {
         let promptTemplate = await loadPrompt(3);
-        const adr = `# ${this.currentProject.title}
+        const phase1Output = `# ${this.currentProject.title}
 
 ## Status
 ${this.currentProject.status}
@@ -919,9 +919,9 @@ ${this.currentProject.consequences}${this.currentProject.rationale ? `
 
 ## Rationale
 ${this.currentProject.rationale}` : ""}`;
-        const feedback = this.currentProject.phase2Review || "[No Phase 2 feedback provided]";
-        promptTemplate = promptTemplate.replace(/{adr}/g, adr);
-        promptTemplate = promptTemplate.replace(/{feedback}/g, feedback);
+        const phase2Review = this.currentProject.phase2Review || "[No Phase 2 feedback provided]";
+        promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
+        promptTemplate = promptTemplate.replace(/{phase2_review}/g, phase2Review);
         this.currentProject.phase3Prompt = promptTemplate;
         await storage.saveProject(this.currentProject);
         await navigator.clipboard.writeText(promptTemplate);
