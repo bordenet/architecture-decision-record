@@ -62,6 +62,8 @@ Generate a complete ADR based on the input above. You must:
 - "Adds 50-100ms network latency for inter-service calls; request tracing becomes mandatory" ✅
 - "Enables horizontal scaling of individual services; microservice #1 can handle 10x traffic without scaling all others" ✅
 - "Requires hiring expertise in message queues (Kafka, RabbitMQ) and distributed systems; existing team needs 6-8 weeks training" ✅
+- "Operational teams must maintain separate deployment pipelines for each service, increasing release coordination from 30-minute monolithic releases to independent per-service deployments (5 minutes each)" ✅
+- "Requires investment in distributed tracing tooling (X-Ray, Jaeger); debugging cross-service issues that once required grep now need trace visualization" ✅
 
 ## Output Format
 
@@ -125,7 +127,9 @@ Reference specific facts from the context in your Decision and Consequences:
 - ✅ Each consequence is a substantive sentence, not a phrase
 - ✅ Negative consequences are honest and realistic (not minimized)
 - ✅ Consequences reference specific impacts: "adds X latency", "requires Y expertise", "enables Z benefit"
+- ✅ **Consequences explicitly address team factors**: training needs, skill gaps, hiring requirements, team structure changes
 - ✅ Consequences address ALL three dimensions: technical, organizational, operational
+- ✅ **NO vague consequence language**: Replace "complexity" with specific impacts, "overhead" with measurable costs
 - ✅ **Subsequent ADRs section lists 2-3 triggered decisions** (e.g., "service mesh selection", "distributed tracing strategy")
 - ✅ **Recommended Review Timing specifies clear checkpoints** (not vague; e.g., "30 days" not "later")
 

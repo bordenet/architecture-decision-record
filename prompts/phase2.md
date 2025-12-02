@@ -40,13 +40,23 @@ Review the ADR across these dimensions and produce an improved version:
 **If Consequences are Generic**: Replace with concrete, measurable impacts:
 - VAGUE: "May increase complexity" ❌
 - SPECIFIC: "Requires event-driven patterns for data consistency; services can't use distributed transactions" ✅
+- VAGUE: "Makes things harder" ❌
+- SPECIFIC: "Operational teams must implement distributed tracing; debugging cross-service issues now requires Jaeger instead of grep logs" ✅
 
 **If Balance is Off**: Ensure minimum 3 positive AND 3 negative consequences. Be honest about trade-offs.
 
 **If Missing Impact Areas**: Add consequences addressing:
-- Technical: network latency, distributed systems patterns, technology requirements
-- Organizational: training needs, team coordination overhead, hiring requirements
-- Operational: deployment complexity, monitoring/observability needs, runbooks
+- Technical: network latency, distributed systems patterns, technology requirements, debugging complexity
+- Organizational: training needs (specify duration & subject), team coordination overhead, hiring requirements, team structure impact
+- Operational: deployment complexity, monitoring/observability needs, runbooks, incident response changes
+
+**If Decision Lacks Alternatives**: Add explicit comparison like "We considered X (cost: Y, benefit: Z) and A (cost: B, benefit: C), but chose decision because..."
+
+**If Team Factors Missing**: Add specific impacts:
+- "Requires hiring 2-3 distributed systems engineers (3-month ramp-up)"
+- "Existing team needs 6-8 weeks Kafka/event-driven training"
+- "Changes deployment ownership from central release team to service teams"
+- "Increases on-call burden due to complex debugging requirements"
 
 ## Output Format
 

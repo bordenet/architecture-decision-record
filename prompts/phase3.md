@@ -26,9 +26,12 @@ Create the final ADR by:
 
 When deciding between Phase 1 and feedback suggestions:
 - **If Phase 1 is specific and concrete**: Keep it (don't weaken it)
-- **If feedback suggests better specificity**: Adopt the specific version
+- **If feedback suggests better specificity**: Adopt the specific version without hesitation
 - **If Phase 1 is vague**: Replace with the concrete suggestion from Phase 2
-- **Don't average or water down**: Choose the clearer, more concrete version each time
+- **NEVER average or water down**: Choose the clearer, more concrete version EVERY time
+- **If both are strong but different**: Pick the one that better addresses the business drivers
+- **Example of what NOT to do**: "may increase complexity (from Phase 1) with some mitigation (from Phase 2)" ❌
+- **Example of what TO do**: "Requires distributed tracing implementation; debugging cross-service issues changes from grep-based to Jaeger visualization" ✅
 
 ## Critical Requirements for Final ADR
 
