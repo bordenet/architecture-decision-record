@@ -25,17 +25,17 @@ describe("App Module", () => {
     expect(document.getElementById("app-container")).toBeTruthy();
   });
 
-  test("should render empty projects list", () => {
+  test("should render empty ADRs list", () => {
     const container = document.getElementById("app-container");
     container.innerHTML = `
       <div class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400 mb-6">No projects yet</p>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">No ADRs yet</p>
       </div>
     `;
-    expect(container.innerHTML).toContain("No projects yet");
+    expect(container.innerHTML).toContain("No ADRs yet");
   });
 
-  test("should handle creating new project", () => {
+  test("should handle creating new ADR", () => {
     const newBtn = document.getElementById("new-project-btn");
     expect(newBtn).toBeTruthy();
   });
