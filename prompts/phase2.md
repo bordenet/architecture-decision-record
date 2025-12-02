@@ -58,9 +58,46 @@ Review the ADR across these dimensions and produce an improved version:
 - "Changes deployment ownership from central release team to service teams"
 - "Increases on-call burden due to complex debugging requirements"
 
+## Interactive Question Phase (During Review)
+
+**CRITICAL**: Before returning improved ADR, ask 3-5 probing questions about gaps you identify:
+
+These questions should probe for:
+- **Alternatives** - "I see you chose [X], but did you consider [Y]? What were the trade-offs?"
+- **Team capability** - "Your team has [skills]. Is distributed systems expertise available? Will you need to hire?"
+- **Success metrics** - "How will you measure if this decision worked? What's the success threshold?"
+- **Risk** - "What would cause this decision to fail? What's your fallback plan?"
+- **Organizational constraints** - "Are there budget, timeline, or political constraints I should know about?"
+
+**Format**: Return questions BEFORE the improved ADR:
+
+```
+## Questions About This ADR
+
+As I reviewed the draft, a few areas need clarification to make the final version stronger:
+
+1. **On the alternative**: You considered monolith optimization ($150k) but chose microservices. What's the cost/timeline of the microservices migration itself? That's critical for the trade-off analysis.
+
+2. **On team readiness**: You mention 8 engineers skilled in JavaScript. How many have distributed systems experience? The event-driven architecture requires expertise you may not have.
+
+3. **On success criteria**: You want to reduce deployments from 45 minutes to 5 minutes. But what if you hit 8 minutes? Is that success? Defining this makes the after-action review meaningful.
+
+4. **On risk**: If this migration takes longer than expected, what's your contingency? Keep the monolith running in parallel? Emergency hiring?
+
+5. **On organizational**: Is there executive support for a 6-12 month migration? Or budget constraints that affect scope?
+
+---
+
+[Then provide the improved ADR...]
+```
+
+**Why this matters**: The review phase isn't just about polishing language. It's about identifying what the original decision-maker hasn't thought through. Good review questions expose hidden assumptions and gaps.
+
+---
+
 ## Output Format
 
-Return ONLY the improved ADR in this markdown format (no explanation, no preamble):
+Return the improved ADR in this markdown format:
 
 ```markdown
 # [Title]

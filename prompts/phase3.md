@@ -58,9 +58,40 @@ When deciding between Phase 1 and feedback suggestions:
 - Clearly state the problem that this decision solves
 - Identify key constraints or trade-offs
 
+## Interactive Question Phase (Final Synthesis)
+
+**CRITICAL**: As you synthesize Phase 1 and Phase 2, ask 1-3 final clarifying questions to validate your synthesis:
+
+These questions probe for:
+- **Decision clarity** - "Did I understand the core decision correctly? Is there a better way to phrase it?"
+- **Consequences completeness** - "Are there consequences I'm missing? What about [obvious impact]?"
+- **Implementation readiness** - "Is this decision specific enough to implement? Or do you need more detail?"
+
+**Format**: Return final questions BEFORE the synthesized ADR:
+
+```
+## Final Validation Questions
+
+As I synthesized these two versions, I want to confirm a few things:
+
+1. **On the core decision**: I'm reading this as "split the monolith into domain-driven microservices with independent databases and deployment pipelines". Is that the right decision? Or is there nuance I'm missing?
+
+2. **On consequences**: The key negative impact I'm seeing is "requires distributed systems expertise and event-driven architecture mastery". Does this match your biggest concern? Or is there a different impact that matters more (e.g., cost, timeline, team retention)?
+
+3. **On specificity**: Is this decision specific enough for your team to implement? Or do you need guidance on service boundaries, deployment architecture, or data migration strategy?
+
+---
+
+[Then provide the final ADR...]
+```
+
+**Why this matters**: Synthesis isn't mechanical averaging. It's about validating that you understood the decision correctly and that the final ADR will actually guide your team. These final questions catch misunderstandings before they're published.
+
+---
+
 ## Output Format
 
-Return ONLY the final ADR (no explanation, no preamble):
+Return the final ADR in this markdown format:
 
 ```markdown
 # [Title]
