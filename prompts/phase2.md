@@ -1,69 +1,82 @@
-You are a critical reviewer of Architecture Decision Records (ADR).
+You are refining an Architecture Decision Record (ADR) based on critical review feedback.
 
-Your job is to identify gaps, weaknesses, and missed opportunities in the draft ADR. Be constructive but rigorous.
+Your job is to analyze the draft ADR and produce an improved version that addresses identified weaknesses while maintaining what works well.
 
 Reference the official ADR format: https://github.com/joelparkerhenderson/architecture-decision-record
 
-## ADR to Review
+## Draft ADR (Original)
 
 {phase1_output}
 
-## Your Critical Review Task
+## Your Refinement Task
 
-Analyze this ADR across five dimensions:
+Review the ADR across these dimensions and produce an improved version:
 
 ### 1. Decision Specificity
-- Is the decision naming a specific approach (e.g., "microservices", not just "improve scalability")?
-- Could someone reading this know exactly what was decided?
+- Does the decision name a specific architectural approach (microservices, event-driven, monorepo, etc.)?
 - Does it explain WHY, not just WHAT?
-- Are there any vague words like "improve", "optimize", "better", "enhance"?
+- Are there any vague words (improve, optimize, better, enhance, complexity, overhead)?
 
 ### 2. Consequences Balance & Depth
-- Are BOTH positive AND negative consequences present?
-- Are there at least 2-3 of each type, or is one side underdeveloped?
-- Are consequences specific and concrete, or generic?
-- Do consequences address: technical impact, team impact, operational impact?
-- Are any consequences just descriptions of implementation ("will use X"), or all about outcomes?
+- Are BOTH positive AND negative consequences equally present?
+- Do consequences include specific, measurable impacts (not generic statements)?
+- Are three dimensions covered: technical, organizational, operational?
+- Does each consequence address WHAT the impact is and HOW it affects the team?
 
 ### 3. Context Grounding
-- Does the decision clearly address the problems stated in Context?
-- Are specific numbers/facts from the context referenced in the decision or consequences?
-- Is the rationale for this decision over alternatives explained?
+- Are specific numbers/facts from the context referenced in the decision and consequences?
+- Does the decision clearly solve the problem stated in Context?
+- Could someone understand WHY this decision was chosen over alternatives?
 
-### 4. Organizational Realism
-- Are there honest costs to adopting this approach?
-- Does it acknowledge team skill gaps or training needs?
-- Are there realistic constraints acknowledged?
+## Critical Improvements Required
 
-### 5. Implementability
-- Could a reasonable engineering team actually execute this decision?
-- Are there prerequisites or dependencies that should be called out?
-- Is the scope clear (what's in scope, what's out)?
+**If Decision is Vague**: Replace with specific architectural pattern (e.g., "domain-driven microservices" not "improve scalability")
+
+**If Consequences are Generic**: Replace with concrete, measurable impacts:
+- VAGUE: "May increase complexity" ❌
+- SPECIFIC: "Requires event-driven patterns for data consistency; services can't use distributed transactions" ✅
+
+**If Balance is Off**: Ensure minimum 3 positive AND 3 negative consequences. Be honest about trade-offs.
+
+**If Missing Impact Areas**: Add consequences addressing:
+- Technical: network latency, distributed systems patterns, technology requirements
+- Organizational: training needs, team coordination overhead, hiring requirements
+- Operational: deployment complexity, monitoring/observability needs, runbooks
 
 ## Output Format
 
-Provide feedback in this EXACT structure:
+Return ONLY the improved ADR in this markdown format (no explanation, no preamble):
 
-### Strengths
-[2-3 specific strengths - what works well]
+```markdown
+# [Title]
 
-### Weaknesses
-[List each weakness as a separate point with specifics, not generalities]
+## Status
+[Status]
 
-### Missing Elements
-[What should be in the ADR but isn't]
+## Context
+[Original context - keep as-is unless critical gap identified]
 
-### Specific Improvements
-[Concrete, actionable suggestions - be prescriptive]
+## Decision
+[Improved decision with specific architectural approach and clear rationale]
 
-### Implications Not Addressed
-[What stakeholders or concerns haven't been considered?]
+## Consequences
 
-## Critical Feedback Standards
-- ✅ Be specific (reference exact phrases that need work)
-- ✅ Be constructive (suggest alternatives, not just problems)
-- ✅ Highlight gaps honestly (don't validate weak work)
-- ✅ Focus on improvement opportunities
+### Positive Consequences
+[3+ specific, concrete positive impacts with details]
 
-## Return Format
-Provide ONLY the feedback structure above. No preamble or summary.
+### Negative Consequences
+[3+ specific, concrete negative impacts with honest assessment]
+```
+
+## Quality Checklist Before Returning
+- ✅ Decision names a specific approach (not vague principles)
+- ✅ Decision explains WHY, not HOW
+- ✅ 3+ positive consequences listed with concrete specifics
+- ✅ 3+ negative consequences listed with concrete specifics
+- ✅ No vague words (complexity, overhead, improve, optimize, better)
+- ✅ Specific technical implications (latency, patterns, technology requirements)
+- ✅ Organizational impact addressed (training, team coordination, expertise)
+- ✅ Operational impact addressed (deployment, monitoring, dependencies)
+- ✅ Each consequence is a substantive sentence, not a phrase
+
+Return the complete, refined ADR above. This version will feed into final synthesis.

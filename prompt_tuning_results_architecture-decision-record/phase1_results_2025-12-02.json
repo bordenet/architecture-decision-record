@@ -4,7 +4,7 @@
     "testCaseName": "Monolithic to Microservices Migration",
     "phase": "phase1",
     "output": "# Monolithic to Microservices Migration\n\n## Status\nProposed\n\n## Context\nOur e-commerce platform is built as a monolith with growing scalability issues. \n        Customer base has grown 300% in 18 months, causing database bottlenecks and slow deployments.\n        The system has tight coupling between order processing, inventory management, and payment processing.\n        Deployments take 45 minutes and lock the database, causing 2-3 hour outages weekly.\n        Our team now spans 5 domains with conflicting deployment schedules.\n\n## Decision\nWe will migrate from a monolithic architecture to domain-driven microservices, with each business domain owning its database and deploying independently. This addresses the 300% customer growth driving current deployment bottlenecks and team coordination overhead.\n\n## Consequences\n\n### Positive Consequences\n- Reduces deployment time from 45 minutes to 5 minutes per service, eliminating synchronized release windows and production outage risks\n- Enables individual teams to scale services independently based on actual demand; order processing can scale 10x without scaling inventory\n- Allows domain teams to adopt appropriate technology stacks per domain; removes one-size-fits-all technology constraints\n- Reduces team wait times on shared infrastructure; teams no longer block each other on database schema changes or deployment coordination\n\n### Negative Consequences\n- Requires implementing distributed systems patterns: eventual consistency replaces ACID transactions, requiring event-driven architecture and compensation logic\n- Increases network latency: inter-service calls add 50-100ms per hop, requiring caching strategies and circuit breakers throughout the system\n- Requires new expertise in message queues (Kafka, RabbitMQ), distributed tracing (Jaeger), and service mesh; estimated 6-8 weeks team training\n- Increases operational complexity: surface area grows from 1 deployment artifact to 10+, requiring Kubernetes orchestration and observability infrastructure",
-    "score": 3.395518207282912,
+    "score": 3.960224089635854,
     "details": {
       "completeness": [
         {
@@ -69,15 +69,15 @@
       "consequencesBalance": [
         {
           "name": "Lists positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Lists negative consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 negative consequences",
@@ -131,7 +131,7 @@
     "testCaseName": "Frontend Framework Migration",
     "phase": "phase1",
     "output": "# Frontend Framework Migration\n\n## Status\nProposed\n\n## Context\nOur 5-year-old jQuery-based admin dashboard has become unmaintainable.\n        It takes new developers 6 weeks to become productive. The codebase has no tests.\n        We're losing features to competitors with better UX. Customer feedback shows frustration with performance.\n        Our team of 8 frontend developers spends 40% of time on bug fixes rather than features.\n        Modern frameworks offer better component reusability and testing support.\n\n## Decision\nWe will migrate our jQuery-based admin dashboard to React with TypeScript, establishing a component library shared across all frontend services. This addresses the 6-week onboarding time for new developers and reduces 40% of engineering time spent on bugs rather than features.\n\n## Consequences\n\n### Positive Consequences\n- Reduces developer onboarding from 6 weeks to 2 weeks through component reusability and clear patterns\n- Enables automated testing: component test coverage increases from 0% to 80%+ within first quarter\n- Reduces bug-related work from 40% to 10% of sprint time through type safety (TypeScript) and component isolation\n- Improves performance: lazy-loading and bundle optimization reduce initial load from 8s to 2s\n\n### Negative Consequences\n- Requires React and TypeScript expertise; team needs 4-week ramp-up period before productive at target velocity\n- Migration effort is 6-8 weeks for existing features; requires parallel implementation to avoid downtime\n- Increases build infrastructure complexity with new toolchain (webpack/Vite) and dependency management overhead\n- Requires npm ecosystem security practices; developers need training on managing transitive dependencies",
-    "score": 3.32829131652661,
+    "score": 3.8929971988795518,
     "details": {
       "completeness": [
         {
@@ -196,15 +196,15 @@
       "consequencesBalance": [
         {
           "name": "Lists positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Lists negative consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 negative consequences",
@@ -258,7 +258,7 @@
     "testCaseName": "Database Technology Selection",
     "phase": "phase1",
     "output": "# Database Technology Selection\n\n## Status\nProposed\n\n## Context\nOur relational database stores 500GB of primarily unstructured operational logs and events.\n        Queries for analytics take 30+ minutes. Compliance requires we retain data for 7 years.\n        We're running out of disk space despite aggressive archiving.\n        Data structure is mostly key-value pairs with variable attributes.\n        Current quarterly costs are $150k for database infrastructure alone.\n\n## Decision\nWe will migrate our relational database of 500GB primarily unstructured operational logs to a time-series database (InfluxDB or similar), compressing and retaining only aggregated metrics beyond 30 days. This addresses $150k quarterly costs and 30-minute query latencies for analytics.\n\n## Consequences\n\n### Positive Consequences\n- Reduces storage costs by 75% through compression and intelligent retention policies; quarterly cost drops from $150k to $37k\n- Improves query performance from 30 minutes to 30 seconds for analytics queries through columnar storage\n- Enables real-time dashboards and alerts by supporting sub-second query response times for recent data windows\n- Allows automatic enforcement of legal data deletion requirements through granular retention policies\n\n### Negative Consequences\n- Requires migrating 500GB data with zero downtime; dual-write period during migration increases database load 20%\n- Requires retraining analytics team: time-series semantics differ significantly from relational; 3-4 weeks learning curve for new query patterns\n- Limits query flexibility: complex joins become impossible; data model must be redesigned around time-series expectations\n- Increases operational dependencies: time-series database clustering and replication complexity if not using managed service",
-    "score": 3.4403361344537813,
+    "score": 4.193277310924369,
     "details": {
       "completeness": [
         {
@@ -323,19 +323,19 @@
       "consequencesBalance": [
         {
           "name": "Lists positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Lists negative consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 negative consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Uses clear consequence language",
@@ -385,7 +385,7 @@
     "testCaseName": "Authentication Strategy",
     "phase": "phase1",
     "output": "# Authentication Strategy\n\n## Status\nProposed\n\n## Context\nCurrently, each service manages its own user authentication using session cookies.\n        This causes inconsistent security policies and hard-to-audit login attempts.\n        We have 8 different services with 8 different password policies.\n        Security audit flagged 12 vulnerabilities related to inconsistent auth implementation.\n        New compliance requirement mandates multi-factor authentication across all services.\n\n## Decision\nWe will establish centralized OAuth 2.0 authentication with single-sign-on (SSO), removing per-service login implementations. This addresses 12 security vulnerabilities from inconsistent auth and enables mandated multi-factor authentication across all services.\n\n## Consequences\n\n### Positive Consequences\n- Reduces security vulnerabilities from 12 OWASP findings to 0 by eliminating session cookie handling bugs replicated across services\n- Enables consistent password policy and MFA enforcement across all services; compliance audits now straightforward\n- Simplifies user credential management: one password reset, one MFA enrollment enables access across all services\n- Allows security team to perform one comprehensive review instead of auditing eight separate implementations\n\n### Negative Consequences\n- Requires implementing single point of failure protection: authentication service outage blocks all dependent services; needs 99.99% SLA\n- Increases authentication latency: every user request requires round-trip to auth service; requires aggressive token caching strategy\n- Requires rewriting authentication flows in 8 different services; estimated 4-6 weeks engineering effort for coordinated rollout\n- Requires new dependency on third-party identity provider (Okta, Auth0); adds $3-5k monthly cost and integration complexity",
-    "score": 3.5187675070028015,
+    "score": 4.083473389355742,
     "details": {
       "completeness": [
         {
@@ -450,15 +450,15 @@
       "consequencesBalance": [
         {
           "name": "Lists positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Lists negative consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 negative consequences",
@@ -512,7 +512,7 @@
     "testCaseName": "API Versioning Strategy",
     "phase": "phase1",
     "output": "# API Versioning Strategy\n\n## Status\nProposed\n\n## Context\nOur public API has 1,200 active integrations with third-party developers.\n        We need to make breaking changes to support new business requirements.\n        We've deprecated v1 twice already, each time causing partner outages and support burden.\n        Current approach of maintaining multiple endpoint versions causes code duplication and inconsistency.\n        Partners request longer deprecation timelines (currently 6 months, asking for 18 months).\n\n## Decision\nWe will establish centralized OAuth 2.0 authentication with single-sign-on (SSO), removing per-service login implementations. This addresses 12 security vulnerabilities from inconsistent auth and enables mandated multi-factor authentication across all services.\n\n## Consequences\n\n### Positive Consequences\n- Reduces security vulnerabilities from 12 OWASP findings to 0 by eliminating session cookie handling bugs replicated across services\n- Enables consistent password policy and MFA enforcement across all services; compliance audits now straightforward\n- Simplifies user credential management: one password reset, one MFA enrollment enables access across all services\n- Allows security team to perform one comprehensive review instead of auditing eight separate implementations\n\n### Negative Consequences\n- Requires implementing single point of failure protection: authentication service outage blocks all dependent services; needs 99.99% SLA\n- Increases authentication latency: every user request requires round-trip to auth service; requires aggressive token caching strategy\n- Requires rewriting authentication flows in 8 different services; estimated 4-6 weeks engineering effort for coordinated rollout\n- Requires new dependency on third-party identity provider (Okta, Auth0); adds $3-5k monthly cost and integration complexity",
-    "score": 3.361904761904762,
+    "score": 3.926610644257703,
     "details": {
       "completeness": [
         {
@@ -577,15 +577,15 @@
       "consequencesBalance": [
         {
           "name": "Lists positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Lists negative consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 positive consequences",
-          "passed": false
+          "passed": true
         },
         {
           "name": "Has at least 2 negative consequences",
