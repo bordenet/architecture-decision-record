@@ -391,10 +391,10 @@ class App {
     try {
       let promptTemplate = await loadPrompt(2);
 
-      // Replace variables with current ADR data
-      const adr = `# ${this.currentProject.title}\n\n## Status\n${this.currentProject.status}\n\n## Context\n${this.currentProject.context}\n\n## Decision\n${this.currentProject.decision}\n\n## Consequences\n${this.currentProject.consequences}${this.currentProject.rationale ? `\n\n## Rationale\n${this.currentProject.rationale}` : ""}`;
+      // Build complete ADR from Phase 1 data
+      const phase1Output = `# ${this.currentProject.title}\n\n## Status\n${this.currentProject.status}\n\n## Context\n${this.currentProject.context}\n\n## Decision\n${this.currentProject.decision}\n\n## Consequences\n${this.currentProject.consequences}${this.currentProject.rationale ? `\n\n## Rationale\n${this.currentProject.rationale}` : ""}`;
 
-      promptTemplate = promptTemplate.replace(/{adr}/g, adr);
+      promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
 
       this.currentProject.phase2Prompt = promptTemplate;
       await storage.saveProject(this.currentProject);
@@ -512,12 +512,13 @@ class App {
     try {
       let promptTemplate = await loadPrompt(3);
 
-      const adr = `# ${this.currentProject.title}\n\n## Status\n${this.currentProject.status}\n\n## Context\n${this.currentProject.context}\n\n## Decision\n${this.currentProject.decision}\n\n## Consequences\n${this.currentProject.consequences}${this.currentProject.rationale ? `\n\n## Rationale\n${this.currentProject.rationale}` : ""}`;
+      // Build complete ADR from Phase 1 data
+      const phase1Output = `# ${this.currentProject.title}\n\n## Status\n${this.currentProject.status}\n\n## Context\n${this.currentProject.context}\n\n## Decision\n${this.currentProject.decision}\n\n## Consequences\n${this.currentProject.consequences}${this.currentProject.rationale ? `\n\n## Rationale\n${this.currentProject.rationale}` : ""}`;
 
-      const feedback = this.currentProject.phase2Review || "[No Phase 2 feedback provided]";
+      const phase2Review = this.currentProject.phase2Review || "[No Phase 2 feedback provided]";
 
-      promptTemplate = promptTemplate.replace(/{adr}/g, adr);
-      promptTemplate = promptTemplate.replace(/{feedback}/g, feedback);
+      promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
+      promptTemplate = promptTemplate.replace(/{phase2_review}/g, phase2Review);
 
       this.currentProject.phase3Prompt = promptTemplate;
       await storage.saveProject(this.currentProject);
