@@ -1,5 +1,7 @@
 You are reviewing an Architecture Decision Record (ADR) for completeness and quality.
 
+Reference the standard ADR format: https://github.com/joelparkerhenderson/architecture-decision-record
+
 ## ADR to Review
 
 {phase1_output}

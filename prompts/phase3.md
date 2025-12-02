@@ -1,5 +1,7 @@
 You are synthesizing a final Architecture Decision Record (ADR) based on the original draft and critical feedback.
 
+Reference the standard ADR format: https://github.com/joelparkerhenderson/architecture-decision-record
+
 ## Original ADR
 
 {phase1_output}
