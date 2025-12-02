@@ -44,6 +44,7 @@ Generate a complete ADR based on the input above. You must:
 - Include a MINIMUM of 3 negative consequences (be honest about trade-offs)
 - **Include subsequent ADRs triggered by this decision** (e.g., "This triggers decisions on: service mesh selection, distributed tracing strategy, API gateway choice")
 - **Include after-action review guidance** (e.g., "Review in 30 days to compare actual deployment time with 5-minute target")
+- **Address team factors**: team skill gaps, training requirements, hiring needs, team structure impact
 - State what becomes EASIER and what becomes HARDER
 - List specific technical implications (e.g., "requires event-driven patterns", "adds network latency", "needs distributed tracing")
 - Address team/organizational impact (training needs, hiring, coordination overhead)
@@ -91,6 +92,18 @@ Return ONLY the completed ADR in this markdown format (no explanation, no preamb
 
 ### Recommended Review Timing
 [Specify when to review: e.g., "30 days", "end of Q1", or "after 3 deployments"]
+
+## If This ADR Is Updated Later
+
+This is a **living document**. If circumstances change (new tools, new constraints, new learning), add a dated amendment instead of modifying the original text:
+
+### Amendment - YYYY-MM-DD
+[Date]: [What changed]
+Impact on decision: [How does this affect the original decision? Still valid? Needs revision?]
+
+Example: 
+### Amendment - 2025-12-15
+Kubernetes became the standard for orchestration (was Mesos). Impact: Our service mesh strategy (Istio) is now more aligned with industry standard. Decision remains valid; implementation easier than initially planned.
 ```
 
 ## Context Grounding

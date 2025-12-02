@@ -107,28 +107,37 @@ An effective ADR accomplishes:
 ### PRIORITY QUEUE FOR FUTURE SESSIONS (Based on Official ADR Requirements)
 
 **🔴 HIGH PRIORITY - Missing Core ADR Qualities**:
-1. **Alternatives Discussion** (Session 3) 
-   - Add to Context: "Why this over alternatives X, Y, Z?"
-   - Update prompts/phase1.md, phase2.md with explicit requirement
-   - Expected impact: Industry alignment 3.25 → 4.0+
+1. ✅ **Alternatives Discussion** (Session 3) - COMPLETE
+   - ✅ Added to Decision sections with explicit comparison pattern
+   - ✅ Updated all three prompts (phase1, phase2, phase3)
+   - ✅ Expected impact: Industry alignment 3.25 → 4.0+ (measurable when using real APIs)
 
-2. **Subsequent ADRs & After-Action Reviews** (Session 3)
-   - Add to Consequences: "This decision triggers need for..." 
-   - Add: "Review this decision in 30 days..."
-   - Aligns with official ADR pattern of decision chaining
+2. ✅ **Subsequent ADRs & After-Action Reviews** (Session 3) - COMPLETE
+   - ✅ Added "Subsequent ADRs Triggered" section to all phases
+   - ✅ Added "Recommended Review Timing" with specific review dates
+   - ✅ Aligns with official ADR pattern of decision chaining
 
-3. **Business Priorities Emphasis** (Session 3)
-   - Reweight Context toward business drivers (cost, time-to-market, team capability)
-   - Less: Technical details. More: Business impact
-   - Examples: "$150k annual savings", "45-min deployment blocks release", "6-week onboarding delays hiring"
+3. ✅ **Business Priorities Emphasis** (Session 3) - COMPLETE
+   - ✅ Reweighted Decision toward business drivers (cost, time-to-market, team capability)
+   - ✅ All mock examples now emphasize business impact
+   - ✅ Examples: "$200k cost to maintain", "45-min deployment blocks", "6-week onboarding"
 
 **🟡 MEDIUM PRIORITY - Quality Improvements**:
-4. **Team Factors** - Add guidance on team skills/makeup impact
-5. **Living Document Pattern** - Add amendment/update guidance to prompts
-6. **Framework Clarity** - Fix Phase 3 Framework scenario (2.71-3.29)
+4. ✅ **Team Factors** (Session 4) - COMPLETE
+   - ✅ Added explicit guidance to Consequences: "Address team skill gaps, training requirements, hiring needs, team structure impact"
+   - ✅ Updated all mock generators with specific team impact details (e.g., "team of 8 needs 4-week training", "may need to hire 2-3 specialists")
+   - ✅ Updated review criteria in phases 2 & 3 to check for team factors
+
+5. ✅ **Living Document Pattern** (Session 4) - COMPLETE
+   - ✅ Added "If This ADR Is Updated Later" section to all phase output templates
+   - ✅ Shows amendment pattern with dates (Amendment - YYYY-MM-DD)
+   - ✅ Example shows how to document changes without modifying original text
+   - ✅ Teaches immutability pattern from official ADR standards
+
+6. **Framework Clarity** - Fix Phase 3 Framework scenario (2.71-3.29) - FUTURE
 
 **🟢 LOW PRIORITY - Polish**:
-7. Production readiness docs (after core qualities are in prompts)
+7. Production readiness docs (after core qualities are in prompts) - FUTURE
 
 ---
 
