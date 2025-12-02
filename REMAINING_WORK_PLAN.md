@@ -7,21 +7,54 @@
 
 ---
 
-## ADR OUTCOME FRAMEWORK (From Official GitHub Repository)
+## ADR OUTCOME FRAMEWORK (From Official joelparkerhenderson/architecture-decision-record)
+
+### Core Purpose: Help Teams Think Smarter & Communicate Better
 
 An effective ADR accomplishes:
-1. **Captures "WHY"** - Rationale for the decision (not just "what" was done)
-2. **Documents CONTEXT** - Organization situation, business priorities, team makeup, pros/cons
-3. **Specifies CONSEQUENCES** - Clear effects, outcomes, and follow-ups (both positive AND negative)
-4. **Enables COMMUNICATION** - Helps future developers understand decisions without redoing research
-5. **Supports EVOLUTION** - Enables teams to track lifecycle (Proposed → Accepted → Superseded → Deprecated)
+1. **Captures "WHY"** - Rationale explaining reasons for decision (not just "what" was done)
+2. **Documents CONTEXT** - Organization situation, business priorities, team makeup, pros/cons of alternatives
+3. **Specifies CONSEQUENCES** - Clear effects, outcomes, follow-ups, AND impact on subsequent decisions
+4. **Enables COMMUNICATION** - Future developers understand decision without redoing research
+5. **Supports EVOLUTION** - "Living document" with dated updates when circumstances change
 
-**Key Quality Indicators:**
-- Rationale is explicit and business-driven
-- Context explains constraints and alternatives
-- Consequences are realistic, measurable, and show trade-offs
-- Decision is specific (one decision per ADR) and immutable
-- Supports "living document" evolution with dated updates
+### Critical Quality Indicators (From Authoritative Source)
+
+**Context Section Must:**
+- Explain organization's situation and business priorities ⭐
+- Include pros/cons of relevant choices ⭐
+- Describe in terms aligned with needs/goals
+- Address team skills makeup and social factors
+- Reference specific constraints driving decision
+
+**Decision Section Must:**
+- Be specific: ONE decision per ADR (not multiple)
+- Include clear RATIONALE explaining "why"
+- Reference specific facts from context
+- Use definitive language (will, adopt, implement)
+
+**Consequences Section Must:**
+- Explain effects, outcomes, outputs, follow-ups ⭐
+- Include information about subsequent ADRs triggered
+- Address after-action review processes
+- Show both positive AND negative impacts honestly
+- Explain what becomes easier vs. harder
+
+**Immutability Pattern:**
+- ⭐ Core rule: Don't alter existing information
+- In practice: Add dated amendments for living documents
+- Example: "2025-12-02: Updated - new vendor capabilities available"
+- Reason: Enables tracking how decisions evolved over time
+
+### MISSING FROM OUR CURRENT PROMPTS
+
+**⚠️ CRITICAL GAPS:**
+1. **Alternatives Discussion** - Prompts don't require explicit "why this over that"
+2. **Subsequent ADRs** - Consequences don't mention triggered decisions
+3. **After-Action Reviews** - No mention of review processes
+4. **Immutability Pattern** - No guidance on amendment format
+5. **Business Context** - Needs more emphasis on business priorities (not just technical)
+6. **Team Factors** - Missing guidance on team skills/makeup impact
 
 ---
 
@@ -71,10 +104,31 @@ An effective ADR accomplishes:
 - **Phase 2**: 3.99/5.0 (was 2.06, CRITICAL FIX COMPLETE)
 - **Phase 3**: 3.96/5.0 (was 2.79, working well)
 
-### Next Actions (AFTER THIS SESSION)
-1. **Optional - Industry Alignment**: Improve from 3.25 to 3.6+ (add explicit alternatives/trade-offs)
-2. **Consistency**: Reduce Phase 3 score variance (Framework/Microservices scenarios vary more)
-3. **Production Readiness**: Create USAGE_EXAMPLES.md and API_INTEGRATION_GUIDE.md
+### PRIORITY QUEUE FOR FUTURE SESSIONS (Based on Official ADR Requirements)
+
+**🔴 HIGH PRIORITY - Missing Core ADR Qualities**:
+1. **Alternatives Discussion** (Session 3) 
+   - Add to Context: "Why this over alternatives X, Y, Z?"
+   - Update prompts/phase1.md, phase2.md with explicit requirement
+   - Expected impact: Industry alignment 3.25 → 4.0+
+
+2. **Subsequent ADRs & After-Action Reviews** (Session 3)
+   - Add to Consequences: "This decision triggers need for..." 
+   - Add: "Review this decision in 30 days..."
+   - Aligns with official ADR pattern of decision chaining
+
+3. **Business Priorities Emphasis** (Session 3)
+   - Reweight Context toward business drivers (cost, time-to-market, team capability)
+   - Less: Technical details. More: Business impact
+   - Examples: "$150k annual savings", "45-min deployment blocks release", "6-week onboarding delays hiring"
+
+**🟡 MEDIUM PRIORITY - Quality Improvements**:
+4. **Team Factors** - Add guidance on team skills/makeup impact
+5. **Living Document Pattern** - Add amendment/update guidance to prompts
+6. **Framework Clarity** - Fix Phase 3 Framework scenario (2.71-3.29)
+
+**🟢 LOW PRIORITY - Polish**:
+7. Production readiness docs (after core qualities are in prompts)
 
 ---
 
