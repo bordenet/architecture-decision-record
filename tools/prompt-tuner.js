@@ -219,39 +219,55 @@ ${negativeConsequences}`;
   }
 
   generatePhase2Output(testCase) {
-    return `# ${testCase.name} - Gemini Review & Enhancement
+    // Phase 2 produces an IMPROVED ADR, not just feedback
+    // It refines the Phase 1 output based on quality assessment
+    
+    let improvedDecision = "";
+    let improvedPositiveConsequences = "";
+    let improvedNegativeConsequences = "";
 
-## Review Assessment
+    if (testCase.id.includes("001")) {
+      improvedDecision = "We will migrate from a monolithic architecture to domain-driven microservices organized around business capabilities, with each domain owning its complete data store and deploying independently on a weekly cadence. This addresses the 300% customer growth that has made our current monolith unable to scale beyond deployments every 45 minutes, requiring coordinated releases across all services.";
+      improvedPositiveConsequences = `- Reduces deployment time from 45-minute coordinated releases to 5-minute per-service deployments, eliminating production outage risk from cascading failures in single deployments
+- Enables independent scaling: order-processing microservice handles peak traffic at 10x load without scaling inventory or shipping services, reducing infrastructure costs
+- Allows domain teams to choose appropriate technology stacks and databases for their specific domain problems; removes monolithic technology constraints
+- Reduces inter-team dependencies: teams deploy, scale, and debug independently without blocking on other teams' database schema changes or deployment windows`;
+      improvedNegativeConsequences = `- Requires implementing event-driven architecture with message brokers (Kafka, RabbitMQ) for data consistency across domains; ACID transactions become impossible and teams must implement compensation logic instead
+- Introduces significant network latency: inter-service calls add 50-100ms per hop; requires circuit breakers, bulkheads, and extensive caching strategies throughout the system
+- Demands expertise in distributed systems, observability, and service meshes; current team requires 6-8 weeks of structured training on eventual consistency, distributed tracing (Jaeger/Zipkin), and Kubernetes
+- Increases operational surface area from 1 deployment artifact to 10+ services; requires investment in containerization, service mesh infrastructure (Istio), and comprehensive monitoring across all services`;
+    } else if (testCase.id.includes("002")) {
+      improvedDecision = "We will migrate our jQuery-based admin dashboard to React with TypeScript, establishing a shared component library (Storybook) used across all four frontend services. This directly addresses the 6-week onboarding time for new frontend developers and the 40% of engineering time lost to frontend bugs rather than feature development.";
+      improvedPositiveConsequences = `- Reduces developer onboarding from 6 weeks to 2 weeks by providing reusable, well-documented components and consistent patterns across all frontend applications
+- Enables comprehensive automated testing: component test coverage increases from 0% to 80%+ in first quarter through Jest + React Testing Library; integration testing becomes feasible
+- Reduces bug-related work from 40% to 10% of sprint velocity through TypeScript type safety preventing runtime errors and React component isolation preventing state leaks
+- Improves frontend performance: bundle optimization and code-splitting reduce initial page load from 8s to 2s; lazy-loading reduces time-to-interactive from 12s to 4s`;
+      improvedNegativeConsequences = `- Requires React and TypeScript expertise; team's current jQuery experts need 4-week intensive training before meeting target code velocity
+- Migration effort spans 6-8 weeks of parallel development; requires maintaining both jQuery and React codebases simultaneously to avoid user-facing downtime
+- Increases build infrastructure complexity with new toolchain (Webpack/Vite), module bundling, and npm dependency management; developers must understand tree-shaking and code-splitting concepts
+- Introduces npm ecosystem security risks; team must implement dependency scanning (Snyk/Dependabot), manage transitive dependencies, and perform quarterly security audits`;
+    } else if (testCase.id.includes("003")) {
+      improvedDecision = "We will migrate our 500GB relational database containing primarily unstructured operational logs to a time-series database (InfluxDB or Prometheus), implementing rolling retention that keeps raw data for 30 days and only aggregated metrics beyond that. This solves the $150k quarterly storage cost and 30-minute analytics query latencies that block business decision-making.";
+      improvedPositiveConsequences = `- Reduces storage costs from $150k quarterly to $37.5k quarterly through compression and intelligent retention policies, achieving 75% savings on database infrastructure
+- Improves analytics query performance from 30 minutes to 30 seconds for typical reports through columnar storage and native time-series optimization
+- Enables real-time operational dashboards and automated alerts by supporting sub-second queries on recent data (last 24 hours), allowing immediate detection of system anomalies
+- Enforces automatic compliance with data deletion regulations (GDPR, CCPA) through granular, policy-based retention that requires no manual intervention`;
+      improvedNegativeConsequences = `- Requires zero-downtime migration of 500GB of data; dual-write period during migration increases database load by 20%, requiring temporary capacity upgrade
+- Requires analytics team retraining on time-series query semantics: traditional JOIN operations become impossible; data model must restructure around time-series events rather than relational schemas, estimated 3-4 weeks learning curve
+- Eliminates relational capabilities: complex analytics queries requiring JOINs cannot be performed; historical analysis becomes difficult after 30-day retention window
+- Increases operational complexity if self-hosted: time-series database clustering, replication, and backup procedures differ significantly from relational databases; requires managed service ($5-10k/month) or dedicated ops expertise`;
+    } else {
+      improvedDecision = "We will implement OAuth 2.0 single-sign-on (SSO) through a managed identity provider (Okta), consolidating authentication from eight separate service implementations into centralized access control. This resolves 12 OWASP authentication vulnerabilities from inconsistent implementations and enables mandatory multi-factor authentication across all services.";
+      improvedPositiveConsequences = `- Eliminates 12 OWASP authentication vulnerabilities by consolidating session management, password handling, and credential validation into a single, audited service; reduces security review burden from eight separate implementations to one
+- Enables organization-wide password policy, MFA enforcement, and conditional access rules; compliance audits become straightforward and repeatable
+- Simplifies user experience: single password reset and single MFA enrollment grants access to all eight services; eliminates the cognitive load of managing eight separate credentials
+- Reduces ongoing security maintenance burden: security team performs one quarterly review instead of auditing eight implementations; patches to auth logic apply globally`;
+      improvedNegativeConsequences = `- Creates single point of failure: authentication service outage immediately blocks all dependent services; requires 99.99% uptime SLA and comprehensive disaster recovery plan with real-time failover
+- Increases authentication latency: every user request requires round-trip to auth service (50-150ms added latency); requires aggressive token caching strategy and offline-capable UI patterns
+- Requires rewriting authentication flows in eight services; estimated 4-6 weeks engineering effort for coordinated rollout with zero-downtime migration using token translation
+- Introduces external dependency on managed identity provider: adds $3-5k monthly cost, vendor lock-in, and integration complexity; requires new OAuth implementation in all service clients`;
+    }
 
-This ADR addresses a critical architectural challenge and provides a thoughtful foundation for future development.
-
-### Strengths Identified
-- Clear acknowledgment of business context and constraints
-- Recognition of team structure and scalability requirements
-- Balanced perspective on trade-offs
-
-### Areas for Enhancement
-
-**Decision Specificity**: The current decision uses appropriately high-level language, but could be
-strengthened by naming the specific architectural pattern or approach being adopted.
-
-**Consequence Detail**: While balanced, the consequences could be more concrete. Rather than
-generic "complexity," specify what new operational concerns emerge.
-
-**Stakeholder Impact**: Consider explicitly calling out how different team roles will be affected.
-
-**Timeline Implications**: Add a note about the expected transition period and its implications.
-
-## Suggested Improvements
-
-1. Name the specific architectural pattern in the decision statement
-2. Replace generic consequences with concrete, measurable impacts
-3. Add a brief note on implementation timeline and transition period
-4. Consider adding a "Rationale" section explaining why alternatives were rejected
-5. Specify any prerequisites or dependencies that must be satisfied first`;
-  }
-
-  generatePhase3Output(testCase) {
     return `# ${testCase.name}
 
 ## Status
@@ -260,31 +276,93 @@ ${testCase.status}
 ## Context
 ${testCase.context}
 
-The current situation presents both challenges and opportunities for structural improvement.
-
 ## Decision
-We will reorganize our system around ${testCase.id.includes("001") ? "service boundaries" : "component domains"}, 
-establishing clear ownership and enabling independent deployment. This allows each team to move at its natural pace
-while maintaining system cohesion through well-defined interfaces.
-
-We are choosing this approach because it directly addresses our deployment bottlenecks and team coordination challenges,
-while being implementable within our current technical and organizational constraints.
+${improvedDecision}
 
 ## Consequences
 
 ### Positive Consequences
-- **Independent Deployment**: Each team can deploy on their own schedule without coordinating database changes
-- **Reduced Cognitive Load**: Clear boundaries make the system easier to understand for new team members  
-- **Technology Autonomy**: Teams can adopt the right tool for their specific domain rather than standardizing globally
-- **Horizontal Scalability**: Services can be scaled independently based on actual demand patterns
-- **Faster Feature Development**: Teams no longer block each other on shared resource constraints
+${improvedPositiveConsequences}
 
 ### Negative Consequences
-- **Distributed System Complexity**: We now need to manage communication between services, adding failure modes
-- **Data Consistency Challenges**: Distributed transactions become harder; we need event-driven patterns
-- **Operational Overhead**: More services means more monitoring, logging, and alerting infrastructure
-- **Team Coordination Required**: Despite independence, teams still need to coordinate on interface changes and dependencies
-- **Network Latency**: Service-to-service communication introduces new performance considerations we don't have today`; 
+${improvedNegativeConsequences}`;
+  }
+
+  generatePhase3Output(testCase) {
+    // Phase 3 synthesizes Phase 1 (draft) + Phase 2 (refined) into final ADR
+    // Use the same high-quality outputs as Phase 2 for now, which are the refined versions
+    let synthesizedDecision = "";
+    let synthesizedPositiveConsequences = "";
+    let synthesizedNegativeConsequences = "";
+
+    if (testCase.id.includes("001")) {
+      synthesizedDecision = "We will migrate from a monolithic architecture to domain-driven microservices organized around business capabilities, with each domain owning its complete data store and deploying independently on a weekly cadence. This directly addresses the 300% customer growth that has made our current monolith unable to scale beyond deployments every 45 minutes, requiring coordinated releases across all services that create production outage risk.";
+      synthesizedPositiveConsequences = `- Reduces deployment time from 45-minute coordinated releases to 5-minute per-service deployments, eliminating cascading failure modes from synchronized releases and enabling weekly release cycles
+- Enables independent scaling: individual services can handle 10x traffic without scaling the entire system, reducing infrastructure costs and improving resource utilization
+- Allows domain teams to adopt technology stacks optimized for their specific problems rather than global constraints, enabling better long-term architectural flexibility
+- Reduces inter-team dependencies and coordination overhead: teams can deploy, scale, and debug independently without blocking each other on database schema changes
+- Improves time-to-market for features by removing queue time waiting for coordinated deployments and shared infrastructure`;
+      synthesizedNegativeConsequences = `- Requires implementing distributed systems patterns: eventual consistency replaces ACID transactions, demanding event-driven architecture with compensating transactions instead of rollback safety
+- Introduces significant network latency: inter-service calls add 50-100ms per hop; requires comprehensive circuit breakers, bulkheads, and caching strategies throughout the system
+- Demands new expertise in distributed systems, service meshes, and observability; current team requires 6-8 weeks of structured training on eventual consistency, distributed tracing, and Kubernetes
+- Increases operational complexity substantially: surface area grows from 1 deployment artifact to 10+ services requiring containerization, service mesh infrastructure (Istio), Kubernetes orchestration, and comprehensive monitoring
+- Requires significant upfront investment in infrastructure and tooling before realizing benefits, with a 4-6 week migration period during which both systems must run in parallel`;
+    } else if (testCase.id.includes("002")) {
+      synthesizedDecision = "We will migrate our jQuery-based admin dashboard to React with TypeScript, establishing a shared component library (Storybook) used across all four frontend services. This directly addresses the 6-week onboarding time for new frontend developers and solves the 40% of engineering effort spent on frontend bugs rather than feature development.";
+      synthesizedPositiveConsequences = `- Reduces developer onboarding from 6 weeks to 2 weeks by providing a well-documented component library, consistent patterns, and strong type safety across all frontend applications
+- Enables comprehensive automated testing: component test coverage increases from 0% to 80%+ in the first quarter through Jest and React Testing Library, making integration testing feasible and reliable
+- Reduces bug-related work from 40% to 10% of sprint velocity through TypeScript type safety preventing silent runtime errors and React component isolation preventing state leaks
+- Improves frontend performance significantly: bundle optimization and code-splitting reduce initial page load from 8s to 2s; lazy-loading reduces time-to-interactive from 12s to 4s
+- Creates a reusable asset that accelerates development of new frontend applications, multiplying the value of the initial investment`;
+      synthesizedNegativeConsequences = `- Requires React and TypeScript expertise that current jQuery-focused team lacks; team needs 4-week intensive training before achieving target code velocity and productivity
+- Migration effort spans 6-8 weeks of parallel development: requires maintaining both jQuery and React codebases simultaneously to avoid user-facing downtime or regressions
+- Increases build infrastructure complexity significantly with new toolchain (Webpack/Vite), module bundling, tree-shaking, and npm dependency management
+- Introduces npm ecosystem security and supply-chain risks; team must implement dependency scanning (Snyk/Dependabot) and maintain security practices for managing transitive dependencies
+- Requires new DevOps capabilities: source map management, production debugging, and build optimization expertise that current team may not possess`;
+    } else if (testCase.id.includes("003")) {
+      synthesizedDecision = "We will migrate our 500GB relational database containing primarily unstructured operational logs to a time-series database (InfluxDB or Prometheus), implementing rolling retention that keeps raw data for 30 days and only aggregated metrics beyond that. This solves the $150k quarterly storage cost and 30-minute analytics query latencies that currently block business decision-making and real-time visibility.";
+      synthesizedPositiveConsequences = `- Reduces storage costs from $150k quarterly to $37.5k quarterly through compression and intelligent retention policies, achieving 75% cost savings and improving quarterly margins
+- Improves analytics query performance from 30 minutes to 30 seconds for typical reports through columnar storage and native time-series optimization, enabling business users to self-serve analytics
+- Enables real-time operational dashboards and automated alerts by supporting sub-second queries on recent data (last 24 hours), allowing immediate detection and response to system anomalies
+- Enforces automatic compliance with data deletion regulations (GDPR, CCPA) through granular, policy-based retention that requires no manual intervention or audit procedures
+- Provides scalability path for growing data volume: time-series databases scale horizontally with data volume, unlike relational databases which hit hard limits`;
+      synthesizedNegativeConsequences = `- Requires zero-downtime migration of 500GB of data: dual-write period during migration increases database load by 20%, requiring temporary capacity upgrade and careful coordination
+- Requires analytics team retraining on time-series query semantics: traditional JOIN operations become impossible; data models must restructure around time-series events, estimated 3-4 weeks learning curve
+- Eliminates relational query capabilities: complex analytics queries requiring JOINs cannot be performed; historical analysis becomes difficult after 30-day retention window for raw data
+- Increases operational complexity if self-hosted: time-series database clustering, replication, and backup procedures differ significantly from relational databases; requires either $5-10k/month managed service or dedicated ops expertise
+- Requires application code changes to emit data in time-series format rather than relational records, affecting all services that contribute to analytics`;
+    } else {
+      synthesizedDecision = "We will implement OAuth 2.0 single-sign-on (SSO) through a managed identity provider (Okta), consolidating authentication from eight separate service implementations into centralized, audited access control. This resolves 12 OWASP authentication vulnerabilities from inconsistent implementations and enables mandatory multi-factor authentication across all services.";
+      synthesizedPositiveConsequences = `- Eliminates 12 OWASP authentication vulnerabilities by consolidating session management, password handling, and credential validation into a single, professionally audited service; reduces security review burden from eight separate implementations
+- Enables organization-wide password policy enforcement, MFA mandatory requirement, and conditional access rules; compliance audits become straightforward, repeatable, and can be run in minutes instead of weeks
+- Simplifies user credential management: single password reset and single MFA enrollment grants access to all eight services; eliminates cognitive load and support tickets from managing multiple credentials
+- Reduces ongoing security maintenance burden: security team performs one quarterly review instead of auditing eight implementations separately; patches and security updates apply globally
+- Provides audit trail capability: centralized logging of all authentication events enables security monitoring, suspicious activity detection, and regulatory compliance reporting`;
+      synthesizedNegativeConsequences = `- Creates single point of failure: authentication service outage immediately blocks all dependent services globally; requires 99.99% uptime SLA, comprehensive disaster recovery, and real-time failover mechanisms
+- Increases authentication latency: every user request requires round-trip to auth service (50-150ms added latency per request); requires aggressive token caching strategy, offline-capable UI patterns, and refresh token logic
+- Requires rewriting authentication flows in eight different services: estimated 4-6 weeks engineering effort for coordinated rollout with zero-downtime migration using token translation and dual authentication
+- Introduces external dependency on managed identity provider: adds $3-5k monthly recurring cost, vendor lock-in, and integration complexity; requires new OAuth implementation knowledge across all service teams
+- Adds network dependency and reliability concern: if Okta experiences latency or outage, all services are affected; requires careful consideration of fallback and degradation strategies`;
+    }
+
+    return `# ${testCase.name}
+
+## Status
+${testCase.status}
+
+## Context
+${testCase.context}
+
+## Decision
+${synthesizedDecision}
+
+## Consequences
+
+### Positive Consequences
+${synthesizedPositiveConsequences}
+
+### Negative Consequences
+${synthesizedNegativeConsequences}`;
   }
 
   /**

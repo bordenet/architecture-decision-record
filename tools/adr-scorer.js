@@ -133,32 +133,32 @@ class ADRScorer {
   }
 
   checkPositiveConsequences(content) {
-    const consequencesMatch = content.match(/^##\s+Consequences\s*\n([\s\S]*?)(?:^##|$)/im);
-    if (!consequencesMatch) return false;
-    const consequences = consequencesMatch[1];
-    return /\b(simpler|easier|faster|reduces|improves|enables|allows|benefits|advantages|strengths)\b/im.test(consequences);
+    const positiveMatch = content.match(/^###\s+Positive\s+Consequences\s*\n([\s\S]*?)\n\n(?=###|##)/im);
+    if (!positiveMatch) return false;
+    const section = positiveMatch[1];
+    return /\b(simpler|easier|faster|reduces|improves|enables|allows|benefits|advantages|strengths)\b/im.test(section);
   }
 
   checkNegativeConsequences(content) {
-    const consequencesMatch = content.match(/^##\s+Consequences\s*\n([\s\S]*?)(?:^##|$)/im);
-    if (!consequencesMatch) return false;
-    const consequences = consequencesMatch[1];
-    return /\b(more complex|harder|slower|increases|requires|drawbacks|disadvantages|limitations|difficult)\b/im.test(consequences);
+    const negativeMatch = content.match(/^###\s+Negative\s+Consequences\s*\n([\s\S]*?)(?:\n\n(?=###|##)|$)/im);
+    if (!negativeMatch) return false;
+    const section = negativeMatch[1];
+    return /\b(more complex|harder|slower|increases|requires|drawbacks|disadvantages|limitations|difficult)\b/im.test(section);
   }
 
   checkMinimumPositive(content) {
-    const consequencesMatch = content.match(/^##\s+Consequences\s*\n([\s\S]*?)(?:^##|$)/im);
-    if (!consequencesMatch) return false;
-    const consequences = consequencesMatch[1];
-    const positiveMatches = (consequences.match(/\b(simpler|easier|faster|reduces|improves|enables|allows|benefits)\b/ig) || []);
+    const positiveMatch = content.match(/^###\s+Positive\s+Consequences\s*\n([\s\S]*?)\n\n(?=###|##)/im);
+    if (!positiveMatch) return false;
+    const section = positiveMatch[1];
+    const positiveMatches = (section.match(/\b(simpler|easier|faster|reduces|improves|enables|allows|benefits)\b/ig) || []);
     return positiveMatches.length >= 2;
   }
 
   checkMinimumNegative(content) {
-    const consequencesMatch = content.match(/^##\s+Consequences\s*\n([\s\S]*?)(?:^##|$)/im);
-    if (!consequencesMatch) return false;
-    const consequences = consequencesMatch[1];
-    const negativeMatches = (consequences.match(/\b(more complex|harder|slower|increases|requires|drawbacks|limitations|difficult)\b/ig) || []);
+    const negativeMatch = content.match(/^###\s+Negative\s+Consequences\s*\n([\s\S]*?)(?:\n\n(?=###|##)|$)/im);
+    if (!negativeMatch) return false;
+    const section = negativeMatch[1];
+    const negativeMatches = (section.match(/\b(more complex|harder|slower|increases|requires|drawbacks|limitations|difficult)\b/ig) || []);
     return negativeMatches.length >= 2;
   }
 
