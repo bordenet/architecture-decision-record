@@ -15,6 +15,8 @@ Review the ADR across these dimensions and produce an improved version:
 ### 1. Decision Specificity
 - Does the decision name a specific architectural approach (microservices, event-driven, monorepo, etc.)?
 - Does it explain WHY, not just WHAT?
+- **Does it include explicit alternatives comparison** ("We considered X and Y, but chose Z because...")?
+- **Is the rationale grounded in business drivers** (cost, time-to-market, team capability, risk)?
 - Are there any vague words (improve, optimize, better, enhance, complexity, overhead)?
 
 ### 2. Consequences Balance & Depth
@@ -22,6 +24,8 @@ Review the ADR across these dimensions and produce an improved version:
 - Do consequences include specific, measurable impacts (not generic statements)?
 - Are three dimensions covered: technical, organizational, operational?
 - Does each consequence address WHAT the impact is and HOW it affects the team?
+- **Are subsequent ADRs triggered by this decision mentioned** (e.g., "This necessitates decisions on X, Y, Z")?
+- **Is after-action review timing specified** (e.g., "Review in 30 days" not "monitor later")?
 
 ### 3. Context Grounding
 - Are specific numbers/facts from the context referenced in the decision and consequences?
@@ -57,7 +61,7 @@ Return ONLY the improved ADR in this markdown format (no explanation, no preambl
 [Original context - keep as-is unless critical gap identified]
 
 ## Decision
-[Improved decision with specific architectural approach and clear rationale]
+[Improved decision with specific architectural approach, alternatives comparison, business drivers, and clear rationale]
 
 ## Consequences
 
@@ -66,11 +70,19 @@ Return ONLY the improved ADR in this markdown format (no explanation, no preambl
 
 ### Negative Consequences
 [3+ specific, concrete negative impacts with honest assessment]
+
+### Subsequent ADRs Triggered by This Decision
+[List 2-3 architectural decisions that this decision necessitates]
+
+### Recommended Review Timing
+[Specify clear checkpoints for after-action review]
 ```
 
 ## Quality Checklist Before Returning
 - ✅ Decision names a specific approach (not vague principles)
 - ✅ Decision explains WHY, not HOW
+- ✅ **Decision includes alternatives comparison** ("We considered X, but chose Y because...")
+- ✅ **Decision is grounded in business drivers** (cost, time-to-market, capability, risk)
 - ✅ 3+ positive consequences listed with concrete specifics
 - ✅ 3+ negative consequences listed with concrete specifics
 - ✅ No vague words (complexity, overhead, improve, optimize, better)
@@ -78,5 +90,7 @@ Return ONLY the improved ADR in this markdown format (no explanation, no preambl
 - ✅ Organizational impact addressed (training, team coordination, expertise)
 - ✅ Operational impact addressed (deployment, monitoring, dependencies)
 - ✅ Each consequence is a substantive sentence, not a phrase
+- ✅ **Subsequent ADRs section present** (lists 2-3 triggered decisions)
+- ✅ **Recommended Review Timing present** (specific checkpoints, not vague timelines)
 
 Return the complete, refined ADR above. This version will feed into final synthesis.
