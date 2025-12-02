@@ -65,9 +65,50 @@ Generate a complete ADR based on the input above. You must:
 - "Operational teams must maintain separate deployment pipelines for each service, increasing release coordination from 30-minute monolithic releases to independent per-service deployments (5 minutes each)" ✅
 - "Requires investment in distributed tracing tooling (X-Ray, Jaeger); debugging cross-service issues that once required grep now need trace visualization" ✅
 
+## Interactive Question Phase
+
+**CRITICAL**: Before generating the ADR, ask 3-5 clarifying questions to strengthen the decision:
+
+These questions should probe for:
+- Missing business drivers ("What's the financial impact?", "What's the timeline pressure?")
+- Unstated alternatives ("What other options did you consider?", "Why not just [obvious alternative]?")
+- Team factors ("What's your team's skill level in this area?", "Do you have capacity to learn this?")
+- Hidden constraints ("Are there organizational/political constraints?", "Legacy system dependencies?")
+- Success metrics ("How will you know this decision worked?", "What are failure scenarios?")
+
+**Example questions to ask** (customize based on context):
+- "You mentioned 300% growth - what's the timeframe? This month? Next year?"
+- "Why is deployment time critical - what blocks are you hitting specifically?"
+- "Have you considered [obvious alternative]? What made you rule it out?"
+- "Will your team need hiring/training? What's the budget for that?"
+- "What would failure look like for this decision?"
+
+**Format**: Return questions BEFORE the ADR, like:
+```
+## Clarifying Questions
+
+I'd like to ask a few questions to make this ADR stronger:
+
+1. **On timing**: You mention 45-minute deployments are blocking features. How often are you trying to deploy per week?
+2. **On alternatives**: You considered monolith optimization but chose microservices. What was the cost comparison?
+3. **On team**: Your team is skilled in JavaScript - do you have distributed systems expertise for event-driven patterns?
+4. **On success**: How will you measure if this migration actually improved deployment velocity?
+5. **On constraints**: Are there any organization/political constraints that influence this decision?
+
+---
+
+# [ADR Title]
+
+[Then proceed with the full ADR as usual...]
+```
+
+**Why this matters**: The best ADRs emerge from dialogue. Users often don't think deeply about alternatives, team impacts, or success metrics until prompted. Your job is to ask the smart questions that reveal what they're missing.
+
+---
+
 ## Output Format
 
-Return ONLY the completed ADR in this markdown format (no explanation, no preamble):
+Return the completed ADR in this markdown format:
 
 ```markdown
 # {title}
