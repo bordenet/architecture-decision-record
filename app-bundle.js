@@ -797,7 +797,6 @@ Prompt loading failed.`;
     async generatePhase2Prompt() {
       try {
         let promptTemplate = await loadPrompt(2);
-        console.log("Loaded template:", promptTemplate.substring(0, 100));
         const phase1Output = `# ${this.currentProject.title}
 
 ## Status
@@ -814,9 +813,7 @@ ${this.currentProject.consequences}${this.currentProject.rationale ? `
 
 ## Rationale
 ${this.currentProject.rationale}` : ""}`;
-        console.log("Phase 1 output:", phase1Output.substring(0, 100));
         promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
-        console.log("After replace:", promptTemplate.substring(0, 100));
         this.currentProject.phase2Prompt = promptTemplate;
         await storage.saveProject(this.currentProject);
         await navigator.clipboard.writeText(promptTemplate);
