@@ -390,11 +390,19 @@ class App {
   async generatePhase2Prompt() {
     try {
       let promptTemplate = await loadPrompt(2);
+      // eslint-disable-next-line no-console
+      console.log("Loaded template:", promptTemplate.substring(0, 100));
 
       // Build complete ADR from Phase 1 data
       const phase1Output = `# ${this.currentProject.title}\n\n## Status\n${this.currentProject.status}\n\n## Context\n${this.currentProject.context}\n\n## Decision\n${this.currentProject.decision}\n\n## Consequences\n${this.currentProject.consequences}${this.currentProject.rationale ? `\n\n## Rationale\n${this.currentProject.rationale}` : ""}`;
 
+      // eslint-disable-next-line no-console
+      console.log("Phase 1 output:", phase1Output.substring(0, 100));
+
       promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
+
+      // eslint-disable-next-line no-console
+      console.log("After replace:", promptTemplate.substring(0, 100));
 
       this.currentProject.phase2Prompt = promptTemplate;
       await storage.saveProject(this.currentProject);
