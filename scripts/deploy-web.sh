@@ -30,6 +30,10 @@ print_error() {
   echo -e "${RED}✗${NC} $1"
 }
 
+print_warning() {
+  echo -e "${YELLOW}⚠${NC} $1"
+}
+
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
