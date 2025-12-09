@@ -261,6 +261,7 @@ Available options:
 
 - **[One-Pager Assistant](https://bordenet.github.io/one-pager/)** - Create concise one-page documents
 - **[Product Requirements Assistant](https://bordenet.github.io/product-requirements-assistant/)** - Write professional PRDs
+- **[Power Statement Assistant](https://bordenet.github.io/power-statement-assistant/)** - Create compelling power statements
 - **[Architecture Decision Record Standard](https://github.com/joelparkerhenderson/architecture-decision-record)** - ADR documentation
 
 ---
