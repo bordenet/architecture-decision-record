@@ -589,25 +589,71 @@ Prompt loading failed.`;
         }
       } else {
         container.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          ${this.projects.map((p) => `
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                 onclick="app.openProject('${p.id}')">
-              <h3 class="font-bold text-lg text-gray-900 dark:text-white truncate">${p.title || "Untitled"}</h3>
-              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                <span class="inline-block px-2 py-1 rounded bg-gray-200 dark:bg-gray-700">${p.status || "Proposed"}</span>
-              </p>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">${p.context || "No context"}</p>
-              <p class="text-xs text-gray-400 dark:text-gray-500 mt-3">
-                Phase ${p.phase || 1} - Updated: ${new Date(p.updatedAt).toLocaleDateString()}
-              </p>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          ${this.projects.map((p) => {
+          const phase = p.phase || 1;
+          const completedPhases = this.countCompletedPhases(p);
+          return `
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer" data-project-id="${p.id}">
+              <div class="p-6">
+                <div class="flex items-start justify-between mb-3">
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
+                    ${this.escapeHtml(p.title) || "Untitled"}
+                  </h3>
+                  <button class="delete-project-btn text-gray-400 hover:text-red-600 transition-colors" data-project-id="${p.id}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="mb-4">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Phase ${phase}/3</span>
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: ${phase / 3 * 100}%"></div>
+                    </div>
+                  </div>
+                  <div class="flex space-x-1">
+                    ${[1, 2, 3].map((phaseNum) => `
+                      <div class="flex-1 h-1 rounded ${phaseNum <= completedPhases ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}"></div>
+                    `).join("")}
+                  </div>
+                </div>
+
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                  ${this.escapeHtml(p.context) || "No context"}
+                </p>
+
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span>Updated ${this.formatDate(p.updatedAt)}</span>
+                  <span>${completedPhases}/3 complete</span>
+                </div>
+              </div>
             </div>
-          `).join("")}
+            `;
+        }).join("")}
         </div>
         <button id="new-project-btn" class="mt-6 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
           + New ADR
         </button>
       `;
+        const projectCards = container.querySelectorAll("[data-project-id]");
+        projectCards.forEach((card) => {
+          card.addEventListener("click", (e) => {
+            if (!e.target.closest(".delete-project-btn")) {
+              this.openProject(card.dataset.projectId);
+            }
+          });
+        });
+        const deleteBtns = container.querySelectorAll(".delete-project-btn");
+        deleteBtns.forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const projectId = btn.dataset.projectId;
+            await this.deleteProject(projectId);
+          });
+        });
         const newBtn = document.getElementById("new-project-btn");
         if (newBtn) {
           newBtn.addEventListener("click", () => this.createNewProject());
@@ -1012,6 +1058,68 @@ ${this.currentProject.rationale}` : ""}`;
         showToast("Failed to import ADRs", "error");
       }
       event.target.value = "";
+    }
+    /**
+     * Delete a project by ID (called from project list)
+     * @param {string} projectId - Project ID to delete
+     */
+    async deleteProject(projectId) {
+      const project = this.projects.find((p) => p.id === projectId);
+      const title = project?.title || "this ADR";
+      if (!window.confirm(`Are you sure you want to delete "${title}"?`)) {
+        return;
+      }
+      try {
+        await storage.deleteProject(projectId);
+        showToast("ADR deleted", "success");
+        await this.loadProjects();
+        await this.renderProjectList();
+      } catch (error) {
+        console.error("Delete failed:", error);
+        showToast("Failed to delete ADR", "error");
+      }
+    }
+    /**
+     * Count completed phases for a project
+     * @param {Object} project - Project object
+     * @returns {number} Number of completed phases
+     */
+    countCompletedPhases(project) {
+      let count = 0;
+      if (project.title && project.context) count++;
+      if (project.phase2Review) count++;
+      if (project.finalADR) count++;
+      return count;
+    }
+    /**
+     * Escape HTML to prevent XSS
+     * @param {string} str - String to escape
+     * @returns {string} Escaped string
+     */
+    escapeHtml(str) {
+      if (!str) return "";
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+    /**
+     * Format date for display
+     * @param {string} dateStr - ISO date string
+     * @returns {string} Formatted date string
+     */
+    formatDate(dateStr) {
+      if (!dateStr) return "Never";
+      const date = new Date(dateStr);
+      const now = /* @__PURE__ */ new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 6e4);
+      const diffHours = Math.floor(diffMs / 36e5);
+      const diffDays = Math.floor(diffMs / 864e5);
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return date.toLocaleDateString();
     }
   };
   var app = new App();
