@@ -693,7 +693,7 @@ class App {
    */
   async deleteProject(projectId) {
     const project = this.projects.find(p => p.id === projectId);
-    const title = project?.title || "this ADR";
+    const title = project?.title || "Untitled";
 
     if (!window.confirm(`Are you sure you want to delete "${title}"?`)) {
       return;
