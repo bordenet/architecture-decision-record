@@ -152,7 +152,7 @@ class App {
               <div class="p-6">
                 <div class="flex items-start justify-between mb-3">
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                    ${this.escapeHtml(p.title) || "Untitled"}
+                    ${this.escapeHtml(p.title || p.name) || "Untitled"}
                   </h3>
                   <button class="delete-project-btn text-gray-400 hover:text-red-600 transition-colors" data-project-id="${p.id}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -693,7 +693,7 @@ class App {
    */
   async deleteProject(projectId) {
     const project = this.projects.find(p => p.id === projectId);
-    const title = project?.title || "Untitled";
+    const title = project?.title || project?.name || "Untitled";
 
     if (!window.confirm(`Are you sure you want to delete "${title}"?`)) {
       return;
