@@ -887,9 +887,13 @@ class App {
   }
 }
 
-// Only initialize if running in browser (not in test environment)
+// Only initialize if running in real browser (not Jest JSDOM)
+// Check for Jest by looking for process.env.JEST_WORKER_ID or typical test indicators
+const isTestEnvironment = typeof process !== "undefined" &&
+  (process.env?.JEST_WORKER_ID !== undefined || process.env?.NODE_ENV === "test");
+
 let app = null;
-if (typeof window !== "undefined" && typeof document !== "undefined" && document.readyState) {
+if (!isTestEnvironment && typeof window !== "undefined" && typeof document !== "undefined") {
   // Use DOMContentLoaded to ensure DOM is ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
