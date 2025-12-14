@@ -33,7 +33,7 @@ describe("Views Module", () => {
   test("should render phase 2 form for Claude review", () => {
     const result = renderPhase2Form(testProject);
     expect(result).toContain("Phase 2: Review with Claude");
-    expect(result).toContain("Generate Prompt for Claude");
+    expect(result).toContain("Copy Prompt to Clipboard");
     expect(result).toContain("phase2-response-textarea");
     expect(result).toContain("Next: Phase 3");
   });
@@ -41,7 +41,7 @@ describe("Views Module", () => {
   test("should render phase 3 form for synthesis", () => {
     const result = renderPhase3Form(testProject);
     expect(result).toContain("Phase 3: Final Synthesis");
-    expect(result).toContain("Generate Synthesis Prompt");
+    expect(result).toContain("Copy Prompt to Clipboard");
     expect(result).toContain("phase3-response-textarea");
     expect(result).toContain("Export as Markdown");
   });

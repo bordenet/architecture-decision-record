@@ -217,7 +217,14 @@ class App {
       });
     });
 
-    // Update storage info
+    // Update footer stats
+    await this.updateStorageInfo();
+  }
+
+  /**
+   * Update footer storage info - called after every route/view change
+   */
+  async updateStorageInfo() {
     const estimate = await storage.getStorageSize();
     const used = (estimate.usage / (1024 * 1024)).toFixed(2);
     const total = (estimate.quota / (1024 * 1024)).toFixed(2);
@@ -258,7 +265,7 @@ class App {
     }
   }
 
-  renderCurrentPhase() {
+  async renderCurrentPhase() {
     const phase = this.currentProject.phase || 1;
     const container = document.getElementById("app-container");
 
@@ -272,6 +279,9 @@ class App {
       container.innerHTML = renderPhase3Form(this.currentProject);
       this.setupPhase3Handlers();
     }
+
+    // Update footer stats after every view render
+    await this.updateStorageInfo();
   }
 
   setupPhase1Handlers() {
@@ -375,20 +385,32 @@ class App {
       generateBtn.addEventListener("click", () => this.generatePhase2Prompt());
     }
 
-    // Save button
+    // Response textarea - update button state as user types
+    const responseTextarea = document.getElementById("phase2-response-textarea");
     const saveBtn = document.getElementById("save-phase2-btn");
-    if (saveBtn) {
+    const nextBtn = document.getElementById("next-phase3-btn");
+
+    if (responseTextarea && saveBtn) {
+      responseTextarea.addEventListener("input", () => {
+        const hasEnoughContent = responseTextarea.value.trim().length >= 3;
+        saveBtn.disabled = !hasEnoughContent;
+        if (nextBtn) {
+          nextBtn.disabled = !hasEnoughContent;
+          if (hasEnoughContent) {
+            nextBtn.classList.remove("opacity-50", "cursor-not-allowed");
+          } else {
+            nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+          }
+        }
+      });
+
       saveBtn.addEventListener("click", () => this.savePhase2Data());
     }
 
-    // Next phase button
-    const nextBtn = document.getElementById("next-phase3-btn");
+    // Next phase button (auto-advance is already handled by savePhase2Data)
     if (nextBtn) {
       nextBtn.addEventListener("click", async() => {
         await this.savePhase2Data();
-        this.currentProject.phase = 3;
-        await storage.saveProject(this.currentProject);
-        this.renderCurrentPhase();
       });
     }
 
@@ -459,7 +481,23 @@ class App {
       await navigator.clipboard.writeText(promptTemplate);
       showToast("Prompt copied to clipboard! Paste it to Claude", "success");
 
-      // Re-render to show prompt
+      // Enable the "Open AI" button now that prompt is copied
+      const openAiBtn = document.getElementById("open-ai-phase2-btn");
+      if (openAiBtn) {
+        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+        openAiBtn.classList.add("hover:bg-green-700");
+        openAiBtn.removeAttribute("aria-disabled");
+      }
+
+      // Enable the response textarea now that prompt is copied
+      const responseTextarea = document.getElementById("phase2-response-textarea");
+      if (responseTextarea) {
+        responseTextarea.disabled = false;
+        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
+        responseTextarea.focus();
+      }
+
+      // Re-render to show prompt preview (but don't lose textarea state)
       this.renderCurrentPhase();
     } catch (error) {
       console.error("Failed to generate prompt:", error);
@@ -470,6 +508,11 @@ class App {
   async savePhase2Data() {
     const review = document.getElementById("phase2-response-textarea").value.trim();
 
+    if (!review || review.length < 3) {
+      showToast("Please enter at least 3 characters", "warning");
+      return;
+    }
+
     const updatedProject = {
       ...this.currentProject,
       phase2Review: review,
@@ -479,7 +522,12 @@ class App {
     try {
       await storage.saveProject(updatedProject);
       this.currentProject = updatedProject;
-      showToast("Phase 2 saved", "success");
+
+      // Auto-advance to Phase 3
+      showToast("Response saved! Moving to Phase 3...", "success");
+      this.currentProject.phase = 3;
+      await storage.saveProject(this.currentProject);
+      this.renderCurrentPhase();
     } catch (error) {
       console.error("Save failed:", error);
       showToast("Failed to save", "error");
@@ -502,14 +550,29 @@ class App {
       generateBtn.addEventListener("click", () => this.generatePhase3Prompt());
     }
 
-    // Save button
+    // Response textarea - update button state as user types
+    const responseTextarea = document.getElementById("phase3-response-textarea");
     const saveBtn = document.getElementById("save-phase3-btn");
-    if (saveBtn) {
+    const exportBtn = document.getElementById("export-adr-btn");
+
+    if (responseTextarea && saveBtn) {
+      responseTextarea.addEventListener("input", () => {
+        const hasEnoughContent = responseTextarea.value.trim().length >= 3;
+        saveBtn.disabled = !hasEnoughContent;
+        if (exportBtn) {
+          exportBtn.disabled = !hasEnoughContent;
+          if (hasEnoughContent) {
+            exportBtn.classList.remove("opacity-50", "cursor-not-allowed");
+          } else {
+            exportBtn.classList.add("opacity-50", "cursor-not-allowed");
+          }
+        }
+      });
+
       saveBtn.addEventListener("click", () => this.savePhase3Data());
     }
 
     // Export button
-    const exportBtn = document.getElementById("export-adr-btn");
     if (exportBtn) {
       exportBtn.addEventListener("click", () => this.exportADR());
     }
@@ -583,7 +646,23 @@ class App {
       await navigator.clipboard.writeText(promptTemplate);
       showToast("Prompt copied to clipboard! Paste it to Claude", "success");
 
-      // Re-render to show prompt
+      // Enable the "Open AI" button now that prompt is copied
+      const openAiBtn = document.getElementById("open-ai-phase3-btn");
+      if (openAiBtn) {
+        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+        openAiBtn.classList.add("hover:bg-green-700");
+        openAiBtn.removeAttribute("aria-disabled");
+      }
+
+      // Enable the response textarea now that prompt is copied
+      const responseTextarea = document.getElementById("phase3-response-textarea");
+      if (responseTextarea) {
+        responseTextarea.disabled = false;
+        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
+        responseTextarea.focus();
+      }
+
+      // Re-render to show prompt preview
       this.renderCurrentPhase();
     } catch (error) {
       console.error("Failed to generate prompt:", error);
@@ -591,8 +670,32 @@ class App {
     }
   }
 
+  /**
+   * Extract title from markdown content (looks for # Title at the beginning)
+   * @param {string} markdown - The markdown content
+   * @returns {string|null} - The extracted title or null if not found
+   */
+  extractTitleFromMarkdown(markdown) {
+    if (!markdown) return null;
+
+    // Look for first H1 heading (# Title)
+    const match = markdown.match(/^#\s+(.+?)$/m);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+    return null;
+  }
+
   async savePhase3Data() {
     const finalADR = document.getElementById("phase3-response-textarea").value.trim();
+
+    if (!finalADR || finalADR.length < 3) {
+      showToast("Please enter at least 3 characters", "warning");
+      return;
+    }
+
+    // Extract title from markdown if present
+    const extractedTitle = this.extractTitleFromMarkdown(finalADR);
 
     const updatedProject = {
       ...this.currentProject,
@@ -600,10 +703,24 @@ class App {
       updatedAt: new Date().toISOString()
     };
 
+    // Update title if we extracted one and it's different
+    if (extractedTitle && extractedTitle !== this.currentProject.title) {
+      updatedProject.title = extractedTitle;
+      updatedProject.name = extractedTitle; // Legacy compatibility
+    }
+
     try {
       await storage.saveProject(updatedProject);
       this.currentProject = updatedProject;
-      showToast("Phase 3 saved", "success");
+
+      if (extractedTitle && extractedTitle !== this.currentProject.title) {
+        showToast(`ADR saved! Title updated to "${extractedTitle}"`, "success");
+      } else {
+        showToast("Phase 3 complete! Your ADR is ready for export.", "success");
+      }
+
+      // Re-render to update UI with new title and enable export
+      this.renderCurrentPhase();
     } catch (error) {
       console.error("Save failed:", error);
       showToast("Failed to save", "error");
