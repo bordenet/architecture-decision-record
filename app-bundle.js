@@ -544,6 +544,9 @@ Prompt loading failed.`;
       this.projects = [];
     }
     async init() {
+      if (typeof document === "undefined" || !document.getElementById) {
+        return;
+      }
       try {
         console.log("App initialization started");
         initializeTheme();
@@ -572,6 +575,9 @@ Prompt loading failed.`;
       }
     }
     setupEventListeners() {
+      if (typeof document === "undefined" || !document.body) {
+        return;
+      }
       const exportBtn = document.getElementById("export-all-btn");
       if (exportBtn) {
         exportBtn.addEventListener("click", () => this.exportAll());
@@ -1254,7 +1260,18 @@ ${this.currentProject.rationale}` : ""}`;
       return date.toLocaleDateString();
     }
   };
-  var app = new App();
-  app.init();
-  window.app = app;
+  var app = null;
+  if (typeof window !== "undefined" && typeof document !== "undefined" && document.readyState) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        app = new App();
+        app.init();
+        window.app = app;
+      });
+    } else {
+      app = new App();
+      app.init();
+      window.app = app;
+    }
+  }
 })();

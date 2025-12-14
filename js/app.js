@@ -17,6 +17,11 @@ class App {
   }
 
   async init() {
+    // Guard against test environment without proper DOM
+    if (typeof document === "undefined" || !document.getElementById) {
+      return;
+    }
+
     try {
       // eslint-disable-next-line no-console
       console.log("App initialization started");
@@ -65,6 +70,11 @@ class App {
   }
 
   setupEventListeners() {
+    // Guard against test environment without proper DOM
+    if (typeof document === "undefined" || !document.body) {
+      return;
+    }
+
     // Theme toggle is handled by ui.js
 
     // Export all button
@@ -877,8 +887,21 @@ class App {
   }
 }
 
-const app = new App();
-app.init();
-window.app = app;
+// Only initialize if running in browser (not in test environment)
+let app = null;
+if (typeof window !== "undefined" && typeof document !== "undefined" && document.readyState) {
+  // Use DOMContentLoaded to ensure DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      app = new App();
+      app.init();
+      window.app = app;
+    });
+  } else {
+    app = new App();
+    app.init();
+    window.app = app;
+  }
+}
 
 export { App, app };
