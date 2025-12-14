@@ -3,20 +3,99 @@
  * Handles view rendering for 3-phase ADR workflow
  */
 
+/**
+ * Render phase tabs header - shared across all phase forms
+ * @param {Object} project - Project object
+ * @param {number} activePhase - Currently active phase (1, 2, or 3)
+ * @returns {string} HTML for phase tabs
+ */
+function renderPhaseTabs(project, activePhase) {
+  const phases = [
+    { num: 1, icon: "📝", title: "Create ADR", ai: null },
+    { num: 2, icon: "🔍", title: "Review", ai: "Claude" },
+    { num: 3, icon: "✨", title: "Synthesize", ai: "Claude" }
+  ];
+
+  // Determine completion status for each phase
+  const isPhase1Complete = !!(project.title && project.context && project.decision && project.consequences);
+  const isPhase2Complete = !!project.phase2Review;
+  const isPhase3Complete = !!project.finalADR;
+  const completionStatus = [isPhase1Complete, isPhase2Complete, isPhase3Complete];
+
+  return `
+    <div class="mb-6 flex items-center justify-between">
+      <button id="back-to-list-btn" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Projects
+      </button>
+      ${isPhase3Complete ? `
+        <button id="export-adr-top-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+          ✓ Export Final ADR
+        </button>
+      ` : ""}
+    </div>
+
+    <!-- Phase Tabs -->
+    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex space-x-1">
+        ${phases.map(p => {
+    const isActive = activePhase === p.num;
+    const isCompleted = completionStatus[p.num - 1];
+
+    return `
+          <button
+            class="phase-tab px-6 py-3 font-medium transition-colors ${
+  isActive
+    ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400"
+    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+}"
+            data-phase="${p.num}"
+          >
+            <span class="mr-2">${p.icon}</span>
+            Phase ${p.num}
+            ${isCompleted ? "<span class=\"ml-2 text-green-500\">✓</span>" : ""}
+          </button>
+        `;
+  }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Update phase tab styles to reflect the active phase
+ * Call this function from any navigation point (tab clicks, prev/next buttons, auto-advance)
+ * @param {number} activePhase - The phase number to mark as active
+ */
+function updatePhaseTabStyles(activePhase) {
+  document.querySelectorAll(".phase-tab").forEach(tab => {
+    const tabPhase = parseInt(tab.dataset.phase);
+    if (tabPhase === activePhase) {
+      tab.classList.remove("text-gray-600", "dark:text-gray-400", "hover:text-gray-900", "dark:hover:text-gray-200");
+      tab.classList.add("border-b-2", "border-blue-600", "text-blue-600", "dark:text-blue-400");
+    } else {
+      tab.classList.remove("border-b-2", "border-blue-600", "text-blue-600", "dark:text-blue-400");
+      tab.classList.add("text-gray-600", "dark:text-gray-400", "hover:text-gray-900", "dark:hover:text-gray-200");
+    }
+  });
+}
+
 function renderPhase1Form(project) {
   return `
     <div class="phase-1-form space-y-6">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 1: Create ADR</h2>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+      ${renderPhaseTabs(project, 1)}
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            📝 Phase 1: Create ADR
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400">
             Fill in the ADR form following GitHub standard
           </p>
         </div>
-        <button id="back-to-list-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-          Back
-        </button>
-      </div>
 
       <div class="grid grid-cols-1 gap-6">
         <!-- Title -->
@@ -106,19 +185,20 @@ function renderPhase1Form(project) {
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-        <div class="flex gap-3">
-          <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-            Save
-          </button>
-          <button id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Next: Phase 2
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex gap-3">
+            <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+              Save
+            </button>
+            <button id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Next Phase →
+            </button>
+          </div>
+          <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+            Delete
           </button>
         </div>
-        <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-          Delete
-        </button>
       </div>
     </div>
   `;
@@ -130,90 +210,94 @@ function renderPhase2Form(project) {
 
   return `
     <div class="phase-2-form space-y-6">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 2: Review with Claude</h2>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+      ${renderPhaseTabs(project, 2)}
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            🔍 Phase 2: Review with Claude
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-2">
             Get adversarial feedback from Claude
           </p>
+          <div class="inline-flex items-center px-3 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 rounded-full text-sm">
+            <span class="mr-2">🤖</span>
+            Use with Claude
+          </div>
         </div>
-        <button id="back-to-phase1-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-          Back
-        </button>
-      </div>
 
-      <!-- Step A: Copy Prompt -->
-      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          Step A: Copy Prompt to AI
-        </h3>
-        <div class="flex gap-3 flex-wrap">
-          <button id="generate-phase2-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-            📋 Copy Prompt to Clipboard
-          </button>
-          <a
-            id="open-ai-phase2-btn"
-            href="https://claude.ai"
-            target="ai-assistant-tab"
-            rel="noopener noreferrer"
-            class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
-            ${hasPrompt ? "" : "aria-disabled=\"true\""}
-          >
-            🔗 Open Claude
-          </a>
-        </div>
-        ${project.phase2Prompt ? `
-          <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
-              <div class="flex gap-2">
-                <button id="copy-phase2-prompt-quick-btn" class="text-green-600 dark:text-green-400 hover:underline text-sm font-medium">
-                  Copy
-                </button>
+        <!-- Step A: Copy Prompt -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Step A: Copy Prompt to AI
+          </h4>
+          <div class="flex gap-3 flex-wrap">
+            <button id="generate-phase2-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              📋 Copy Prompt to Clipboard
+            </button>
+            <a
+              id="open-ai-phase2-btn"
+              href="https://claude.ai"
+              target="ai-assistant-tab"
+              rel="noopener noreferrer"
+              class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
+              ${hasPrompt ? "" : "aria-disabled=\"true\""}
+            >
+              🔗 Open Claude
+            </a>
+          </div>
+          ${project.phase2Prompt ? `
+            <div class="mt-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
                 <button id="view-phase2-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
-                  View Full
+                  View Full Prompt
                 </button>
               </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+                ${(project.phase2Prompt || "").substring(0, 200)}...
+              </p>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
-              ${(project.phase2Prompt || "").substring(0, 200)}...
-            </p>
+          ` : ""}
+        </div>
+
+        <!-- Step B: Paste Response -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Step B: Paste Claude's Response
+          </h4>
+          <textarea
+            id="phase2-response-textarea"
+            rows="12"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
+            placeholder="Paste Claude's entire critique here..."
+            ${!hasPrompt && !hasResponse ? "disabled" : ""}
+          >${project.phase2Review || ""}</textarea>
+          <div class="mt-3 flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+              ${hasResponse ? "✓ Phase completed" : "Paste response to complete this phase"}
+            </span>
+            <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600" ${!hasResponse ? "disabled" : ""}>
+              Save Response
+            </button>
           </div>
-        ` : ""}
-      </div>
-
-      <!-- Step B: Paste Response -->
-      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          Step B: Paste Claude's Response
-        </h3>
-        <textarea
-          id="phase2-response-textarea"
-          rows="12"
-          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
-          placeholder="Paste Claude's entire critique here..."
-          ${!hasPrompt && !hasResponse ? "disabled" : ""}
-        >${project.phase2Review || ""}</textarea>
-        <div class="mt-3 flex justify-between items-center">
-          <span class="text-sm text-gray-600 dark:text-gray-400">
-            ${hasResponse ? "✓ Response saved" : "Paste response to complete this phase"}
-          </span>
-          <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600" ${!hasResponse ? "disabled" : ""}>
-            Save Response
-          </button>
         </div>
-      </div>
 
-      <!-- Navigation -->
-      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-        <div class="flex gap-3">
-          <button id="next-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${hasResponse ? "" : "opacity-50 cursor-not-allowed"}" ${hasResponse ? "" : "disabled"}>
-            Next: Phase 3 →
+        <!-- Navigation -->
+        <div class="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+          <button id="prev-phase1-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            ← Previous Phase
           </button>
+          ${hasResponse ? `
+            <button id="next-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Next Phase →
+            </button>
+          ` : `
+            <button id="skip-phase2-btn" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+              Skip to Phase 3
+            </button>
+          `}
         </div>
-        <button id="skip-phase2-btn" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-          Skip to Phase 3
-        </button>
       </div>
 
       <!-- Prompt Modal -->
@@ -223,7 +307,7 @@ function renderPhase2Form(project) {
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 2 Prompt</h3>
               <button id="close-phase2-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                X
+                ✕
               </button>
             </div>
             <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase2Prompt || "No prompt generated yet"}</pre>
@@ -245,90 +329,90 @@ function renderPhase3Form(project) {
 
   return `
     <div class="phase-3-form space-y-6">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Phase 3: Final Synthesis</h2>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+      ${renderPhaseTabs(project, 3)}
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div class="mb-6">
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            ✨ Phase 3: Final Synthesis
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-2">
             Synthesize final ADR with Claude
           </p>
+          <div class="inline-flex items-center px-3 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 rounded-full text-sm">
+            <span class="mr-2">🤖</span>
+            Use with Claude
+          </div>
         </div>
-        <button id="back-to-phase2-btn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-          Back
-        </button>
-      </div>
 
-      <!-- Step A: Copy Prompt -->
-      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          Step A: Copy Synthesis Prompt to AI
-        </h3>
-        <div class="flex gap-3 flex-wrap">
-          <button id="generate-phase3-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-            📋 Copy Prompt to Clipboard
-          </button>
-          <a
-            id="open-ai-phase3-btn"
-            href="https://claude.ai"
-            target="ai-assistant-tab"
-            rel="noopener noreferrer"
-            class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
-            ${hasPrompt ? "" : "aria-disabled=\"true\""}
-          >
-            🔗 Open Claude
-          </a>
-        </div>
-        ${project.phase3Prompt ? `
-          <div class="mt-3 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
-              <div class="flex gap-2">
-                <button id="copy-phase3-prompt-quick-btn" class="text-green-600 dark:text-green-400 hover:underline text-sm font-medium">
-                  Copy
-                </button>
+        <!-- Step A: Copy Prompt -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Step A: Copy Synthesis Prompt to AI
+          </h4>
+          <div class="flex gap-3 flex-wrap">
+            <button id="generate-phase3-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              📋 Copy Prompt to Clipboard
+            </button>
+            <a
+              id="open-ai-phase3-btn"
+              href="https://claude.ai"
+              target="ai-assistant-tab"
+              rel="noopener noreferrer"
+              class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
+              ${hasPrompt ? "" : "aria-disabled=\"true\""}
+            >
+              🔗 Open Claude
+            </a>
+          </div>
+          ${project.phase3Prompt ? `
+            <div class="mt-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Prompt:</span>
                 <button id="view-phase3-prompt-btn" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
-                  View Full
+                  View Full Prompt
                 </button>
               </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
+                ${(project.phase3Prompt || "").substring(0, 200)}...
+              </p>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
-              ${(project.phase3Prompt || "").substring(0, 200)}...
-            </p>
+          ` : ""}
+        </div>
+
+        <!-- Step B: Paste Response -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Step B: Paste Claude's Final ADR
+          </h4>
+          <textarea
+            id="phase3-response-textarea"
+            rows="16"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
+            placeholder="Paste Claude's final synthesized ADR here..."
+            ${!hasPrompt && !hasResponse ? "disabled" : ""}
+          >${project.finalADR || ""}</textarea>
+          <div class="mt-3 flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+              ${hasResponse ? "✓ Phase completed" : "Paste response to complete your ADR"}
+            </span>
+            <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600" ${!hasResponse ? "disabled" : ""}>
+              Save Response
+            </button>
           </div>
-        ` : ""}
-      </div>
-
-      <!-- Step B: Paste Response -->
-      <div class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          Step B: Paste Claude's Final ADR
-        </h3>
-        <textarea
-          id="phase3-response-textarea"
-          rows="16"
-          class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
-          placeholder="Paste Claude's final synthesized ADR here..."
-          ${!hasPrompt && !hasResponse ? "disabled" : ""}
-        >${project.finalADR || ""}</textarea>
-        <div class="mt-3 flex justify-between items-center">
-          <span class="text-sm text-gray-600 dark:text-gray-400">
-            ${hasResponse ? "✓ Final ADR saved" : "Paste response to complete your ADR"}
-          </span>
-          <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600" ${!hasResponse ? "disabled" : ""}>
-            Save Response
-          </button>
         </div>
-      </div>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-        <div class="flex gap-3">
-          <button id="export-adr-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors ${hasResponse ? "" : "opacity-50 cursor-not-allowed"}" ${hasResponse ? "" : "disabled"}>
-            ✓ Export as Markdown
+        <!-- Navigation -->
+        <div class="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+          <button id="prev-phase2-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            ← Previous Phase
           </button>
+          ${hasResponse ? `
+            <button id="export-adr-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+              ✓ Export as Markdown
+            </button>
+          ` : "<div></div>"}
         </div>
-        <button id="back-to-list-btn" class="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-          Back to Projects
-        </button>
       </div>
 
       <!-- Prompt Modal -->
@@ -338,7 +422,7 @@ function renderPhase3Form(project) {
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 3 Prompt</h3>
               <button id="close-phase3-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                X
+                ✕
               </button>
             </div>
             <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase3Prompt || "No prompt generated yet"}</pre>
@@ -354,4 +438,4 @@ function renderPhase3Form(project) {
   `;
 }
 
-export { renderPhase1Form, renderPhase2Form, renderPhase3Form };
+export { renderPhase1Form, renderPhase2Form, renderPhase3Form, updatePhaseTabStyles };

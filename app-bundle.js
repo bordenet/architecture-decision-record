@@ -1260,8 +1260,9 @@ ${this.currentProject.rationale}` : ""}`;
       return date.toLocaleDateString();
     }
   };
+  var isTestEnvironment = typeof process !== "undefined" && (process.env?.JEST_WORKER_ID !== void 0 || false);
   var app = null;
-  if (typeof window !== "undefined" && typeof document !== "undefined" && document.readyState) {
+  if (!isTestEnvironment && typeof window !== "undefined" && typeof document !== "undefined") {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", () => {
         app = new App();
