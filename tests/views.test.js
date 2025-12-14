@@ -27,7 +27,7 @@ describe("Views Module", () => {
     expect(result).toContain("decision-textarea");
     expect(result).toContain("consequences-textarea");
     expect(result).toContain("rationale-textarea");
-    expect(result).toContain("Next: Phase 2");
+    expect(result).toContain("Next Phase →");
   });
 
   test("should render phase 2 form for Claude review", () => {
@@ -35,11 +35,12 @@ describe("Views Module", () => {
     expect(result).toContain("Phase 2: Review with Claude");
     expect(result).toContain("Copy Prompt to Clipboard");
     expect(result).toContain("phase2-response-textarea");
-    expect(result).toContain("Next: Phase 3");
+    expect(result).toContain("← Previous Phase");
   });
 
   test("should render phase 3 form for synthesis", () => {
-    const result = renderPhase3Form(testProject);
+    const projectWithResponse = { ...testProject, finalADR: "Final ADR content" };
+    const result = renderPhase3Form(projectWithResponse);
     expect(result).toContain("Phase 3: Final Synthesis");
     expect(result).toContain("Copy Prompt to Clipboard");
     expect(result).toContain("phase3-response-textarea");

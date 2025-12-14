@@ -7,7 +7,7 @@ import { initializeTheme, setupThemeToggle, showToast } from "./ui.js";
 import { loadPrompt } from "./workflow.js";
 import { storage } from "./storage.js";
 import { exportAsMarkdown } from "./phase3-synthesis.js";
-import { renderPhase1Form, renderPhase2Form, renderPhase3Form } from "./views.js";
+import { renderPhase1Form, renderPhase2Form, renderPhase3Form, updatePhaseTabStyles } from "./views.js";
 import { setupKeyboardShortcuts } from "./keyboard-shortcuts.js";
 
 class App {
@@ -290,12 +290,31 @@ class App {
       this.setupPhase3Handlers();
     }
 
+    // Setup phase tab handlers (shared across all phases)
+    this.setupPhaseTabHandlers();
+
     // Update footer stats after every view render
     await this.updateStorageInfo();
   }
 
-  setupPhase1Handlers() {
-    // Back button
+  /**
+   * Setup phase tab click handlers - shared across all phase views
+   * Allows clicking between phases while maintaining state
+   */
+  setupPhaseTabHandlers() {
+    document.querySelectorAll(".phase-tab").forEach(tab => {
+      tab.addEventListener("click", async() => {
+        const targetPhase = parseInt(tab.dataset.phase);
+        if (targetPhase !== this.currentProject.phase) {
+          this.currentProject.phase = targetPhase;
+          await storage.saveProject(this.currentProject);
+          updatePhaseTabStyles(targetPhase);
+          this.renderCurrentPhase();
+        }
+      });
+    });
+
+    // Back to list button (appears in phase tabs header)
     const backBtn = document.getElementById("back-to-list-btn");
     if (backBtn) {
       backBtn.addEventListener("click", () => {
@@ -304,6 +323,14 @@ class App {
       });
     }
 
+    // Top export button (appears when phase 3 is complete)
+    const exportTopBtn = document.getElementById("export-adr-top-btn");
+    if (exportTopBtn) {
+      exportTopBtn.addEventListener("click", () => this.exportADR());
+    }
+  }
+
+  setupPhase1Handlers() {
     // Save button
     const saveBtn = document.getElementById("save-phase1-btn");
     if (saveBtn) {
@@ -375,16 +402,19 @@ class App {
     this.currentProject.phase = 2;
     await storage.saveProject(this.currentProject);
 
-    // Render Phase 2
+    // Render Phase 2 with updated tab styles
+    updatePhaseTabStyles(2);
     this.renderCurrentPhase();
   }
 
   setupPhase2Handlers() {
-    // Back button
-    const backBtn = document.getElementById("back-to-phase1-btn");
-    if (backBtn) {
-      backBtn.addEventListener("click", () => {
+    // Previous phase button
+    const prevBtn = document.getElementById("prev-phase1-btn");
+    if (prevBtn) {
+      prevBtn.addEventListener("click", async() => {
         this.currentProject.phase = 1;
+        await storage.saveProject(this.currentProject);
+        updatePhaseTabStyles(1);
         this.renderCurrentPhase();
       });
     }
@@ -404,14 +434,6 @@ class App {
       responseTextarea.addEventListener("input", () => {
         const hasEnoughContent = responseTextarea.value.trim().length >= 3;
         saveBtn.disabled = !hasEnoughContent;
-        if (nextBtn) {
-          nextBtn.disabled = !hasEnoughContent;
-          if (hasEnoughContent) {
-            nextBtn.classList.remove("opacity-50", "cursor-not-allowed");
-          } else {
-            nextBtn.classList.add("opacity-50", "cursor-not-allowed");
-          }
-        }
       });
 
       saveBtn.addEventListener("click", () => this.savePhase2Data());
@@ -430,6 +452,7 @@ class App {
       skipBtn.addEventListener("click", async() => {
         this.currentProject.phase = 3;
         await storage.saveProject(this.currentProject);
+        updatePhaseTabStyles(3);
         this.renderCurrentPhase();
       });
     }
@@ -456,17 +479,6 @@ class App {
     const copyBtn = document.getElementById("copy-phase2-prompt-btn");
     if (copyBtn) {
       copyBtn.addEventListener("click", async() => {
-        if (this.currentProject.phase2Prompt) {
-          await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
-          showToast("Copied to clipboard!", "success");
-        }
-      });
-    }
-
-    // Quick copy button (from preview)
-    const quickCopyBtn = document.getElementById("copy-phase2-prompt-quick-btn");
-    if (quickCopyBtn) {
-      quickCopyBtn.addEventListener("click", async() => {
         if (this.currentProject.phase2Prompt) {
           await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
           showToast("Copied to clipboard!", "success");
@@ -533,10 +545,11 @@ class App {
       await storage.saveProject(updatedProject);
       this.currentProject = updatedProject;
 
-      // Auto-advance to Phase 3
+      // Auto-advance to Phase 3 (Pattern 4: Auto-Advance on Save)
       showToast("Response saved! Moving to Phase 3...", "success");
       this.currentProject.phase = 3;
       await storage.saveProject(this.currentProject);
+      updatePhaseTabStyles(3);
       this.renderCurrentPhase();
     } catch (error) {
       console.error("Save failed:", error);
@@ -545,11 +558,13 @@ class App {
   }
 
   setupPhase3Handlers() {
-    // Back button
-    const backBtn = document.getElementById("back-to-phase2-btn");
-    if (backBtn) {
-      backBtn.addEventListener("click", () => {
+    // Previous phase button
+    const prevBtn = document.getElementById("prev-phase2-btn");
+    if (prevBtn) {
+      prevBtn.addEventListener("click", async() => {
         this.currentProject.phase = 2;
+        await storage.saveProject(this.currentProject);
+        updatePhaseTabStyles(2);
         this.renderCurrentPhase();
       });
     }
@@ -563,37 +578,20 @@ class App {
     // Response textarea - update button state as user types
     const responseTextarea = document.getElementById("phase3-response-textarea");
     const saveBtn = document.getElementById("save-phase3-btn");
-    const exportBtn = document.getElementById("export-adr-btn");
 
     if (responseTextarea && saveBtn) {
       responseTextarea.addEventListener("input", () => {
         const hasEnoughContent = responseTextarea.value.trim().length >= 3;
         saveBtn.disabled = !hasEnoughContent;
-        if (exportBtn) {
-          exportBtn.disabled = !hasEnoughContent;
-          if (hasEnoughContent) {
-            exportBtn.classList.remove("opacity-50", "cursor-not-allowed");
-          } else {
-            exportBtn.classList.add("opacity-50", "cursor-not-allowed");
-          }
-        }
       });
 
       saveBtn.addEventListener("click", () => this.savePhase3Data());
     }
 
     // Export button
+    const exportBtn = document.getElementById("export-adr-btn");
     if (exportBtn) {
       exportBtn.addEventListener("click", () => this.exportADR());
-    }
-
-    // Back to list button
-    const backToListBtn = document.getElementById("back-to-list-btn");
-    if (backToListBtn) {
-      backToListBtn.addEventListener("click", () => {
-        this.currentProject = null;
-        this.renderProjectList();
-      });
     }
 
     // View prompt button
@@ -618,17 +616,6 @@ class App {
     const copyBtn = document.getElementById("copy-phase3-prompt-btn");
     if (copyBtn) {
       copyBtn.addEventListener("click", async() => {
-        if (this.currentProject.phase3Prompt) {
-          await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
-          showToast("Copied to clipboard!", "success");
-        }
-      });
-    }
-
-    // Quick copy button (from preview)
-    const quickCopyBtn = document.getElementById("copy-phase3-prompt-quick-btn");
-    if (quickCopyBtn) {
-      quickCopyBtn.addEventListener("click", async() => {
         if (this.currentProject.phase3Prompt) {
           await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
           showToast("Copied to clipboard!", "success");
