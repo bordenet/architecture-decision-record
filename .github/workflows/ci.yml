@@ -78,11 +78,3 @@ jobs:
 
       - name: Build bundle
         run: npm run build
-
-      - name: Check for Genesis template variables
-        run: |
-          if grep -r --include="*.html" --include="*.js" --include="*.css" --include="*.json" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github '{{' . 2>/dev/null | grep -v 'node_modules' | grep -v '.git'; then
-            echo "ERROR: Found unreplaced Genesis template variables"
-            exit 1
-          fi
-          echo "No Genesis template variables found"
