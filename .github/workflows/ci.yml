@@ -1,5 +1,7 @@
 name: CI
 
+# Continuous Integration workflow for architecture-decision-record
+
 on:
   push:
     branches: [ main, develop ]
