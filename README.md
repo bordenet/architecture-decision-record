@@ -6,6 +6,7 @@ An AI-assisted tool for drafting architecture decision records (ADRs) using the 
 
 [![CI/CD](https://github.com/bordenet/architecture-decision-record/actions/workflows/ci.yml/badge.svg)](https://github.com/bordenet/architecture-decision-record/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/bordenet/architecture-decision-record/branch/main/graph/badge.svg)](https://codecov.io/gh/bordenet/architecture-decision-record)
+[![Dependabot](https://img.shields.io/badge/Dependabot-enabled-025E8C?logo=dependabot&logoColor=white)](https://github.com/bordenet/architecture-decision-record/security/dependabot)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node Version](https://img.shields.io/badge/Node-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 
@@ -48,6 +49,7 @@ Based on the [architecture-decision-record](https://github.com/joelparkerhenders
 The assistant guides you through a structured 3-phase process for creating comprehensive ADRs:
 
 ### Phase 1: Initial Draft (Mock Mode)
+
 1. Fill in the ADR form with your decision context
 2. AI generates a structured initial ADR draft
 3. Review and refine the generated draft
@@ -56,6 +58,7 @@ The assistant guides you through a structured 3-phase process for creating compr
 **What happens**: The system takes your inputs and organizes them into a formal ADR structure, creating a foundation for review.
 
 ### Phase 2: Adversarial Review (Manual Mode)
+
 1. Copy the Phase 1 ADR to an external AI (Claude, ChatGPT, Gemini)
 2. Ask the AI to critique the decision from different angles
 3. Paste the AI feedback back into the tool
@@ -64,6 +67,7 @@ The assistant guides you through a structured 3-phase process for creating compr
 **What happens**: The external AI provides challenging questions and alternative perspectives to strengthen your decision. The tool automatically detects if you're using the same AI model as Phase 1 and applies adversarial strategies to maintain tension.
 
 ### Phase 3: Final Synthesis (Mock Mode)
+
 1. The system synthesizes Phase 1 draft and Phase 2 feedback
 2. Produces a final, polished ADR incorporating all insights
 3. Export as markdown for GitHub or JSON for storage
@@ -150,12 +154,13 @@ npm run lint:fix
 ### Automated Deployment
 
 This project uses GitHub Actions for continuous deployment. Every push to `main` triggers:
+
 1. Linting checks
 2. Unit tests
 3. Test coverage verification
 4. Automatic deployment to GitHub Pages
 
-**Live Site**: https://bordenet.github.io/architecture-decision-record/
+**Live Site**: <https://bordenet.github.io/architecture-decision-record/>
 
 ### Manual Deployment (Local)
 
@@ -166,6 +171,7 @@ To deploy changes from your local machine:
 ```
 
 The script will:
+
 1. Run linting checks (`npm run lint`)
 2. Run all unit tests (`npm test`)
 3. Verify test coverage meets requirements
@@ -175,7 +181,7 @@ The script will:
 
 ### Deployment Workflow
 
-```
+```text
 Your changes
     ↓
 npm run lint (automated)
@@ -199,7 +205,7 @@ https://bordenet.github.io/architecture-decision-record/ (live)
 
 ## Project Structure
 
-```
+```text
 architecture-decision-record/
 ├── index.html              # Main application
 ├── css/
@@ -251,6 +257,7 @@ cp .env.example .env
 ```
 
 Available options:
+
 - `AI_MODE`: "mock" (default) or "live"
 - `DEBUG`: "true" or "false"
 - `LOG_LEVEL`: "info" (default), "debug", "warn", "error"
@@ -345,6 +352,7 @@ npm test -- --verbose
 ### Dark Mode Not Working
 
 Dark mode is enabled via Tailwind CSS. If toggle doesn't work:
+
 1. Check browser DevTools for errors
 2. Verify `darkMode: 'class'` in Tailwind config
 3. Check `.github/workflows/ci.yml` for quality gate errors
