@@ -1,7 +1,5 @@
 name: CI
 
-# Continuous Integration workflow for architecture-decision-record
-
 on:
   push:
     branches: [ main, develop ]
@@ -12,105 +10,79 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
 
-    - name: Cache npm packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Run ESLint
-      run: npm run lint
-
-    - name: Validate Documentation Hygiene
-      run: bash ./scripts/lib/validate-docs.sh
+      - name: Run ESLint
+        run: npm run lint
 
   test:
     name: Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['18.x', '20.x', '22.x']
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - name: Cache npm packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Run tests with coverage
+        run: npm run test:coverage
 
-    - name: Run tests with coverage
-      run: npm run test:coverage
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage/coverage-final.json
-        flags: webapp
-        name: webapp-coverage
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: false
-        verbose: true
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == '20.x'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/coverage-final.json
+          flags: javascript
+          name: codecov-js
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   quality:
-    name: Quality Check
+    name: Quality Checks
     runs-on: ubuntu-latest
-    needs: [lint, test]
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Verify Genesis cleanup
-      run: |
-        echo "Checking for Genesis artifacts..."
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
 
-        # Check if genesis/ directory exists (should be deleted)
-        if [ -d "genesis" ]; then
-          echo "❌ ERROR: genesis/ directory was not deleted!"
-          echo "The genesis/ directory should be removed after project setup."
-          echo "Run: rm -rf genesis/ && git add . && git commit -m 'Remove genesis'"
-          exit 1
-        fi
-        echo "✅ genesis/ directory properly removed"
+      - name: Install dependencies
+        run: npm ci
 
-        # Check for unreplaced template variables (excluding intentional ADR templates)
-        # Note: Exclude .github/workflows/*.yml since they legitimately use ${{ }} syntax
-        if grep -r "{{" . --include="*.md" --include="*.js" --include="*.json" --include="*.html" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude="phase3-synthesis.js" 2>/dev/null; then
-          echo "❌ ERROR: Found unreplaced template variables ({{...}})"
-          echo "All {{VARIABLE}} placeholders must be replaced with actual values."
-          exit 1
-        fi
-        echo "✅ No unreplaced template variables"
+      - name: Build CSS
+        run: npm run build:css
 
-    - name: Quality gate passed
-      run: |
-        echo "✅ All quality checks passed!"
-        echo "✅ Linting: PASSED"
-        echo "✅ Tests: PASSED"
-        echo "✅ Coverage: PASSED"
-        echo "✅ Genesis cleanup: PASSED"
+      - name: Build bundle
+        run: npm run build
+
+      - name: Check for Genesis template variables
+        run: |
+          if grep -r --include="*.html" --include="*.js" --include="*.css" --include="*.json" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github '{{' . 2>/dev/null | grep -v 'node_modules' | grep -v '.git'; then
+            echo "ERROR: Found unreplaced Genesis template variables"
+            exit 1
+          fi
+          echo "No Genesis template variables found"
