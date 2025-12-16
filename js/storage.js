@@ -21,7 +21,7 @@ class Storage {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
 
         request.onerror = () => {
-          // eslint-disable-next-line no-console
+           
           console.error("IndexedDB open error:", request.error);
           reject(request.error);
         };
@@ -53,7 +53,7 @@ class Storage {
           }
         };
       } catch (error) {
-        // eslint-disable-next-line no-console
+         
         console.error("IndexedDB init error:", error);
         reject(error);
       }

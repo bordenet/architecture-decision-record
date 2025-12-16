@@ -54,7 +54,7 @@ class App {
 
       showToast("Application loaded successfully", "success");
     } catch (error) {
-      // eslint-disable-next-line no-console
+       
       console.error("App initialization error:", error);
       showToast("Failed to initialize application", "error");
     }

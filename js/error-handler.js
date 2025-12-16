@@ -89,7 +89,7 @@ function getErrorMessage(error) {
  * @param {string} context - Context for console logging
  */
 function handleStorageError(error, showToast, context = "Storage Operation") {
-  // eslint-disable-next-line no-console
+   
   console.error(`${context} Error:`, error);
   
   const errorInfo = getErrorMessage(error);
