@@ -6,9 +6,15 @@ An AI-assisted tool for drafting architecture decision records (ADRs) using the 
 
 [![CI/CD](https://github.com/bordenet/architecture-decision-record/actions/workflows/ci.yml/badge.svg)](https://github.com/bordenet/architecture-decision-record/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/bordenet/architecture-decision-record/branch/main/graph/badge.svg)](https://codecov.io/gh/bordenet/architecture-decision-record)
-[![Dependabot](https://img.shields.io/badge/Dependabot-enabled-025E8C?logo=dependabot&logoColor=white)](https://github.com/bordenet/architecture-decision-record/security/dependabot)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node Version](https://img.shields.io/badge/Node-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Node.js 18+](https://img.shields.io/badge/node-18+-brightgreen.svg)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Dependabot](https://img.shields.io/badge/dependabot-enabled-025E8C?logo=dependabot)](https://github.com/bordenet/architecture-decision-record/security/dependabot)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![Linting: ESLint](https://img.shields.io/badge/linting-ESLint-4B32C3)](https://eslint.org/)
+[![Testing: Jest](https://img.shields.io/badge/testing-Jest-C21325)](https://jestjs.io/)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/bordenet/architecture-decision-record/graphs/commit-activity)
+[![GitHub issues](https://img.shields.io/github/issues/bordenet/architecture-decision-record.svg)](https://github.com/bordenet/architecture-decision-record/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/bordenet/architecture-decision-record.svg)](https://github.com/bordenet/architecture-decision-record/pulls)
 
 ---
 
@@ -267,6 +273,7 @@ Available options:
 ## Related Projects
 
 - **[One-Pager Assistant](https://bordenet.github.io/one-pager/)** - Create concise one-page documents
+- **[PR-FAQ Assistant](https://bordenet.github.io/pr-faq-assistant/)** - Create Amazon-style press releases
 - **[Product Requirements Assistant](https://bordenet.github.io/product-requirements-assistant/)** - Write professional PRDs
 - **[Power Statement Assistant](https://bordenet.github.io/power-statement-assistant/)** - Create compelling power statements
 - **[Architecture Decision Record Standard](https://github.com/joelparkerhenderson/architecture-decision-record)** - ADR documentation
