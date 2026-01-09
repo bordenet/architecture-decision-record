@@ -231,4 +231,210 @@ test.describe("Architecture Decision Record Assistant", () => {
 
     await context.close();
   });
+
+  test("should navigate from Phase 2 back to Phase 1 via tab", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+
+    // Create a new project
+    const createBtn = await page.locator("button").filter({ hasText: /Create|New/ }).first();
+    await createBtn.click();
+
+    // Fill in Phase 1 form
+    await page.locator("#title-input").fill("Test ADR Navigation");
+    await page.locator("#context-textarea").fill("Testing phase navigation");
+    await page.locator("#decision-textarea").fill("We will test navigation");
+    await page.locator("#consequences-textarea").fill("Navigation will work correctly");
+
+    // Advance to Phase 2
+    const nextBtn = await page.locator("#next-phase-btn");
+    await nextBtn.click();
+    await page.waitForTimeout(300);
+
+    // Verify we're on Phase 2
+    const phase2Header = await page.locator("text=🔍 Review");
+    await expect(phase2Header).toBeVisible();
+
+    // Click Phase 1 tab to go back
+    const phase1Tab = await page.locator(".phase-tab[data-phase='1']");
+    await phase1Tab.click();
+    await page.waitForTimeout(300);
+
+    // Verify we're back on Phase 1 form with data preserved
+    const titleInput = await page.locator("#title-input");
+    await expect(titleInput).toBeVisible();
+    await expect(titleInput).toHaveValue("Test ADR Navigation");
+  });
+
+  test("should navigate from Phase 2 back to Phase 1 via Previous button", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+
+    // Create a new project
+    const createBtn = await page.locator("button").filter({ hasText: /Create|New/ }).first();
+    await createBtn.click();
+
+    // Fill in Phase 1 form
+    await page.locator("#title-input").fill("Test Previous Button");
+    await page.locator("#context-textarea").fill("Testing previous button");
+    await page.locator("#decision-textarea").fill("We will test previous button");
+    await page.locator("#consequences-textarea").fill("Previous button will work");
+
+    // Advance to Phase 2
+    const nextBtn = await page.locator("#next-phase-btn");
+    await nextBtn.click();
+    await page.waitForTimeout(300);
+
+    // Click Previous Phase button
+    const prevBtn = await page.locator("#prev-phase1-btn");
+    await prevBtn.click();
+    await page.waitForTimeout(300);
+
+    // Verify we're back on Phase 1 form with data preserved
+    const titleInput = await page.locator("#title-input");
+    await expect(titleInput).toBeVisible();
+    await expect(titleInput).toHaveValue("Test Previous Button");
+  });
+
+  test("should delete project from Phase 1", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+
+    // Create a new project
+    const createBtn = await page.locator("button").filter({ hasText: /Create|New/ }).first();
+    await createBtn.click();
+
+    // Fill in Phase 1 form
+    await page.locator("#title-input").fill("Project To Delete From Phase 1");
+    await page.locator("#context-textarea").fill("This will be deleted");
+    await page.locator("#decision-textarea").fill("Delete this project");
+    await page.locator("#consequences-textarea").fill("Project will be deleted");
+
+    // Save first
+    await page.locator("#save-phase1-btn").click();
+    await page.waitForTimeout(300);
+
+    // Set up dialog handler to accept confirmation
+    page.on("dialog", dialog => dialog.accept());
+
+    // Click delete button
+    const deleteBtn = await page.locator("#delete-project-btn");
+    await deleteBtn.click();
+    await page.waitForTimeout(500);
+
+    // Verify we're back on project list (empty state or list without our project)
+    const projectList = await page.locator("#app-container");
+    const text = await projectList.textContent();
+    expect(text).not.toContain("Project To Delete From Phase 1");
+  });
+
+  test("should delete project from Phase 2", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+
+    // Create a new project
+    const createBtn = await page.locator("button").filter({ hasText: /Create|New/ }).first();
+    await createBtn.click();
+
+    // Fill in Phase 1 form
+    await page.locator("#title-input").fill("Project To Delete From Phase 2");
+    await page.locator("#context-textarea").fill("This will be deleted from phase 2");
+    await page.locator("#decision-textarea").fill("Delete this project from phase 2");
+    await page.locator("#consequences-textarea").fill("Project will be deleted");
+
+    // Advance to Phase 2
+    const nextBtn = await page.locator("#next-phase-btn");
+    await nextBtn.click();
+    await page.waitForTimeout(300);
+
+    // Verify we're on Phase 2 and delete button exists
+    const deleteBtn = await page.locator("#delete-project-btn");
+    await expect(deleteBtn).toBeVisible();
+
+    // Set up dialog handler to accept confirmation
+    page.on("dialog", dialog => dialog.accept());
+
+    // Click delete button
+    await deleteBtn.click();
+    await page.waitForTimeout(500);
+
+    // Verify we're back on project list
+    const projectList = await page.locator("#app-container");
+    const text = await projectList.textContent();
+    expect(text).not.toContain("Project To Delete From Phase 2");
+  });
+
+  test("should delete project from Phase 3", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+
+    // Create a new project
+    const createBtn = await page.locator("button").filter({ hasText: /Create|New/ }).first();
+    await createBtn.click();
+
+    // Fill in Phase 1 form
+    await page.locator("#title-input").fill("Project To Delete From Phase 3");
+    await page.locator("#context-textarea").fill("This will be deleted from phase 3");
+    await page.locator("#decision-textarea").fill("Delete this project from phase 3");
+    await page.locator("#consequences-textarea").fill("Project will be deleted");
+
+    // Advance to Phase 2
+    await page.locator("#next-phase-btn").click();
+    await page.waitForTimeout(300);
+
+    // Navigate to Phase 3 via tab
+    const phase3Tab = await page.locator(".phase-tab[data-phase='3']");
+    await phase3Tab.click();
+    await page.waitForTimeout(300);
+
+    // Verify we're on Phase 3 and delete button exists
+    const deleteBtn = await page.locator("#delete-project-btn");
+    await expect(deleteBtn).toBeVisible();
+
+    // Set up dialog handler to accept confirmation
+    page.on("dialog", dialog => dialog.accept());
+
+    // Click delete button
+    await deleteBtn.click();
+    await page.waitForTimeout(500);
+
+    // Verify we're back on project list
+    const projectList = await page.locator("#app-container");
+    const text = await projectList.textContent();
+    expect(text).not.toContain("Project To Delete From Phase 3");
+  });
+
+  test("should preserve data when navigating back from Phase 3 to Phase 1", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
+
+    // Create a new project
+    const createBtn = await page.locator("button").filter({ hasText: /Create|New/ }).first();
+    await createBtn.click();
+
+    // Fill in Phase 1 form with specific data
+    await page.locator("#title-input").fill("Full Navigation Test");
+    await page.locator("#context-textarea").fill("Context for full navigation test");
+    await page.locator("#decision-textarea").fill("Decision for navigation");
+    await page.locator("#consequences-textarea").fill("Consequences of navigation");
+    await page.locator("#rationale-textarea").fill("Rationale for testing");
+
+    // Advance to Phase 2
+    await page.locator("#next-phase-btn").click();
+    await page.waitForTimeout(300);
+
+    // Navigate to Phase 3 via tab
+    await page.locator(".phase-tab[data-phase='3']").click();
+    await page.waitForTimeout(300);
+
+    // Verify we're on Phase 3
+    const phase3Header = await page.locator("text=Synthesize");
+    await expect(phase3Header).toBeVisible();
+
+    // Navigate back to Phase 1 via tab
+    const phase1Tab = await page.locator(".phase-tab[data-phase='1']");
+    await phase1Tab.click();
+    await page.waitForTimeout(300);
+
+    // Verify all Phase 1 data is preserved
+    await expect(page.locator("#title-input")).toHaveValue("Full Navigation Test");
+    await expect(page.locator("#context-textarea")).toHaveValue("Context for full navigation test");
+    await expect(page.locator("#decision-textarea")).toHaveValue("Decision for navigation");
+    await expect(page.locator("#consequences-textarea")).toHaveValue("Consequences of navigation");
+    await expect(page.locator("#rationale-textarea")).toHaveValue("Rationale for testing");
+  });
 });
