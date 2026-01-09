@@ -183,38 +183,25 @@ Prompt loading failed.`;
       ` : ""}
     </div>
 
-    <!-- Phase Tabs -->
+    <!-- Phase Progress Indicator (display-only) -->
     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
       <div class="flex space-x-1">
         ${phases.map((p) => {
       const isActive = activePhase === p.num;
       const isCompleted = completionStatus[p.num - 1];
       return `
-          <button
-            class="phase-tab px-6 py-3 font-medium transition-colors ${isActive ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"}"
-            data-phase="${p.num}"
+          <div
+            class="px-6 py-3 font-medium ${isActive ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"}"
           >
             <span class="mr-2">${p.icon}</span>
             Phase ${p.num}
             ${isCompleted ? '<span class="ml-2 text-green-500">\u2713</span>' : ""}
-          </button>
+          </div>
         `;
     }).join("")}
       </div>
     </div>
   `;
-  }
-  function updatePhaseTabStyles(activePhase) {
-    document.querySelectorAll(".phase-tab").forEach((tab) => {
-      const tabPhase = parseInt(tab.dataset.phase);
-      if (tabPhase === activePhase) {
-        tab.classList.remove("text-gray-600", "dark:text-gray-400", "hover:text-gray-900", "dark:hover:text-gray-200");
-        tab.classList.add("border-b-2", "border-blue-600", "text-blue-600", "dark:text-blue-400");
-      } else {
-        tab.classList.remove("border-b-2", "border-blue-600", "text-blue-600", "dark:text-blue-400");
-        tab.classList.add("text-gray-600", "dark:text-gray-400", "hover:text-gray-900", "dark:hover:text-gray-200");
-      }
-    });
   }
   function renderFormEntry(project) {
     return `
@@ -956,21 +943,10 @@ Prompt loading failed.`;
       await this.updateStorageInfo();
     }
     /**
-     * Setup phase tab click handlers - shared across all phase views
-     * Allows clicking between phases while maintaining state
+     * Setup shared phase handlers - back button and export button
+     * Phase tabs are now display-only (no click navigation)
      */
     setupPhaseTabHandlers() {
-      document.querySelectorAll(".phase-tab").forEach((tab) => {
-        tab.addEventListener("click", async () => {
-          const targetPhase = parseInt(tab.dataset.phase);
-          if (targetPhase !== this.currentProject.phase) {
-            this.currentProject.phase = targetPhase;
-            await storage.saveProject(this.currentProject);
-            updatePhaseTabStyles(targetPhase);
-            this.renderCurrentPhase();
-          }
-        });
-      });
       const backBtn = document.getElementById("back-to-list-btn");
       if (backBtn) {
         backBtn.addEventListener("click", () => {
@@ -1159,7 +1135,6 @@ Prompt loading failed.`;
         showToast("Response saved! Moving to Phase 2...", "success");
         this.currentProject.phase = 2;
         await storage.saveProject(this.currentProject);
-        updatePhaseTabStyles(2);
         this.renderCurrentPhase();
       } catch (error) {
         console.error("Save failed:", error);
@@ -1172,7 +1147,6 @@ Prompt loading failed.`;
         prevBtn.addEventListener("click", async () => {
           this.currentProject.phase = 1;
           await storage.saveProject(this.currentProject);
-          updatePhaseTabStyles(1);
           this.renderCurrentPhase();
         });
       }
@@ -1267,7 +1241,6 @@ Prompt loading failed.`;
         showToast("Response saved! Moving to Phase 3...", "success");
         this.currentProject.phase = 3;
         await storage.saveProject(this.currentProject);
-        updatePhaseTabStyles(3);
         this.renderCurrentPhase();
       } catch (error) {
         console.error("Save failed:", error);
@@ -1280,7 +1253,6 @@ Prompt loading failed.`;
         prevBtn.addEventListener("click", async () => {
           this.currentProject.phase = 2;
           await storage.saveProject(this.currentProject);
-          updatePhaseTabStyles(2);
           this.renderCurrentPhase();
         });
       }
