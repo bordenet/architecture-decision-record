@@ -178,7 +178,7 @@ Prompt loading failed.`;
       </button>
       ${isPhase3Complete ? `
         <button id="export-adr-top-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-          \u2713 Export Final ADR
+          \u{1F4C4} Export as Markdown
         </button>
       ` : ""}
     </div>
@@ -281,7 +281,7 @@ Prompt loading failed.`;
               Start AI Workflow \u2192
             </button>
           </div>
-          <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
             Delete
           </button>
         </div>
@@ -332,7 +332,7 @@ Prompt loading failed.`;
               </a>
             </div>
             <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
-              \u{1F441} View Prompt
+              \u{1F441}\uFE0F View Prompt
             </button>
           </div>
         </div>
@@ -352,7 +352,7 @@ Prompt loading failed.`;
             <span class="text-sm text-gray-600 dark:text-gray-400">
               ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete this phase"}
             </span>
-            <button id="save-phase1-btn" class="px-6 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors">
+            <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               Save Response
             </button>
           </div>
@@ -360,12 +360,9 @@ Prompt loading failed.`;
 
         <!-- Navigation -->
         <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button id="edit-details-btn" class="px-6 py-2 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-            \u2190 Edit Details
-          </button>
           <div class="flex gap-3">
-            <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-              Delete
+            <button id="edit-details-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              \u2190 Edit Details
             </button>
             ${hasResponse ? `
               <button id="next-phase2-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -373,6 +370,9 @@ Prompt loading failed.`;
               </button>
             ` : ""}
           </div>
+          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+            Delete
+          </button>
         </div>
       </div>
 
@@ -441,7 +441,7 @@ Prompt loading failed.`;
               </a>
             </div>
             <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
-              \u{1F441} View Prompt
+              \u{1F441}\uFE0F View Prompt
             </button>
           </div>
         </div>
@@ -461,7 +461,7 @@ Prompt loading failed.`;
             <span class="text-sm text-gray-600 dark:text-gray-400">
               ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete this phase"}
             </span>
-            <button id="save-phase2-btn" class="px-6 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors">
+            <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               Save Response
             </button>
           </div>
@@ -469,12 +469,9 @@ Prompt loading failed.`;
 
         <!-- Navigation -->
         <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button id="prev-phase1-btn" class="px-6 py-2 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
-            \u2190 Previous Phase
-          </button>
           <div class="flex gap-3">
-            <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-              Delete
+            <button id="prev-phase1-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              \u2190 Previous Phase
             </button>
             ${hasResponse ? `
               <button id="next-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -482,6 +479,9 @@ Prompt loading failed.`;
               </button>
             ` : ""}
           </div>
+          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+            Delete
+          </button>
         </div>
       </div>
 
@@ -550,7 +550,7 @@ Prompt loading failed.`;
               </a>
             </div>
             <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
-              \u{1F441} View Prompt
+              \u{1F441}\uFE0F View Prompt
             </button>
           </div>
         </div>
@@ -570,27 +570,39 @@ Prompt loading failed.`;
             <span class="text-sm text-gray-600 dark:text-gray-400">
               ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete your ADR"}
             </span>
-            <button id="save-phase3-btn" class="px-6 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors">
+            <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               Save Response
             </button>
           </div>
         </div>
 
+        ${hasResponse ? `
+        <!-- Phase 3 Complete: Export Call-to-Action -->
+        <div class="mt-6 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h4 class="text-lg font-semibold text-green-800 dark:text-green-300 flex items-center">
+                <span class="mr-2">\u{1F389}</span> Your ADR is Complete!
+              </h4>
+              <p class="text-green-700 dark:text-green-400 mt-1">
+                Download your finished architecture decision record as a Markdown (.md) file.
+              </p>
+            </div>
+            <button id="export-adr-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
+              \u{1F4C4} Export as Markdown
+            </button>
+          </div>
+        </div>
+        ` : ""}
+
         <!-- Navigation -->
         <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button id="prev-phase2-btn" class="px-6 py-2 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+          <button id="prev-phase2-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
             \u2190 Previous Phase
           </button>
-          <div class="flex gap-3">
-            <button id="delete-project-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-              Delete
-            </button>
-            ${hasResponse ? `
-              <button id="export-adr-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                \u2713 Export as Markdown
-              </button>
-            ` : ""}
-          </div>
+          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+            Delete
+          </button>
         </div>
       </div>
 
