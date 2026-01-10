@@ -10,15 +10,15 @@ const PHASES = {
 };
 
 const PHASE_NAMES = {
-  1: "Initial Draft",
-  2: "Review & Critique",
-  3: "Final Synthesis"
+  1: 'Initial Draft',
+  2: 'Review & Critique',
+  3: 'Final Synthesis'
 };
 
 const PHASE_DESCRIPTIONS = {
-  1: "Fill in your architectural decision details",
-  2: "Get feedback from external AI review",
-  3: "Synthesize into final polished ADR"
+  1: 'Fill in your architectural decision details',
+  2: 'Get feedback from external AI review',
+  3: 'Synthesize into final polished ADR'
 };
 
 class Workflow {
@@ -59,7 +59,7 @@ class Workflow {
 async function loadPrompt(phase) {
   try {
     const response = await fetch(`./prompts/phase${phase}.md`);
-    if (!response.ok) throw new Error("Prompt not found");
+    if (!response.ok) throw new Error('Prompt not found');
     return await response.text();
   } catch (error) {
     console.error(`Failed to load phase ${phase} prompt:`, error);

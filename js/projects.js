@@ -11,12 +11,12 @@ class ProjectManager {
   async createProject(data) {
     const project = {
       id: Date.now().toString(),
-      title: data.title || "",
-      context: data.context || "",
-      decision: data.decision || "",
-      consequences: data.consequences || "",
-      rationale: data.rationale || "",
-      status: "Proposed",
+      title: data.title || '',
+      context: data.context || '',
+      decision: data.decision || '',
+      consequences: data.consequences || '',
+      rationale: data.rationale || '',
+      status: 'Proposed',
       phase: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

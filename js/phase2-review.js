@@ -3,18 +3,18 @@
  * Generates adversarial reviews using same-LLM detection
  */
 
-import { getAdversarialStrategy } from "./same-llm-adversarial.js";
+import { getAdversarialStrategy } from './same-llm-adversarial.js';
 
-async function generatePhase2Review(title, context, decision, currentModel = "Claude") {
+async function generatePhase2Review(title, context, decision, currentModel = 'Claude') {
   const strategy = getAdversarialStrategy(currentModel);
 
   const critiques = [
-    "Critical analysis: What are the hidden assumptions in this decision?",
-    "Risk assessment: What could go wrong with this approach?",
-    "Alternative evaluation: Have all alternatives been properly explored?",
-    "Scalability concerns: How will this decision impact future growth?",
-    "Team impact: What are the implications for team structure and processes?",
-    "Cost-benefit analysis: Is the value truly proportional to the effort required?"
+    'Critical analysis: What are the hidden assumptions in this decision?',
+    'Risk assessment: What could go wrong with this approach?',
+    'Alternative evaluation: Have all alternatives been properly explored?',
+    'Scalability concerns: How will this decision impact future growth?',
+    'Team impact: What are the implications for team structure and processes?',
+    'Cost-benefit analysis: Is the value truly proportional to the effort required?'
   ];
 
   const review = `
@@ -28,7 +28,7 @@ Proposed Decision: ${decision}
 
 CRITICAL FEEDBACK:
 
-${critiques.map((c, i) => `${i + 1}. ${c}`).join("\n")}
+${critiques.map((c, i) => `${i + 1}. ${c}`).join('\n')}
 
 KEY CONCERNS:
 

@@ -3,9 +3,9 @@
  * Handles all client-side data persistence
  */
 
-const DB_NAME = "adr-assistant";
+const DB_NAME = 'adr-assistant';
 const DB_VERSION = 1;
-const STORE_NAME = "projects";
+const STORE_NAME = 'projects';
 
 class Storage {
   constructor() {
@@ -22,39 +22,39 @@ class Storage {
 
         request.onerror = () => {
            
-          console.error("IndexedDB open error:", request.error);
+          console.error('IndexedDB open error:', request.error);
           reject(request.error);
         };
 
         request.onsuccess = () => {
           this.db = request.result;
           // eslint-disable-next-line no-console
-          console.log("IndexedDB initialized successfully");
+          console.log('IndexedDB initialized successfully');
           resolve();
         };
 
         request.onupgradeneeded = (event) => {
           // eslint-disable-next-line no-console
-          console.log("IndexedDB upgrade needed");
+          console.log('IndexedDB upgrade needed');
           const db = event.target.result;
 
           if (!db.objectStoreNames.contains(STORE_NAME)) {
-            const projectStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-            projectStore.createIndex("updatedAt", "updatedAt", { unique: false });
-            projectStore.createIndex("title", "title", { unique: false });
+            const projectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            projectStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+            projectStore.createIndex('title', 'title', { unique: false });
           }
 
-          if (!db.objectStoreNames.contains("prompts")) {
-            db.createObjectStore("prompts", { keyPath: "phase" });
+          if (!db.objectStoreNames.contains('prompts')) {
+            db.createObjectStore('prompts', { keyPath: 'phase' });
           }
 
-          if (!db.objectStoreNames.contains("settings")) {
-            db.createObjectStore("settings", { keyPath: "key" });
+          if (!db.objectStoreNames.contains('settings')) {
+            db.createObjectStore('settings', { keyPath: 'key' });
           }
         };
       } catch (error) {
          
-        console.error("IndexedDB init error:", error);
+        console.error('IndexedDB init error:', error);
         reject(error);
       }
     });
@@ -66,7 +66,7 @@ class Storage {
   async saveProject(project) {
     if (!this.db) await this.init();
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([STORE_NAME], "readwrite");
+      const transaction = this.db.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.put({
         ...project,
@@ -84,7 +84,7 @@ class Storage {
   async getAllProjects() {
     if (!this.db) await this.init();
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([STORE_NAME], "readonly");
+      const transaction = this.db.transaction([STORE_NAME], 'readonly');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.getAll();
 
@@ -99,7 +99,7 @@ class Storage {
   async getProject(id) {
     if (!this.db) await this.init();
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([STORE_NAME], "readonly");
+      const transaction = this.db.transaction([STORE_NAME], 'readonly');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.get(id);
 
@@ -114,7 +114,7 @@ class Storage {
   async deleteProject(id) {
     if (!this.db) await this.init();
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction([STORE_NAME], "readwrite");
+      const transaction = this.db.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const request = store.delete(id);
 

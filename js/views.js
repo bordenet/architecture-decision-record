@@ -17,9 +17,9 @@
  */
 function renderPhaseTabs(project, activePhase) {
   const phases = [
-    { num: 1, icon: "📝", title: "Initial Draft", ai: "Claude" },
-    { num: 2, icon: "🔄", title: "Review", ai: "Gemini" },
-    { num: 3, icon: "✨", title: "Synthesize", ai: "Claude" }
+    { num: 1, icon: '📝', title: 'Initial Draft', ai: 'Claude' },
+    { num: 2, icon: '🔄', title: 'Review', ai: 'Gemini' },
+    { num: 3, icon: '✨', title: 'Synthesize', ai: 'Claude' }
   ];
 
   // Determine completion status for each phase
@@ -40,7 +40,7 @@ function renderPhaseTabs(project, activePhase) {
         <button id="export-adr-top-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
           📄 Export as Markdown
         </button>
-      ` : ""}
+      ` : ''}
     </div>
 
     <!-- Phase Progress Indicator (display-only) -->
@@ -54,16 +54,16 @@ function renderPhaseTabs(project, activePhase) {
           <div
             class="px-6 py-3 font-medium ${
   isActive
-    ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400"
-    : "text-gray-600 dark:text-gray-400"
+    ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
+    : 'text-gray-600 dark:text-gray-400'
 }"
           >
             <span class="mr-2">${p.icon}</span>
             Phase ${p.num}
-            ${isCompleted ? "<span class=\"ml-2 text-green-500\">✓</span>" : ""}
+            ${isCompleted ? '<span class="ml-2 text-green-500">✓</span>' : ''}
           </div>
         `;
-  }).join("")}
+  }).join('')}
       </div>
     </div>
   `;
@@ -105,7 +105,7 @@ function renderFormEntry(project) {
               type="text"
               id="title-input"
               placeholder="e.g., Use microservices architecture for scalability"
-              value="${project.title || ""}"
+              value="${project.title || ''}"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
           </div>
@@ -119,10 +119,10 @@ function renderFormEntry(project) {
               id="status-select"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="Proposed" ${project.status === "Proposed" ? "selected" : ""}>Proposed</option>
-              <option value="Accepted" ${project.status === "Accepted" ? "selected" : ""}>Accepted</option>
-              <option value="Deprecated" ${project.status === "Deprecated" ? "selected" : ""}>Deprecated</option>
-              <option value="Superseded" ${project.status === "Superseded" ? "selected" : ""}>Superseded</option>
+              <option value="Proposed" ${project.status === 'Proposed' ? 'selected' : ''}>Proposed</option>
+              <option value="Accepted" ${project.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
+              <option value="Deprecated" ${project.status === 'Deprecated' ? 'selected' : ''}>Deprecated</option>
+              <option value="Superseded" ${project.status === 'Superseded' ? 'selected' : ''}>Superseded</option>
             </select>
           </div>
 
@@ -137,7 +137,7 @@ function renderFormEntry(project) {
               rows="5"
               placeholder="Include background, constraints, current system state, and why the decision was necessary..."
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            >${project.context || ""}</textarea>
+            >${project.context || ''}</textarea>
           </div>
         </div>
 
@@ -200,13 +200,13 @@ function renderPhase1Form(project) {
                 href="https://claude.ai"
                 target="ai-assistant-tab"
                 rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
-                ${hasPrompt ? "" : "aria-disabled=\"true\""}
+                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? 'hover:bg-green-700' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
+                ${hasPrompt ? '' : 'aria-disabled="true"'}
               >
                 🔗 Open Claude
               </a>
             </div>
-            <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
+            <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? '' : 'opacity-50 cursor-not-allowed'}">
               👁️ View Prompt
             </button>
           </div>
@@ -222,10 +222,10 @@ function renderPhase1Form(project) {
             rows="12"
             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
             placeholder="Paste Claude's response here..."
-          >${project.phase1Response || ""}</textarea>
+          >${project.phase1Response || ''}</textarea>
           <div class="mt-3 flex justify-between items-center">
             <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? "✓ Phase completed" : "Paste response to complete this phase"}
+              ${hasResponse ? '✓ Phase completed' : 'Paste response to complete this phase'}
             </span>
             <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               Save Response
@@ -243,7 +243,7 @@ function renderPhase1Form(project) {
               <button id="next-phase2-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 Next Phase →
               </button>
-            ` : ""}
+            ` : ''}
           </div>
           <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
             Delete
@@ -261,7 +261,7 @@ function renderPhase1Form(project) {
                 ✕
               </button>
             </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase1Prompt || "No prompt generated yet"}</pre>
+            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase1Prompt || 'No prompt generated yet'}</pre>
             <div class="mt-4 flex justify-end">
               <button id="copy-phase1-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 Copy to Clipboard
@@ -314,13 +314,13 @@ function renderPhase2Form(project) {
                 href="https://gemini.google.com"
                 target="ai-assistant-tab"
                 rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
-                ${hasPrompt ? "" : "aria-disabled=\"true\""}
+                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? 'hover:bg-green-700' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
+                ${hasPrompt ? '' : 'aria-disabled="true"'}
               >
                 🔗 Open Gemini
               </a>
             </div>
-            <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
+            <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? '' : 'opacity-50 cursor-not-allowed'}">
               👁️ View Prompt
             </button>
           </div>
@@ -336,10 +336,10 @@ function renderPhase2Form(project) {
             rows="12"
             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
             placeholder="Paste Gemini's response here..."
-          >${project.phase2Review || ""}</textarea>
+          >${project.phase2Review || ''}</textarea>
           <div class="mt-3 flex justify-between items-center">
             <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? "✓ Phase completed" : "Paste response to complete this phase"}
+              ${hasResponse ? '✓ Phase completed' : 'Paste response to complete this phase'}
             </span>
             <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               Save Response
@@ -357,7 +357,7 @@ function renderPhase2Form(project) {
               <button id="next-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 Next Phase →
               </button>
-            ` : ""}
+            ` : ''}
           </div>
           <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
             Delete
@@ -375,7 +375,7 @@ function renderPhase2Form(project) {
                 ✕
               </button>
             </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase2Prompt || "No prompt generated yet"}</pre>
+            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase2Prompt || 'No prompt generated yet'}</pre>
             <div class="mt-4 flex justify-end">
               <button id="copy-phase2-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 Copy to Clipboard
@@ -428,13 +428,13 @@ function renderPhase3Form(project) {
                 href="https://claude.ai"
                 target="ai-assistant-tab"
                 rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
-                ${hasPrompt ? "" : "aria-disabled=\"true\""}
+                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? 'hover:bg-green-700' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
+                ${hasPrompt ? '' : 'aria-disabled="true"'}
               >
                 🔗 Open Claude
               </a>
             </div>
-            <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
+            <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? '' : 'opacity-50 cursor-not-allowed'}">
               👁️ View Prompt
             </button>
           </div>
@@ -450,10 +450,10 @@ function renderPhase3Form(project) {
             rows="16"
             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
             placeholder="Paste Claude's response here..."
-          >${project.finalADR || ""}</textarea>
+          >${project.finalADR || ''}</textarea>
           <div class="mt-3 flex justify-between items-center">
             <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? "✓ Phase completed" : "Paste response to complete your ADR"}
+              ${hasResponse ? '✓ Phase completed' : 'Paste response to complete your ADR'}
             </span>
             <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               Save Response
@@ -478,7 +478,7 @@ function renderPhase3Form(project) {
             </button>
           </div>
         </div>
-        ` : ""}
+        ` : ''}
 
         <!-- Navigation -->
         <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -501,7 +501,7 @@ function renderPhase3Form(project) {
                 ✕
               </button>
             </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase3Prompt || "No prompt generated yet"}</pre>
+            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase3Prompt || 'No prompt generated yet'}</pre>
             <div class="mt-4 flex justify-end">
               <button id="copy-phase3-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 Copy to Clipboard

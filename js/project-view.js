@@ -11,7 +11,7 @@ class ProjectView {
   render() {
     return `
       <div class="project-view">
-        <h1>${this.project.title || "Untitled Project"}</h1>
+        <h1>${this.project.title || 'Untitled Project'}</h1>
         <p>${this.project.context}</p>
       </div>
     `;
