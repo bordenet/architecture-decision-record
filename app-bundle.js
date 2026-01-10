@@ -19,6 +19,33 @@
       themeToggle.addEventListener("click", toggleTheme);
     }
   }
+  async function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch {
+      }
+    }
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (!successful) {
+        throw new Error("Copy command failed");
+      }
+    } catch {
+      document.body.removeChild(textArea);
+      throw new Error("Failed to copy to clipboard");
+    }
+  }
 
   // js/workflow.js
   async function loadPrompt(phase) {
@@ -1107,14 +1134,37 @@ Prompt loading failed.`;
       if (copyBtn) {
         copyBtn.addEventListener("click", async () => {
           if (this.currentProject.phase1Prompt) {
-            await navigator.clipboard.writeText(this.currentProject.phase1Prompt);
-            showToast("Copied to clipboard!", "success");
+            try {
+              await copyToClipboard(this.currentProject.phase1Prompt);
+              showToast("Copied to clipboard!", "success");
+              this.enablePhase1Workflow();
+            } catch {
+              showToast("Failed to copy to clipboard", "error");
+            }
           }
         });
       }
       const deleteBtn = document.getElementById("delete-project-btn");
       if (deleteBtn) {
         deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+      }
+    }
+    /**
+     * Enable Phase 1 workflow progression (Open AI button, textarea)
+     * Called from both main copy button and modal copy button
+     */
+    enablePhase1Workflow() {
+      const openAiBtn = document.getElementById("open-ai-phase1-btn");
+      if (openAiBtn) {
+        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+        openAiBtn.classList.add("hover:bg-green-700");
+        openAiBtn.removeAttribute("aria-disabled");
+      }
+      const responseTextarea = document.getElementById("phase1-response-textarea");
+      if (responseTextarea) {
+        responseTextarea.disabled = false;
+        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
+        responseTextarea.focus();
       }
     }
     /**
@@ -1128,19 +1178,12 @@ Prompt loading failed.`;
         promptTemplate = promptTemplate.replace(/{context}/g, this.currentProject.context || "[No context]");
         this.currentProject.phase1Prompt = promptTemplate;
         await storage.saveProject(this.currentProject);
-        await navigator.clipboard.writeText(promptTemplate);
-        showToast("Prompt copied to clipboard! Paste it to Claude", "success");
-        const openAiBtn = document.getElementById("open-ai-phase1-btn");
-        if (openAiBtn) {
-          openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-          openAiBtn.classList.add("hover:bg-green-700");
-          openAiBtn.removeAttribute("aria-disabled");
-        }
-        const responseTextarea = document.getElementById("phase1-response-textarea");
-        if (responseTextarea) {
-          responseTextarea.disabled = false;
-          responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
-          responseTextarea.focus();
+        try {
+          await copyToClipboard(promptTemplate);
+          showToast("Prompt copied to clipboard! Paste it to Claude", "success");
+          this.enablePhase1Workflow();
+        } catch {
+          showToast("Failed to copy to clipboard", "error");
         }
         this.renderCurrentPhase();
       } catch (error) {
@@ -1220,14 +1263,37 @@ Prompt loading failed.`;
       if (copyBtn) {
         copyBtn.addEventListener("click", async () => {
           if (this.currentProject.phase2Prompt) {
-            await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
-            showToast("Copied to clipboard!", "success");
+            try {
+              await copyToClipboard(this.currentProject.phase2Prompt);
+              showToast("Copied to clipboard!", "success");
+              this.enablePhase2Workflow();
+            } catch {
+              showToast("Failed to copy to clipboard", "error");
+            }
           }
         });
       }
       const deleteBtn = document.getElementById("delete-project-btn");
       if (deleteBtn) {
         deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+      }
+    }
+    /**
+     * Enable Phase 2 workflow progression (Open AI button, textarea)
+     * Called from both main copy button and modal copy button
+     */
+    enablePhase2Workflow() {
+      const openAiBtn = document.getElementById("open-ai-phase2-btn");
+      if (openAiBtn) {
+        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+        openAiBtn.classList.add("hover:bg-green-700");
+        openAiBtn.removeAttribute("aria-disabled");
+      }
+      const responseTextarea = document.getElementById("phase2-response-textarea");
+      if (responseTextarea) {
+        responseTextarea.disabled = false;
+        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
+        responseTextarea.focus();
       }
     }
     async generatePhase2Prompt() {
@@ -1237,19 +1303,12 @@ Prompt loading failed.`;
         promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
         this.currentProject.phase2Prompt = promptTemplate;
         await storage.saveProject(this.currentProject);
-        await navigator.clipboard.writeText(promptTemplate);
-        showToast("Prompt copied to clipboard! Paste it to Gemini", "success");
-        const openAiBtn = document.getElementById("open-ai-phase2-btn");
-        if (openAiBtn) {
-          openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-          openAiBtn.classList.add("hover:bg-green-700");
-          openAiBtn.removeAttribute("aria-disabled");
-        }
-        const responseTextarea = document.getElementById("phase2-response-textarea");
-        if (responseTextarea) {
-          responseTextarea.disabled = false;
-          responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
-          responseTextarea.focus();
+        try {
+          await copyToClipboard(promptTemplate);
+          showToast("Prompt copied to clipboard! Paste it to Gemini", "success");
+          this.enablePhase2Workflow();
+        } catch {
+          showToast("Failed to copy to clipboard", "error");
         }
         this.renderCurrentPhase();
       } catch (error) {
@@ -1324,14 +1383,37 @@ Prompt loading failed.`;
       if (copyBtn) {
         copyBtn.addEventListener("click", async () => {
           if (this.currentProject.phase3Prompt) {
-            await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
-            showToast("Copied to clipboard!", "success");
+            try {
+              await copyToClipboard(this.currentProject.phase3Prompt);
+              showToast("Copied to clipboard!", "success");
+              this.enablePhase3Workflow();
+            } catch {
+              showToast("Failed to copy to clipboard", "error");
+            }
           }
         });
       }
       const deleteBtn = document.getElementById("delete-project-btn");
       if (deleteBtn) {
         deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+      }
+    }
+    /**
+     * Enable Phase 3 workflow progression (Open AI button, textarea)
+     * Called from both main copy button and modal copy button
+     */
+    enablePhase3Workflow() {
+      const openAiBtn = document.getElementById("open-ai-phase3-btn");
+      if (openAiBtn) {
+        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+        openAiBtn.classList.add("hover:bg-green-700");
+        openAiBtn.removeAttribute("aria-disabled");
+      }
+      const responseTextarea = document.getElementById("phase3-response-textarea");
+      if (responseTextarea) {
+        responseTextarea.disabled = false;
+        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
+        responseTextarea.focus();
       }
     }
     async generatePhase3Prompt() {
@@ -1343,19 +1425,12 @@ Prompt loading failed.`;
         promptTemplate = promptTemplate.replace(/{phase2_review}/g, phase2Review);
         this.currentProject.phase3Prompt = promptTemplate;
         await storage.saveProject(this.currentProject);
-        await navigator.clipboard.writeText(promptTemplate);
-        showToast("Prompt copied to clipboard! Paste it to Claude", "success");
-        const openAiBtn = document.getElementById("open-ai-phase3-btn");
-        if (openAiBtn) {
-          openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-          openAiBtn.classList.add("hover:bg-green-700");
-          openAiBtn.removeAttribute("aria-disabled");
-        }
-        const responseTextarea = document.getElementById("phase3-response-textarea");
-        if (responseTextarea) {
-          responseTextarea.disabled = false;
-          responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
-          responseTextarea.focus();
+        try {
+          await copyToClipboard(promptTemplate);
+          showToast("Prompt copied to clipboard! Paste it to Claude", "success");
+          this.enablePhase3Workflow();
+        } catch {
+          showToast("Failed to copy to clipboard", "error");
         }
         this.renderCurrentPhase();
       } catch (error) {
