@@ -197,7 +197,7 @@ function renderPhase1Form(project) {
           <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex gap-3 flex-wrap">
               <button id="generate-phase1-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                📋 Copy Prompt to Clipboard
+                📋 ${hasPrompt ? 'Copy Prompt Again' : 'Generate & Copy Prompt'}
               </button>
               <a
                 id="open-ai-phase1-btn"
@@ -210,9 +210,11 @@ function renderPhase1Form(project) {
                 🔗 Open Claude
               </a>
             </div>
-            <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? '' : 'opacity-50 cursor-not-allowed'}">
+            ${hasPrompt ? `
+            <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
               👁️ View Prompt
             </button>
+            ` : ''}
           </div>
         </div>
 
@@ -312,7 +314,7 @@ function renderPhase2Form(project) {
           <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex gap-3 flex-wrap">
               <button id="generate-phase2-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                📋 Copy Prompt to Clipboard
+                📋 ${hasPrompt ? 'Copy Prompt Again' : 'Generate & Copy Prompt'}
               </button>
               <a
                 id="open-ai-phase2-btn"
@@ -325,9 +327,11 @@ function renderPhase2Form(project) {
                 🔗 Open Gemini
               </a>
             </div>
-            <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? '' : 'opacity-50 cursor-not-allowed'}">
+            ${hasPrompt ? `
+            <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
               👁️ View Prompt
             </button>
+            ` : ''}
           </div>
         </div>
 
@@ -427,7 +431,7 @@ function renderPhase3Form(project) {
           <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex gap-3 flex-wrap">
               <button id="generate-phase3-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                📋 Copy Prompt to Clipboard
+                📋 ${hasPrompt ? 'Copy Prompt Again' : 'Generate & Copy Prompt'}
               </button>
               <a
                 id="open-ai-phase3-btn"
@@ -440,9 +444,11 @@ function renderPhase3Form(project) {
                 🔗 Open Claude
               </a>
             </div>
-            <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? '' : 'opacity-50 cursor-not-allowed'}">
+            ${hasPrompt ? `
+            <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
               👁️ View Prompt
             </button>
+            ` : ''}
           </div>
         </div>
 
