@@ -12,13 +12,13 @@ function detectSameLLM(phase1Model, phase2Model) {
 function getAdversarialStrategy(currentModel) {
   // Simulate different LLM personalities when same LLM is used
   const strategies = {
-    "claude": "Gemini personality simulation - Focus on counterarguments and alternative perspectives",
-    "gemini": "Claude personality simulation - Focus on comprehensive analysis and edge cases",
-    "chatgpt": "Alternative model perspective - Focus on unconventional approaches"
+    'claude': 'Gemini personality simulation - Focus on counterarguments and alternative perspectives',
+    'gemini': 'Claude personality simulation - Focus on comprehensive analysis and edge cases',
+    'chatgpt': 'Alternative model perspective - Focus on unconventional approaches'
   };
 
   const key = Object.keys(strategies).find(k => currentModel.toLowerCase().includes(k));
-  return strategies[key] || "Generate critical feedback from a different perspective";
+  return strategies[key] || 'Generate critical feedback from a different perspective';
 }
 
 function applyAdversarialPrompt(basePrompt, model) {

@@ -3,12 +3,12 @@
  * Architecture Decision Record Assistant with 3-phase workflow
  */
 
-import { initializeTheme, setupThemeToggle, showToast } from "./ui.js";
-import { loadPrompt } from "./workflow.js";
-import { storage } from "./storage.js";
-import { exportAsMarkdown } from "./phase3-synthesis.js";
-import { renderFormEntry, renderPhase1Form, renderPhase2Form, renderPhase3Form } from "./views.js";
-import { setupKeyboardShortcuts } from "./keyboard-shortcuts.js";
+import { initializeTheme, setupThemeToggle, showToast } from './ui.js';
+import { loadPrompt } from './workflow.js';
+import { storage } from './storage.js';
+import { exportAsMarkdown } from './phase3-synthesis.js';
+import { renderFormEntry, renderPhase1Form, renderPhase2Form, renderPhase3Form } from './views.js';
+import { setupKeyboardShortcuts } from './keyboard-shortcuts.js';
 
 class App {
   constructor() {
@@ -18,45 +18,45 @@ class App {
 
   async init() {
     // Guard against test environment without proper DOM
-    if (typeof document === "undefined" || !document.getElementById) {
+    if (typeof document === 'undefined' || !document.getElementById) {
       return;
     }
 
     try {
       // eslint-disable-next-line no-console
-      console.log("App initialization started");
+      console.log('App initialization started');
 
       // Initialize theme
       initializeTheme();
       setupThemeToggle();
       // eslint-disable-next-line no-console
-      console.log("Theme initialized");
+      console.log('Theme initialized');
 
       // Setup keyboard shortcuts
       setupKeyboardShortcuts();
       // eslint-disable-next-line no-console
-      console.log("Keyboard shortcuts configured");
+      console.log('Keyboard shortcuts configured');
 
       // Load projects
       await this.loadProjects();
       // eslint-disable-next-line no-console
-      console.log("Projects loaded:", this.projects.length);
+      console.log('Projects loaded:', this.projects.length);
 
       // Setup event listeners
       this.setupEventListeners();
       // eslint-disable-next-line no-console
-      console.log("Event listeners set up");
+      console.log('Event listeners set up');
 
       // Render initial view
       await this.renderProjectList();
       // eslint-disable-next-line no-console
-      console.log("Project list rendered");
+      console.log('Project list rendered');
 
-      showToast("Application loaded successfully", "success");
+      showToast('Application loaded successfully', 'success');
     } catch (error) {
        
-      console.error("App initialization error:", error);
-      showToast("Failed to initialize application", "error");
+      console.error('App initialization error:', error);
+      showToast('Failed to initialize application', 'error');
     }
   }
 
@@ -64,71 +64,71 @@ class App {
     try {
       this.projects = await storage.getAllProjects();
     } catch (error) {
-      console.error("Failed to load projects:", error);
-      showToast("Failed to load projects", "error");
+      console.error('Failed to load projects:', error);
+      showToast('Failed to load projects', 'error');
     }
   }
 
   setupEventListeners() {
     // Guard against test environment without proper DOM
-    if (typeof document === "undefined" || !document.body) {
+    if (typeof document === 'undefined' || !document.body) {
       return;
     }
 
     // Theme toggle is handled by ui.js
 
     // Export all button
-    const exportBtn = document.getElementById("export-all-btn");
+    const exportBtn = document.getElementById('export-all-btn');
     if (exportBtn) {
-      exportBtn.addEventListener("click", () => this.exportAll());
+      exportBtn.addEventListener('click', () => this.exportAll());
     }
 
     // Import button
-    const importBtn = document.getElementById("import-btn");
+    const importBtn = document.getElementById('import-btn');
     if (importBtn) {
-      importBtn.addEventListener("click", () => {
-        document.getElementById("import-file-input").click();
+      importBtn.addEventListener('click', () => {
+        document.getElementById('import-file-input').click();
       });
     }
 
     // Import file input
-    const fileInput = document.getElementById("import-file-input");
+    const fileInput = document.getElementById('import-file-input');
     if (fileInput) {
-      fileInput.addEventListener("change", (e) => this.importFile(e));
+      fileInput.addEventListener('change', (e) => this.importFile(e));
     }
 
     // Related projects dropdown
-    const relatedBtn = document.getElementById("related-projects-btn");
-    const relatedMenu = document.getElementById("related-projects-menu");
+    const relatedBtn = document.getElementById('related-projects-btn');
+    const relatedMenu = document.getElementById('related-projects-menu');
     if (relatedBtn && relatedMenu) {
-      relatedBtn.addEventListener("click", () => {
-        relatedMenu.classList.toggle("hidden");
+      relatedBtn.addEventListener('click', () => {
+        relatedMenu.classList.toggle('hidden');
       });
-      document.addEventListener("click", (e) => {
+      document.addEventListener('click', (e) => {
         if (!relatedBtn.contains(e.target) && !relatedMenu.contains(e.target)) {
-          relatedMenu.classList.add("hidden");
+          relatedMenu.classList.add('hidden');
         }
       });
     }
 
     // Privacy notice close
-    const closeBtn = document.getElementById("close-privacy-notice");
-    const notice = document.getElementById("privacy-notice");
+    const closeBtn = document.getElementById('close-privacy-notice');
+    const notice = document.getElementById('privacy-notice');
     if (closeBtn && notice) {
-      closeBtn.addEventListener("click", () => {
-        notice.classList.add("hidden");
-        localStorage.setItem("hiddenPrivacyNotice", "true");
+      closeBtn.addEventListener('click', () => {
+        notice.classList.add('hidden');
+        localStorage.setItem('hiddenPrivacyNotice', 'true');
       });
 
-      if (localStorage.getItem("hiddenPrivacyNotice")) {
-        notice.classList.add("hidden");
+      if (localStorage.getItem('hiddenPrivacyNotice')) {
+        notice.classList.add('hidden');
       }
     }
 
     // About link
-    const aboutLink = document.getElementById("about-link");
+    const aboutLink = document.getElementById('about-link');
     if (aboutLink) {
-      aboutLink.addEventListener("click", (e) => {
+      aboutLink.addEventListener('click', (e) => {
         e.preventDefault();
         this.showAboutModal();
       });
@@ -139,8 +139,8 @@ class App {
    * Show about modal with application information
    */
   showAboutModal() {
-    const modal = document.createElement("div");
-    modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
       <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">About ADR Assistant</h3>
@@ -172,10 +172,10 @@ class App {
       }
     };
 
-    modal.querySelector("#close-about").addEventListener("click", closeAbout);
+    modal.querySelector('#close-about').addEventListener('click', closeAbout);
 
     // Close on backdrop click
-    modal.addEventListener("click", (e) => {
+    modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         closeAbout();
       }
@@ -183,16 +183,16 @@ class App {
 
     // Close on Escape key
     const handleEscape = (e) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         closeAbout();
-        document.removeEventListener("keydown", handleEscape);
+        document.removeEventListener('keydown', handleEscape);
       }
     };
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener('keydown', handleEscape);
   }
 
   async renderProjectList() {
-    const container = document.getElementById("app-container");
+    const container = document.getElementById('app-container');
 
     container.innerHTML = `
       <div class="mb-6 flex items-center justify-between">
@@ -227,7 +227,7 @@ class App {
               <div class="p-6">
                 <div class="flex items-start justify-between mb-3">
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                    ${this.escapeHtml(p.title || p.name) || "Untitled"}
+                    ${this.escapeHtml(p.title || p.name) || 'Untitled'}
                   </h3>
                   <button class="delete-project-btn text-gray-400 hover:text-red-600 transition-colors" data-project-id="${p.id}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,13 +245,13 @@ class App {
                   </div>
                   <div class="flex space-x-1">
                     ${[1, 2, 3].map(phaseNum => `
-                      <div class="flex-1 h-1 rounded ${phaseNum <= completedPhases ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}"></div>
-                    `).join("")}
+                      <div class="flex-1 h-1 rounded ${phaseNum <= completedPhases ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}"></div>
+                    `).join('')}
                   </div>
                 </div>
 
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                  ${this.escapeHtml(p.context) || "No context"}
+                  ${this.escapeHtml(p.context) || 'No context'}
                 </p>
 
                 <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
@@ -261,31 +261,31 @@ class App {
               </div>
             </div>
             `;
-  }).join("")}
+  }).join('')}
         </div>
       `}
     `;
 
     // Add event listeners for new project buttons
-    const newProjectBtns = container.querySelectorAll("#new-project-btn, #new-project-btn-empty");
+    const newProjectBtns = container.querySelectorAll('#new-project-btn, #new-project-btn-empty');
     newProjectBtns.forEach(btn => {
-      btn.addEventListener("click", () => this.createNewProject());
+      btn.addEventListener('click', () => this.createNewProject());
     });
 
     // Add event listeners for project cards
-    const projectCards = container.querySelectorAll("[data-project-id]");
+    const projectCards = container.querySelectorAll('[data-project-id]');
     projectCards.forEach(card => {
-      card.addEventListener("click", (e) => {
-        if (!e.target.closest(".delete-project-btn")) {
+      card.addEventListener('click', (e) => {
+        if (!e.target.closest('.delete-project-btn')) {
           this.openProject(card.dataset.projectId);
         }
       });
     });
 
     // Add event listeners for delete buttons
-    const deleteBtns = container.querySelectorAll(".delete-project-btn");
+    const deleteBtns = container.querySelectorAll('.delete-project-btn');
     deleteBtns.forEach(btn => {
-      btn.addEventListener("click", async(e) => {
+      btn.addEventListener('click', async(e) => {
         e.stopPropagation();
         const projectId = btn.dataset.projectId;
         await this.deleteProject(projectId);
@@ -303,7 +303,7 @@ class App {
     const estimate = await storage.getStorageSize();
     const used = (estimate.usage / (1024 * 1024)).toFixed(2);
     const total = (estimate.quota / (1024 * 1024)).toFixed(2);
-    const storageInfo = document.getElementById("storage-info");
+    const storageInfo = document.getElementById('storage-info');
     if (storageInfo) {
       storageInfo.textContent = `${this.projects.length} ADRs • ${used}MB used of ${total}MB`;
     }
@@ -312,20 +312,20 @@ class App {
   async createNewProject() {
     const project = {
       id: Date.now().toString(),
-      title: "",
-      status: "Proposed",
-      context: "",
+      title: '',
+      status: 'Proposed',
+      context: '',
       // Phase 0 is form entry, phases 1-3 are AI round-trips
       phase: 0,
       // Phase 1: Claude initial draft
-      phase1Prompt: "",
-      phase1Response: "",
+      phase1Prompt: '',
+      phase1Response: '',
       // Phase 2: Gemini review
-      phase2Prompt: "",
-      phase2Review: "",
+      phase2Prompt: '',
+      phase2Review: '',
       // Phase 3: Claude synthesis
-      phase3Prompt: "",
-      finalADR: "",
+      phase3Prompt: '',
+      finalADR: '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -345,7 +345,7 @@ class App {
 
   async renderCurrentPhase() {
     const phase = this.currentProject.phase || 0;
-    const container = document.getElementById("app-container");
+    const container = document.getElementById('app-container');
 
     if (phase === 0) {
       // Form entry (before AI workflow)
@@ -377,18 +377,18 @@ class App {
    */
   setupPhaseTabHandlers() {
     // Back to list button (appears in phase tabs header)
-    const backBtn = document.getElementById("back-to-list-btn");
+    const backBtn = document.getElementById('back-to-list-btn');
     if (backBtn) {
-      backBtn.addEventListener("click", () => {
+      backBtn.addEventListener('click', () => {
         this.currentProject = null;
         this.renderProjectList();
       });
     }
 
     // Top export button (appears when phase 3 is complete)
-    const exportTopBtn = document.getElementById("export-adr-top-btn");
+    const exportTopBtn = document.getElementById('export-adr-top-btn');
     if (exportTopBtn) {
-      exportTopBtn.addEventListener("click", () => this.exportADR());
+      exportTopBtn.addEventListener('click', () => this.exportADR());
     }
   }
 
@@ -397,30 +397,30 @@ class App {
    */
   setupFormEntryHandlers() {
     // Back to list button
-    const backBtn = document.getElementById("back-to-list-btn");
+    const backBtn = document.getElementById('back-to-list-btn');
     if (backBtn) {
-      backBtn.addEventListener("click", () => {
+      backBtn.addEventListener('click', () => {
         this.currentProject = null;
         this.renderProjectList();
       });
     }
 
     // Save button
-    const saveBtn = document.getElementById("save-form-btn");
+    const saveBtn = document.getElementById('save-form-btn');
     if (saveBtn) {
-      saveBtn.addEventListener("click", () => this.saveFormData());
+      saveBtn.addEventListener('click', () => this.saveFormData());
     }
 
     // Start workflow button
-    const startBtn = document.getElementById("start-workflow-btn");
+    const startBtn = document.getElementById('start-workflow-btn');
     if (startBtn) {
-      startBtn.addEventListener("click", () => this.startAIWorkflow());
+      startBtn.addEventListener('click', () => this.startAIWorkflow());
     }
 
     // Delete button
-    const deleteBtn = document.getElementById("delete-project-btn");
+    const deleteBtn = document.getElementById('delete-project-btn');
     if (deleteBtn) {
-      deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+      deleteBtn.addEventListener('click', () => this.deleteCurrentProject());
     }
   }
 
@@ -428,12 +428,12 @@ class App {
    * Save form data (phase 0)
    */
   async saveFormData() {
-    const title = document.getElementById("title-input").value.trim();
-    const status = document.getElementById("status-select").value;
-    const context = document.getElementById("context-textarea").value.trim();
+    const title = document.getElementById('title-input').value.trim();
+    const status = document.getElementById('status-select').value;
+    const context = document.getElementById('context-textarea').value.trim();
 
     if (!title || !context) {
-      showToast("Title and Context are required", "error");
+      showToast('Title and Context are required', 'error');
       return;
     }
 
@@ -448,10 +448,10 @@ class App {
     try {
       await storage.saveProject(updatedProject);
       this.currentProject = updatedProject;
-      showToast("Saved successfully", "success");
+      showToast('Saved successfully', 'success');
     } catch (error) {
-      console.error("Save failed:", error);
-      showToast("Failed to save", "error");
+      console.error('Save failed:', error);
+      showToast('Failed to save', 'error');
     }
   }
 
@@ -459,11 +459,11 @@ class App {
    * Start AI workflow - advance from form entry to Phase 1
    */
   async startAIWorkflow() {
-    const title = document.getElementById("title-input").value.trim();
-    const context = document.getElementById("context-textarea").value.trim();
+    const title = document.getElementById('title-input').value.trim();
+    const context = document.getElementById('context-textarea').value.trim();
 
     if (!title || !context) {
-      showToast("Please fill in Title and Context first", "error");
+      showToast('Please fill in Title and Context first', 'error');
       return;
     }
 
@@ -483,9 +483,9 @@ class App {
    */
   setupPhase1Handlers() {
     // Edit details button (go back to form entry)
-    const editBtn = document.getElementById("edit-details-btn");
+    const editBtn = document.getElementById('edit-details-btn');
     if (editBtn) {
-      editBtn.addEventListener("click", async() => {
+      editBtn.addEventListener('click', async() => {
         this.currentProject.phase = 0;
         await storage.saveProject(this.currentProject);
         this.renderCurrentPhase();
@@ -493,65 +493,65 @@ class App {
     }
 
     // Generate prompt button
-    const generateBtn = document.getElementById("generate-phase1-prompt-btn");
+    const generateBtn = document.getElementById('generate-phase1-prompt-btn');
     if (generateBtn) {
-      generateBtn.addEventListener("click", () => this.generatePhase1Prompt());
+      generateBtn.addEventListener('click', () => this.generatePhase1Prompt());
     }
 
     // Response textarea - update button state as user types
-    const responseTextarea = document.getElementById("phase1-response-textarea");
-    const saveBtn = document.getElementById("save-phase1-btn");
-    const nextBtn = document.getElementById("next-phase2-btn");
+    const responseTextarea = document.getElementById('phase1-response-textarea');
+    const saveBtn = document.getElementById('save-phase1-btn');
+    const nextBtn = document.getElementById('next-phase2-btn');
 
     if (responseTextarea && saveBtn) {
-      responseTextarea.addEventListener("input", () => {
+      responseTextarea.addEventListener('input', () => {
         const hasEnoughContent = responseTextarea.value.trim().length >= 3;
         saveBtn.disabled = !hasEnoughContent;
       });
 
-      saveBtn.addEventListener("click", () => this.savePhase1Response());
+      saveBtn.addEventListener('click', () => this.savePhase1Response());
     }
 
     // Next phase button
     if (nextBtn) {
-      nextBtn.addEventListener("click", async() => {
+      nextBtn.addEventListener('click', async() => {
         await this.savePhase1Response();
       });
     }
 
     // View prompt button
-    const viewBtn = document.getElementById("view-phase1-prompt-btn");
+    const viewBtn = document.getElementById('view-phase1-prompt-btn');
     if (viewBtn) {
-      viewBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase1-prompt-modal");
-        if (modal) modal.classList.remove("hidden");
+      viewBtn.addEventListener('click', () => {
+        const modal = document.getElementById('phase1-prompt-modal');
+        if (modal) modal.classList.remove('hidden');
       });
     }
 
     // Close modal button
-    const closeBtn = document.getElementById("close-phase1-modal-btn");
+    const closeBtn = document.getElementById('close-phase1-modal-btn');
     if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase1-prompt-modal");
-        if (modal) modal.classList.add("hidden");
+      closeBtn.addEventListener('click', () => {
+        const modal = document.getElementById('phase1-prompt-modal');
+        if (modal) modal.classList.add('hidden');
       });
     }
 
     // Copy prompt button (from modal)
-    const copyBtn = document.getElementById("copy-phase1-prompt-btn");
+    const copyBtn = document.getElementById('copy-phase1-prompt-btn');
     if (copyBtn) {
-      copyBtn.addEventListener("click", async() => {
+      copyBtn.addEventListener('click', async() => {
         if (this.currentProject.phase1Prompt) {
           await navigator.clipboard.writeText(this.currentProject.phase1Prompt);
-          showToast("Copied to clipboard!", "success");
+          showToast('Copied to clipboard!', 'success');
         }
       });
     }
 
     // Delete button
-    const deleteBtn = document.getElementById("delete-project-btn");
+    const deleteBtn = document.getElementById('delete-project-btn');
     if (deleteBtn) {
-      deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+      deleteBtn.addEventListener('click', () => this.deleteCurrentProject());
     }
   }
 
@@ -563,38 +563,38 @@ class App {
       let promptTemplate = await loadPrompt(1);
 
       // Replace template variables with form data
-      promptTemplate = promptTemplate.replace(/{title}/g, this.currentProject.title || "[No title]");
-      promptTemplate = promptTemplate.replace(/{status}/g, this.currentProject.status || "Proposed");
-      promptTemplate = promptTemplate.replace(/{context}/g, this.currentProject.context || "[No context]");
+      promptTemplate = promptTemplate.replace(/{title}/g, this.currentProject.title || '[No title]');
+      promptTemplate = promptTemplate.replace(/{status}/g, this.currentProject.status || 'Proposed');
+      promptTemplate = promptTemplate.replace(/{context}/g, this.currentProject.context || '[No context]');
 
       this.currentProject.phase1Prompt = promptTemplate;
       await storage.saveProject(this.currentProject);
 
       // Copy to clipboard
       await navigator.clipboard.writeText(promptTemplate);
-      showToast("Prompt copied to clipboard! Paste it to Claude", "success");
+      showToast('Prompt copied to clipboard! Paste it to Claude', 'success');
 
       // Enable the "Open AI" button now that prompt is copied
-      const openAiBtn = document.getElementById("open-ai-phase1-btn");
+      const openAiBtn = document.getElementById('open-ai-phase1-btn');
       if (openAiBtn) {
-        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-        openAiBtn.classList.add("hover:bg-green-700");
-        openAiBtn.removeAttribute("aria-disabled");
+        openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        openAiBtn.classList.add('hover:bg-green-700');
+        openAiBtn.removeAttribute('aria-disabled');
       }
 
       // Enable the response textarea now that prompt is copied
-      const responseTextarea = document.getElementById("phase1-response-textarea");
+      const responseTextarea = document.getElementById('phase1-response-textarea');
       if (responseTextarea) {
         responseTextarea.disabled = false;
-        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
+        responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
         responseTextarea.focus();
       }
 
       // Re-render to show prompt preview
       this.renderCurrentPhase();
     } catch (error) {
-      console.error("Failed to generate prompt:", error);
-      showToast("Failed to generate prompt", "error");
+      console.error('Failed to generate prompt:', error);
+      showToast('Failed to generate prompt', 'error');
     }
   }
 
@@ -602,10 +602,10 @@ class App {
    * Save Phase 1 response (Claude's initial draft)
    */
   async savePhase1Response() {
-    const response = document.getElementById("phase1-response-textarea").value.trim();
+    const response = document.getElementById('phase1-response-textarea').value.trim();
 
     if (!response || response.length < 3) {
-      showToast("Please enter at least 3 characters", "warning");
+      showToast('Please enter at least 3 characters', 'warning');
       return;
     }
 
@@ -620,21 +620,21 @@ class App {
       this.currentProject = updatedProject;
 
       // Auto-advance to Phase 2
-      showToast("Response saved! Moving to Phase 2...", "success");
+      showToast('Response saved! Moving to Phase 2...', 'success');
       this.currentProject.phase = 2;
       await storage.saveProject(this.currentProject);
       this.renderCurrentPhase();
     } catch (error) {
-      console.error("Save failed:", error);
-      showToast("Failed to save", "error");
+      console.error('Save failed:', error);
+      showToast('Failed to save', 'error');
     }
   }
 
   setupPhase2Handlers() {
     // Previous phase button
-    const prevBtn = document.getElementById("prev-phase1-btn");
+    const prevBtn = document.getElementById('prev-phase1-btn');
     if (prevBtn) {
-      prevBtn.addEventListener("click", async() => {
+      prevBtn.addEventListener('click', async() => {
         this.currentProject.phase = 1;
         await storage.saveProject(this.currentProject);
         this.renderCurrentPhase();
@@ -642,65 +642,65 @@ class App {
     }
 
     // Generate prompt button
-    const generateBtn = document.getElementById("generate-phase2-prompt-btn");
+    const generateBtn = document.getElementById('generate-phase2-prompt-btn');
     if (generateBtn) {
-      generateBtn.addEventListener("click", () => this.generatePhase2Prompt());
+      generateBtn.addEventListener('click', () => this.generatePhase2Prompt());
     }
 
     // Response textarea - update button state as user types
-    const responseTextarea = document.getElementById("phase2-response-textarea");
-    const saveBtn = document.getElementById("save-phase2-btn");
-    const nextBtn = document.getElementById("next-phase3-btn");
+    const responseTextarea = document.getElementById('phase2-response-textarea');
+    const saveBtn = document.getElementById('save-phase2-btn');
+    const nextBtn = document.getElementById('next-phase3-btn');
 
     if (responseTextarea && saveBtn) {
-      responseTextarea.addEventListener("input", () => {
+      responseTextarea.addEventListener('input', () => {
         const hasEnoughContent = responseTextarea.value.trim().length >= 3;
         saveBtn.disabled = !hasEnoughContent;
       });
 
-      saveBtn.addEventListener("click", () => this.savePhase2Data());
+      saveBtn.addEventListener('click', () => this.savePhase2Data());
     }
 
     // Next phase button (auto-advance is already handled by savePhase2Data)
     if (nextBtn) {
-      nextBtn.addEventListener("click", async() => {
+      nextBtn.addEventListener('click', async() => {
         await this.savePhase2Data();
       });
     }
 
     // View prompt button
-    const viewBtn = document.getElementById("view-phase2-prompt-btn");
+    const viewBtn = document.getElementById('view-phase2-prompt-btn');
     if (viewBtn) {
-      viewBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase2-prompt-modal");
-        if (modal) modal.classList.remove("hidden");
+      viewBtn.addEventListener('click', () => {
+        const modal = document.getElementById('phase2-prompt-modal');
+        if (modal) modal.classList.remove('hidden');
       });
     }
 
     // Close modal button
-    const closeBtn = document.getElementById("close-phase2-modal-btn");
+    const closeBtn = document.getElementById('close-phase2-modal-btn');
     if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase2-prompt-modal");
-        if (modal) modal.classList.add("hidden");
+      closeBtn.addEventListener('click', () => {
+        const modal = document.getElementById('phase2-prompt-modal');
+        if (modal) modal.classList.add('hidden');
       });
     }
 
     // Copy prompt button (from modal)
-    const copyBtn = document.getElementById("copy-phase2-prompt-btn");
+    const copyBtn = document.getElementById('copy-phase2-prompt-btn');
     if (copyBtn) {
-      copyBtn.addEventListener("click", async() => {
+      copyBtn.addEventListener('click', async() => {
         if (this.currentProject.phase2Prompt) {
           await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
-          showToast("Copied to clipboard!", "success");
+          showToast('Copied to clipboard!', 'success');
         }
       });
     }
 
     // Delete button
-    const deleteBtn = document.getElementById("delete-project-btn");
+    const deleteBtn = document.getElementById('delete-project-btn');
     if (deleteBtn) {
-      deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+      deleteBtn.addEventListener('click', () => this.deleteCurrentProject());
     }
   }
 
@@ -709,7 +709,7 @@ class App {
       let promptTemplate = await loadPrompt(2);
 
       // Use Claude's Phase 1 response (initial draft)
-      const phase1Output = this.currentProject.phase1Response || "[No Phase 1 response]";
+      const phase1Output = this.currentProject.phase1Response || '[No Phase 1 response]';
 
       promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
 
@@ -718,37 +718,37 @@ class App {
 
       // Copy to clipboard
       await navigator.clipboard.writeText(promptTemplate);
-      showToast("Prompt copied to clipboard! Paste it to Gemini", "success");
+      showToast('Prompt copied to clipboard! Paste it to Gemini', 'success');
 
       // Enable the "Open AI" button now that prompt is copied
-      const openAiBtn = document.getElementById("open-ai-phase2-btn");
+      const openAiBtn = document.getElementById('open-ai-phase2-btn');
       if (openAiBtn) {
-        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-        openAiBtn.classList.add("hover:bg-green-700");
-        openAiBtn.removeAttribute("aria-disabled");
+        openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        openAiBtn.classList.add('hover:bg-green-700');
+        openAiBtn.removeAttribute('aria-disabled');
       }
 
       // Enable the response textarea now that prompt is copied
-      const responseTextarea = document.getElementById("phase2-response-textarea");
+      const responseTextarea = document.getElementById('phase2-response-textarea');
       if (responseTextarea) {
         responseTextarea.disabled = false;
-        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
+        responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
         responseTextarea.focus();
       }
 
       // Re-render to show prompt preview (but don't lose textarea state)
       this.renderCurrentPhase();
     } catch (error) {
-      console.error("Failed to generate prompt:", error);
-      showToast("Failed to generate prompt", "error");
+      console.error('Failed to generate prompt:', error);
+      showToast('Failed to generate prompt', 'error');
     }
   }
 
   async savePhase2Data() {
-    const review = document.getElementById("phase2-response-textarea").value.trim();
+    const review = document.getElementById('phase2-response-textarea').value.trim();
 
     if (!review || review.length < 3) {
-      showToast("Please enter at least 3 characters", "warning");
+      showToast('Please enter at least 3 characters', 'warning');
       return;
     }
 
@@ -763,21 +763,21 @@ class App {
       this.currentProject = updatedProject;
 
       // Auto-advance to Phase 3 (Pattern 4: Auto-Advance on Save)
-      showToast("Response saved! Moving to Phase 3...", "success");
+      showToast('Response saved! Moving to Phase 3...', 'success');
       this.currentProject.phase = 3;
       await storage.saveProject(this.currentProject);
       this.renderCurrentPhase();
     } catch (error) {
-      console.error("Save failed:", error);
-      showToast("Failed to save", "error");
+      console.error('Save failed:', error);
+      showToast('Failed to save', 'error');
     }
   }
 
   setupPhase3Handlers() {
     // Previous phase button
-    const prevBtn = document.getElementById("prev-phase2-btn");
+    const prevBtn = document.getElementById('prev-phase2-btn');
     if (prevBtn) {
-      prevBtn.addEventListener("click", async() => {
+      prevBtn.addEventListener('click', async() => {
         this.currentProject.phase = 2;
         await storage.saveProject(this.currentProject);
         this.renderCurrentPhase();
@@ -785,63 +785,63 @@ class App {
     }
 
     // Generate prompt button
-    const generateBtn = document.getElementById("generate-phase3-prompt-btn");
+    const generateBtn = document.getElementById('generate-phase3-prompt-btn');
     if (generateBtn) {
-      generateBtn.addEventListener("click", () => this.generatePhase3Prompt());
+      generateBtn.addEventListener('click', () => this.generatePhase3Prompt());
     }
 
     // Response textarea - update button state as user types
-    const responseTextarea = document.getElementById("phase3-response-textarea");
-    const saveBtn = document.getElementById("save-phase3-btn");
+    const responseTextarea = document.getElementById('phase3-response-textarea');
+    const saveBtn = document.getElementById('save-phase3-btn');
 
     if (responseTextarea && saveBtn) {
-      responseTextarea.addEventListener("input", () => {
+      responseTextarea.addEventListener('input', () => {
         const hasEnoughContent = responseTextarea.value.trim().length >= 3;
         saveBtn.disabled = !hasEnoughContent;
       });
 
-      saveBtn.addEventListener("click", () => this.savePhase3Data());
+      saveBtn.addEventListener('click', () => this.savePhase3Data());
     }
 
     // Export button
-    const exportBtn = document.getElementById("export-adr-btn");
+    const exportBtn = document.getElementById('export-adr-btn');
     if (exportBtn) {
-      exportBtn.addEventListener("click", () => this.exportADR());
+      exportBtn.addEventListener('click', () => this.exportADR());
     }
 
     // View prompt button
-    const viewBtn = document.getElementById("view-phase3-prompt-btn");
+    const viewBtn = document.getElementById('view-phase3-prompt-btn');
     if (viewBtn) {
-      viewBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase3-prompt-modal");
-        if (modal) modal.classList.remove("hidden");
+      viewBtn.addEventListener('click', () => {
+        const modal = document.getElementById('phase3-prompt-modal');
+        if (modal) modal.classList.remove('hidden');
       });
     }
 
     // Close modal button
-    const closeBtn = document.getElementById("close-phase3-modal-btn");
+    const closeBtn = document.getElementById('close-phase3-modal-btn');
     if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        const modal = document.getElementById("phase3-prompt-modal");
-        if (modal) modal.classList.add("hidden");
+      closeBtn.addEventListener('click', () => {
+        const modal = document.getElementById('phase3-prompt-modal');
+        if (modal) modal.classList.add('hidden');
       });
     }
 
     // Copy prompt button (from modal)
-    const copyBtn = document.getElementById("copy-phase3-prompt-btn");
+    const copyBtn = document.getElementById('copy-phase3-prompt-btn');
     if (copyBtn) {
-      copyBtn.addEventListener("click", async() => {
+      copyBtn.addEventListener('click', async() => {
         if (this.currentProject.phase3Prompt) {
           await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
-          showToast("Copied to clipboard!", "success");
+          showToast('Copied to clipboard!', 'success');
         }
       });
     }
 
     // Delete button
-    const deleteBtn = document.getElementById("delete-project-btn");
+    const deleteBtn = document.getElementById('delete-project-btn');
     if (deleteBtn) {
-      deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+      deleteBtn.addEventListener('click', () => this.deleteCurrentProject());
     }
   }
 
@@ -850,9 +850,9 @@ class App {
       let promptTemplate = await loadPrompt(3);
 
       // Use Claude's Phase 1 response (initial draft)
-      const phase1Output = this.currentProject.phase1Response || "[No Phase 1 response]";
+      const phase1Output = this.currentProject.phase1Response || '[No Phase 1 response]';
       // Use Gemini's Phase 2 review
-      const phase2Review = this.currentProject.phase2Review || "[No Phase 2 feedback provided]";
+      const phase2Review = this.currentProject.phase2Review || '[No Phase 2 feedback provided]';
 
       promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
       promptTemplate = promptTemplate.replace(/{phase2_review}/g, phase2Review);
@@ -862,29 +862,29 @@ class App {
 
       // Copy to clipboard
       await navigator.clipboard.writeText(promptTemplate);
-      showToast("Prompt copied to clipboard! Paste it to Claude", "success");
+      showToast('Prompt copied to clipboard! Paste it to Claude', 'success');
 
       // Enable the "Open AI" button now that prompt is copied
-      const openAiBtn = document.getElementById("open-ai-phase3-btn");
+      const openAiBtn = document.getElementById('open-ai-phase3-btn');
       if (openAiBtn) {
-        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-        openAiBtn.classList.add("hover:bg-green-700");
-        openAiBtn.removeAttribute("aria-disabled");
+        openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        openAiBtn.classList.add('hover:bg-green-700');
+        openAiBtn.removeAttribute('aria-disabled');
       }
 
       // Enable the response textarea now that prompt is copied
-      const responseTextarea = document.getElementById("phase3-response-textarea");
+      const responseTextarea = document.getElementById('phase3-response-textarea');
       if (responseTextarea) {
         responseTextarea.disabled = false;
-        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
+        responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
         responseTextarea.focus();
       }
 
       // Re-render to show prompt preview
       this.renderCurrentPhase();
     } catch (error) {
-      console.error("Failed to generate prompt:", error);
-      showToast("Failed to generate prompt", "error");
+      console.error('Failed to generate prompt:', error);
+      showToast('Failed to generate prompt', 'error');
     }
   }
 
@@ -905,10 +905,10 @@ class App {
   }
 
   async savePhase3Data() {
-    const finalADR = document.getElementById("phase3-response-textarea").value.trim();
+    const finalADR = document.getElementById('phase3-response-textarea').value.trim();
 
     if (!finalADR || finalADR.length < 3) {
-      showToast("Please enter at least 3 characters", "warning");
+      showToast('Please enter at least 3 characters', 'warning');
       return;
     }
 
@@ -932,70 +932,70 @@ class App {
       this.currentProject = updatedProject;
 
       if (extractedTitle && extractedTitle !== this.currentProject.title) {
-        showToast(`ADR saved! Title updated to "${extractedTitle}"`, "success");
+        showToast(`ADR saved! Title updated to "${extractedTitle}"`, 'success');
       } else {
-        showToast("Phase 3 complete! Your ADR is ready for export.", "success");
+        showToast('Phase 3 complete! Your ADR is ready for export.', 'success');
       }
 
       // Re-render to update UI with new title and enable export
       this.renderCurrentPhase();
     } catch (error) {
-      console.error("Save failed:", error);
-      showToast("Failed to save", "error");
+      console.error('Save failed:', error);
+      showToast('Failed to save', 'error');
     }
   }
 
   async exportADR() {
-    const adrContent = document.getElementById("phase3-response-textarea").value.trim();
+    const adrContent = document.getElementById('phase3-response-textarea').value.trim();
 
     if (!adrContent) {
-      showToast("Please enter the final ADR content first", "error");
+      showToast('Please enter the final ADR content first', 'error');
       return;
     }
 
     try {
-      const filename = `${this.currentProject.title.replace(/\s+/g, "-")}.md`;
+      const filename = `${this.currentProject.title.replace(/\s+/g, '-')}.md`;
       exportAsMarkdown(adrContent, filename);
-      showToast("ADR exported as Markdown", "success");
+      showToast('ADR exported as Markdown', 'success');
     } catch (error) {
-      console.error("Export failed:", error);
-      showToast("Failed to export ADR", "error");
+      console.error('Export failed:', error);
+      showToast('Failed to export ADR', 'error');
     }
   }
 
   async deleteCurrentProject() {
-    if (!window.confirm("Are you sure you want to delete this ADR?")) {
+    if (!window.confirm('Are you sure you want to delete this ADR?')) {
       return;
     }
 
     try {
       await storage.deleteProject(this.currentProject.id);
-      showToast("ADR deleted", "success");
+      showToast('ADR deleted', 'success');
       await this.loadProjects();
       await this.renderProjectList();
     } catch (error) {
-      console.error("Delete failed:", error);
-      showToast("Failed to delete ADR", "error");
+      console.error('Delete failed:', error);
+      showToast('Failed to delete ADR', 'error');
     }
   }
 
   async exportAll() {
     const data = {
-      version: "1.0.0",
+      version: '1.0.0',
       exportDate: new Date().toISOString(),
       projects: this.projects
     };
 
     const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
+    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `adr-projects-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
 
-    showToast(`Exported ${this.projects.length} ADRs`, "success");
+    showToast(`Exported ${this.projects.length} ADRs`, 'success');
   }
 
   async importFile(event) {
@@ -1012,14 +1012,14 @@ class App {
         }
         await this.loadProjects();
         await this.renderProjectList();
-        showToast(`Imported ${data.projects.length} ADRs`, "success");
+        showToast(`Imported ${data.projects.length} ADRs`, 'success');
       }
     } catch (error) {
-      console.error("Import failed:", error);
-      showToast("Failed to import ADRs", "error");
+      console.error('Import failed:', error);
+      showToast('Failed to import ADRs', 'error');
     }
 
-    event.target.value = "";
+    event.target.value = '';
   }
 
   /**
@@ -1028,7 +1028,7 @@ class App {
    */
   async deleteProject(projectId) {
     const project = this.projects.find(p => p.id === projectId);
-    const title = project?.title || project?.name || "Untitled";
+    const title = project?.title || project?.name || 'Untitled';
 
     if (!window.confirm(`Are you sure you want to delete "${title}"?`)) {
       return;
@@ -1036,12 +1036,12 @@ class App {
 
     try {
       await storage.deleteProject(projectId);
-      showToast("ADR deleted", "success");
+      showToast('ADR deleted', 'success');
       await this.loadProjects();
       await this.renderProjectList();
     } catch (error) {
-      console.error("Delete failed:", error);
-      showToast("Failed to delete ADR", "error");
+      console.error('Delete failed:', error);
+      showToast('Failed to delete ADR', 'error');
     }
   }
 
@@ -1068,8 +1068,8 @@ class App {
    * @returns {string} Escaped string
    */
   escapeHtml(str) {
-    if (!str) return "";
-    const div = document.createElement("div");
+    if (!str) return '';
+    const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
   }
@@ -1080,7 +1080,7 @@ class App {
    * @returns {string} Formatted date string
    */
   formatDate(dateStr) {
-    if (!dateStr) return "Never";
+    if (!dateStr) return 'Never';
     const date = new Date(dateStr);
     const now = new Date();
     const diffMs = now - date;
@@ -1088,7 +1088,7 @@ class App {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "Just now";
+    if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
@@ -1098,14 +1098,14 @@ class App {
 
 // Only initialize if running in real browser (not Jest JSDOM)
 // Check for Jest by looking for process.env.JEST_WORKER_ID or typical test indicators
-const isTestEnvironment = typeof process !== "undefined" &&
-  (process.env?.JEST_WORKER_ID !== undefined || process.env?.NODE_ENV === "test");
+const isTestEnvironment = typeof process !== 'undefined' &&
+  (process.env?.JEST_WORKER_ID !== undefined || process.env?.NODE_ENV === 'test');
 
 let app = null;
-if (!isTestEnvironment && typeof window !== "undefined" && typeof document !== "undefined") {
+if (!isTestEnvironment && typeof window !== 'undefined' && typeof document !== 'undefined') {
   // Use DOMContentLoaded to ensure DOM is ready
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
       app = new App();
       app.init();
       window.app = app;

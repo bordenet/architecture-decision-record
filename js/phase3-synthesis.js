@@ -61,30 +61,30 @@ function synthesizeADR(project) {
   let adr = ADR_TEMPLATE;
 
   // Replace placeholders with actual content
-  adr = adr.replace("{{TITLE}}", project.title || "Architecture Decision");
-  adr = adr.replace("{{STATUS}}", project.status || "Proposed");
-  adr = adr.replace("{{CONTEXT}}", project.context || "[Context not provided]");
-  adr = adr.replace("{{DECISION}}", project.decision || "[Decision not provided]");
-  adr = adr.replace("{{CONSEQUENCE_1}}", project.consequences?.split("\n")[0] || "TBD");
-  adr = adr.replace("{{CONSEQUENCE_2}}", project.consequences?.split("\n")[1] || "TBD");
-  adr = adr.replace("{{RISK_1}}", "Requires careful implementation");
-  adr = adr.replace("{{RISK_2}}", "May require team training");
-  adr = adr.replace("{{RATIONALE}}", project.rationale || "[Rationale not provided]");
+  adr = adr.replace('{{TITLE}}', project.title || 'Architecture Decision');
+  adr = adr.replace('{{STATUS}}', project.status || 'Proposed');
+  adr = adr.replace('{{CONTEXT}}', project.context || '[Context not provided]');
+  adr = adr.replace('{{DECISION}}', project.decision || '[Decision not provided]');
+  adr = adr.replace('{{CONSEQUENCE_1}}', project.consequences?.split('\n')[0] || 'TBD');
+  adr = adr.replace('{{CONSEQUENCE_2}}', project.consequences?.split('\n')[1] || 'TBD');
+  adr = adr.replace('{{RISK_1}}', 'Requires careful implementation');
+  adr = adr.replace('{{RISK_2}}', 'May require team training');
+  adr = adr.replace('{{RATIONALE}}', project.rationale || '[Rationale not provided]');
   adr = adr.replace(
-    "{{ALTERNATIVES}}",
+    '{{ALTERNATIVES}}',
     project.phase2Review
-      ? "See adversarial review feedback for detailed alternative analysis"
-      : "No alternatives documented"
+      ? 'See adversarial review feedback for detailed alternative analysis'
+      : 'No alternatives documented'
   );
-  adr = adr.replace("{{DATE}}", new Date().toISOString().split("T")[0]);
+  adr = adr.replace('{{DATE}}', new Date().toISOString().split('T')[0]);
 
   return adr;
 }
 
-function exportAsMarkdown(adr, filename = "adr.md") {
-  const blob = new Blob([adr], { type: "text/markdown" });
+function exportAsMarkdown(adr, filename = 'adr.md') {
+  const blob = new Blob([adr], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   a.click();
@@ -105,11 +105,11 @@ function exportAsJSON(project) {
   };
 
   const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
+  const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  const a = document.createElement('a');
   a.href = url;
-  a.download = `${project.title || "adr"}.json`;
+  a.download = `${project.title || 'adr'}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
