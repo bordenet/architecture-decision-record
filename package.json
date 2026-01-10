@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "An AI-assisted tool for drafting architecture decision records (ADRs) using the standard GitHub template format",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build:css": "tailwindcss -i css/tailwind-input.css -o css/tailwind.css",
     "build": "npm run build:css && esbuild js/app.js --bundle --outfile=app-bundle.js --platform=browser",
