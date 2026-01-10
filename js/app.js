@@ -3,7 +3,7 @@
  * Architecture Decision Record Assistant with 3-phase workflow
  */
 
-import { initializeTheme, setupThemeToggle, showToast } from './ui.js';
+import { initializeTheme, setupThemeToggle, showToast, copyToClipboard } from './ui.js';
 import { loadPrompt } from './workflow.js';
 import { storage } from './storage.js';
 import { exportAsMarkdown } from './phase3-synthesis.js';
@@ -557,13 +557,18 @@ class App {
       });
     }
 
-    // Copy prompt button (from modal)
+    // Copy prompt button (from modal) - enables workflow when copied
     const copyBtn = document.getElementById('copy-phase1-prompt-btn');
     if (copyBtn) {
       copyBtn.addEventListener('click', async() => {
         if (this.currentProject.phase1Prompt) {
-          await navigator.clipboard.writeText(this.currentProject.phase1Prompt);
-          showToast('Copied to clipboard!', 'success');
+          try {
+            await copyToClipboard(this.currentProject.phase1Prompt);
+            showToast('Copied to clipboard!', 'success');
+            this.enablePhase1Workflow();
+          } catch {
+            showToast('Failed to copy to clipboard', 'error');
+          }
         }
       });
     }
@@ -572,6 +577,26 @@ class App {
     const deleteBtn = document.getElementById('delete-project-btn');
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => this.deleteCurrentProject());
+    }
+  }
+
+  /**
+   * Enable Phase 1 workflow progression (Open AI button, textarea)
+   * Called from both main copy button and modal copy button
+   */
+  enablePhase1Workflow() {
+    const openAiBtn = document.getElementById('open-ai-phase1-btn');
+    if (openAiBtn) {
+      openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+      openAiBtn.classList.add('hover:bg-green-700');
+      openAiBtn.removeAttribute('aria-disabled');
+    }
+
+    const responseTextarea = document.getElementById('phase1-response-textarea');
+    if (responseTextarea) {
+      responseTextarea.disabled = false;
+      responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
+      responseTextarea.focus();
     }
   }
 
@@ -590,24 +615,13 @@ class App {
       this.currentProject.phase1Prompt = promptTemplate;
       await storage.saveProject(this.currentProject);
 
-      // Copy to clipboard
-      await navigator.clipboard.writeText(promptTemplate);
-      showToast('Prompt copied to clipboard! Paste it to Claude', 'success');
-
-      // Enable the "Open AI" button now that prompt is copied
-      const openAiBtn = document.getElementById('open-ai-phase1-btn');
-      if (openAiBtn) {
-        openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
-        openAiBtn.classList.add('hover:bg-green-700');
-        openAiBtn.removeAttribute('aria-disabled');
-      }
-
-      // Enable the response textarea now that prompt is copied
-      const responseTextarea = document.getElementById('phase1-response-textarea');
-      if (responseTextarea) {
-        responseTextarea.disabled = false;
-        responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
-        responseTextarea.focus();
+      // Copy to clipboard with fallback for iPad/mobile
+      try {
+        await copyToClipboard(promptTemplate);
+        showToast('Prompt copied to clipboard! Paste it to Claude', 'success');
+        this.enablePhase1Workflow();
+      } catch {
+        showToast('Failed to copy to clipboard', 'error');
       }
 
       // Re-render to show prompt preview
@@ -706,13 +720,18 @@ class App {
       });
     }
 
-    // Copy prompt button (from modal)
+    // Copy prompt button (from modal) - enables workflow when copied
     const copyBtn = document.getElementById('copy-phase2-prompt-btn');
     if (copyBtn) {
       copyBtn.addEventListener('click', async() => {
         if (this.currentProject.phase2Prompt) {
-          await navigator.clipboard.writeText(this.currentProject.phase2Prompt);
-          showToast('Copied to clipboard!', 'success');
+          try {
+            await copyToClipboard(this.currentProject.phase2Prompt);
+            showToast('Copied to clipboard!', 'success');
+            this.enablePhase2Workflow();
+          } catch {
+            showToast('Failed to copy to clipboard', 'error');
+          }
         }
       });
     }
@@ -721,6 +740,26 @@ class App {
     const deleteBtn = document.getElementById('delete-project-btn');
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => this.deleteCurrentProject());
+    }
+  }
+
+  /**
+   * Enable Phase 2 workflow progression (Open AI button, textarea)
+   * Called from both main copy button and modal copy button
+   */
+  enablePhase2Workflow() {
+    const openAiBtn = document.getElementById('open-ai-phase2-btn');
+    if (openAiBtn) {
+      openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+      openAiBtn.classList.add('hover:bg-green-700');
+      openAiBtn.removeAttribute('aria-disabled');
+    }
+
+    const responseTextarea = document.getElementById('phase2-response-textarea');
+    if (responseTextarea) {
+      responseTextarea.disabled = false;
+      responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
+      responseTextarea.focus();
     }
   }
 
@@ -736,24 +775,13 @@ class App {
       this.currentProject.phase2Prompt = promptTemplate;
       await storage.saveProject(this.currentProject);
 
-      // Copy to clipboard
-      await navigator.clipboard.writeText(promptTemplate);
-      showToast('Prompt copied to clipboard! Paste it to Gemini', 'success');
-
-      // Enable the "Open AI" button now that prompt is copied
-      const openAiBtn = document.getElementById('open-ai-phase2-btn');
-      if (openAiBtn) {
-        openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
-        openAiBtn.classList.add('hover:bg-green-700');
-        openAiBtn.removeAttribute('aria-disabled');
-      }
-
-      // Enable the response textarea now that prompt is copied
-      const responseTextarea = document.getElementById('phase2-response-textarea');
-      if (responseTextarea) {
-        responseTextarea.disabled = false;
-        responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
-        responseTextarea.focus();
+      // Copy to clipboard with fallback for iPad/mobile
+      try {
+        await copyToClipboard(promptTemplate);
+        showToast('Prompt copied to clipboard! Paste it to Gemini', 'success');
+        this.enablePhase2Workflow();
+      } catch {
+        showToast('Failed to copy to clipboard', 'error');
       }
 
       // Re-render to show prompt preview (but don't lose textarea state)
@@ -847,13 +875,18 @@ class App {
       });
     }
 
-    // Copy prompt button (from modal)
+    // Copy prompt button (from modal) - enables workflow when copied
     const copyBtn = document.getElementById('copy-phase3-prompt-btn');
     if (copyBtn) {
       copyBtn.addEventListener('click', async() => {
         if (this.currentProject.phase3Prompt) {
-          await navigator.clipboard.writeText(this.currentProject.phase3Prompt);
-          showToast('Copied to clipboard!', 'success');
+          try {
+            await copyToClipboard(this.currentProject.phase3Prompt);
+            showToast('Copied to clipboard!', 'success');
+            this.enablePhase3Workflow();
+          } catch {
+            showToast('Failed to copy to clipboard', 'error');
+          }
         }
       });
     }
@@ -862,6 +895,26 @@ class App {
     const deleteBtn = document.getElementById('delete-project-btn');
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => this.deleteCurrentProject());
+    }
+  }
+
+  /**
+   * Enable Phase 3 workflow progression (Open AI button, textarea)
+   * Called from both main copy button and modal copy button
+   */
+  enablePhase3Workflow() {
+    const openAiBtn = document.getElementById('open-ai-phase3-btn');
+    if (openAiBtn) {
+      openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+      openAiBtn.classList.add('hover:bg-green-700');
+      openAiBtn.removeAttribute('aria-disabled');
+    }
+
+    const responseTextarea = document.getElementById('phase3-response-textarea');
+    if (responseTextarea) {
+      responseTextarea.disabled = false;
+      responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
+      responseTextarea.focus();
     }
   }
 
@@ -880,24 +933,13 @@ class App {
       this.currentProject.phase3Prompt = promptTemplate;
       await storage.saveProject(this.currentProject);
 
-      // Copy to clipboard
-      await navigator.clipboard.writeText(promptTemplate);
-      showToast('Prompt copied to clipboard! Paste it to Claude', 'success');
-
-      // Enable the "Open AI" button now that prompt is copied
-      const openAiBtn = document.getElementById('open-ai-phase3-btn');
-      if (openAiBtn) {
-        openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
-        openAiBtn.classList.add('hover:bg-green-700');
-        openAiBtn.removeAttribute('aria-disabled');
-      }
-
-      // Enable the response textarea now that prompt is copied
-      const responseTextarea = document.getElementById('phase3-response-textarea');
-      if (responseTextarea) {
-        responseTextarea.disabled = false;
-        responseTextarea.classList.remove('opacity-50', 'cursor-not-allowed');
-        responseTextarea.focus();
+      // Copy to clipboard with fallback for iPad/mobile
+      try {
+        await copyToClipboard(promptTemplate);
+        showToast('Prompt copied to clipboard! Paste it to Claude', 'success');
+        this.enablePhase3Workflow();
+      } catch {
+        showToast('Failed to copy to clipboard', 'error');
       }
 
       // Re-render to show prompt preview
