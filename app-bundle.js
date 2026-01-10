@@ -204,6 +204,9 @@ Prompt loading failed.`;
   `;
   }
   function renderFormEntry(project) {
+    const hasTitle = !!(project.title && project.title.trim());
+    const hasContext = !!(project.context && project.context.trim());
+    const isValid = hasTitle && hasContext;
     return `
     <div class="form-entry space-y-6">
       <div class="mb-6 flex items-center justify-between">
@@ -274,10 +277,10 @@ Prompt loading failed.`;
         <!-- Action Buttons -->
         <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
           <div class="flex gap-3">
-            <button id="save-form-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            <button id="save-form-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed" ${!isValid ? "disabled" : ""}>
               Save
             </button>
-            <button id="start-workflow-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button id="start-workflow-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!isValid ? "disabled" : ""}>
               Start AI Workflow \u2192
             </button>
           </div>
@@ -345,14 +348,15 @@ Prompt loading failed.`;
           <textarea
             id="phase1-response-textarea"
             rows="12"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
             placeholder="Paste Claude's response here..."
+            ${!hasResponse && !hasPrompt ? "disabled" : ""}
           >${project.phase1Response || ""}</textarea>
           <div class="mt-3 flex justify-between items-center">
             <span class="text-sm text-gray-600 dark:text-gray-400">
               ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete this phase"}
             </span>
-            <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? "disabled" : ""}>
               Save Response
             </button>
           </div>
@@ -454,14 +458,15 @@ Prompt loading failed.`;
           <textarea
             id="phase2-response-textarea"
             rows="12"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
             placeholder="Paste Gemini's response here..."
+            ${!hasResponse && !hasPrompt ? "disabled" : ""}
           >${project.phase2Review || ""}</textarea>
           <div class="mt-3 flex justify-between items-center">
             <span class="text-sm text-gray-600 dark:text-gray-400">
               ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete this phase"}
             </span>
-            <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? "disabled" : ""}>
               Save Response
             </button>
           </div>
@@ -563,14 +568,15 @@ Prompt loading failed.`;
           <textarea
             id="phase3-response-textarea"
             rows="16"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
             placeholder="Paste Claude's response here..."
+            ${!hasResponse && !hasPrompt ? "disabled" : ""}
           >${project.finalADR || ""}</textarea>
           <div class="mt-3 flex justify-between items-center">
             <span class="text-sm text-gray-600 dark:text-gray-400">
               ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete your ADR"}
             </span>
-            <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? "disabled" : ""}>
               Save Response
             </button>
           </div>
@@ -993,6 +999,21 @@ Prompt loading failed.`;
       const deleteBtn = document.getElementById("delete-project-btn");
       if (deleteBtn) {
         deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
+      }
+      const titleInput = document.getElementById("title-input");
+      const contextTextarea = document.getElementById("context-textarea");
+      const updateButtonStates = () => {
+        const hasTitle = titleInput && titleInput.value.trim().length > 0;
+        const hasContext = contextTextarea && contextTextarea.value.trim().length > 0;
+        const isValid = hasTitle && hasContext;
+        if (saveBtn) saveBtn.disabled = !isValid;
+        if (startBtn) startBtn.disabled = !isValid;
+      };
+      if (titleInput) {
+        titleInput.addEventListener("input", updateButtonStates);
+      }
+      if (contextTextarea) {
+        contextTextarea.addEventListener("input", updateButtonStates);
       }
     }
     /**
