@@ -29,7 +29,7 @@ describe("Views Module", () => {
   test("should render phase 1 form for Claude initial draft", () => {
     const result = renderPhase1Form(testProject);
     expect(result).toContain("📝 Initial Draft");
-    expect(result).toContain("Copy Prompt to Clipboard");
+    expect(result).toContain("Generate & Copy Prompt");
     expect(result).toContain("phase1-response-textarea");
     expect(result).toContain("← Edit Details");
   });
@@ -37,7 +37,7 @@ describe("Views Module", () => {
   test("should render phase 2 form for Gemini review", () => {
     const result = renderPhase2Form(testProject);
     expect(result).toContain("🔄 Alternative Perspective");
-    expect(result).toContain("Copy Prompt to Clipboard");
+    expect(result).toContain("Generate & Copy Prompt");
     expect(result).toContain("phase2-response-textarea");
     expect(result).toContain("← Previous Phase");
   });
@@ -46,7 +46,7 @@ describe("Views Module", () => {
     const projectWithResponse = { ...testProject, finalADR: "Final ADR content" };
     const result = renderPhase3Form(projectWithResponse);
     expect(result).toContain("✨ Synthesize");
-    expect(result).toContain("Copy Prompt to Clipboard");
+    expect(result).toContain("Generate & Copy Prompt");
     expect(result).toContain("phase3-response-textarea");
     expect(result).toContain("Export as Markdown");
   });

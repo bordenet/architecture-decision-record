@@ -351,7 +351,7 @@ Prompt loading failed.`;
           <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex gap-3 flex-wrap">
               <button id="generate-phase1-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                \u{1F4CB} Copy Prompt to Clipboard
+                \u{1F4CB} ${hasPrompt ? "Copy Prompt Again" : "Generate & Copy Prompt"}
               </button>
               <a
                 id="open-ai-phase1-btn"
@@ -364,9 +364,11 @@ Prompt loading failed.`;
                 \u{1F517} Open Claude
               </a>
             </div>
-            <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
+            ${hasPrompt ? `
+            <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
               \u{1F441}\uFE0F View Prompt
             </button>
+            ` : ""}
           </div>
         </div>
 
@@ -461,7 +463,7 @@ Prompt loading failed.`;
           <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex gap-3 flex-wrap">
               <button id="generate-phase2-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                \u{1F4CB} Copy Prompt to Clipboard
+                \u{1F4CB} ${hasPrompt ? "Copy Prompt Again" : "Generate & Copy Prompt"}
               </button>
               <a
                 id="open-ai-phase2-btn"
@@ -474,9 +476,11 @@ Prompt loading failed.`;
                 \u{1F517} Open Gemini
               </a>
             </div>
-            <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
+            ${hasPrompt ? `
+            <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
               \u{1F441}\uFE0F View Prompt
             </button>
+            ` : ""}
           </div>
         </div>
 
@@ -571,7 +575,7 @@ Prompt loading failed.`;
           <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex gap-3 flex-wrap">
               <button id="generate-phase3-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                \u{1F4CB} Copy Prompt to Clipboard
+                \u{1F4CB} ${hasPrompt ? "Copy Prompt Again" : "Generate & Copy Prompt"}
               </button>
               <a
                 id="open-ai-phase3-btn"
@@ -584,9 +588,11 @@ Prompt loading failed.`;
                 \u{1F517} Open Claude
               </a>
             </div>
-            <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "opacity-50 cursor-not-allowed"}">
+            ${hasPrompt ? `
+            <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
               \u{1F441}\uFE0F View Prompt
             </button>
+            ` : ""}
           </div>
         </div>
 
