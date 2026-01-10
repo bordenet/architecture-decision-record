@@ -422,6 +422,26 @@ class App {
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => this.deleteCurrentProject());
     }
+
+    // Form validation - enable/disable buttons based on required fields
+    const titleInput = document.getElementById('title-input');
+    const contextTextarea = document.getElementById('context-textarea');
+
+    const updateButtonStates = () => {
+      const hasTitle = titleInput && titleInput.value.trim().length > 0;
+      const hasContext = contextTextarea && contextTextarea.value.trim().length > 0;
+      const isValid = hasTitle && hasContext;
+
+      if (saveBtn) saveBtn.disabled = !isValid;
+      if (startBtn) startBtn.disabled = !isValid;
+    };
+
+    if (titleInput) {
+      titleInput.addEventListener('input', updateButtonStates);
+    }
+    if (contextTextarea) {
+      contextTextarea.addEventListener('input', updateButtonStates);
+    }
   }
 
   /**
