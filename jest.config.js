@@ -2,12 +2,16 @@ export default {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleFileExtensions: ['js'],
-  testMatch: ['**/tests/**/*.test.js'],
+  testMatch: ['**/*.test.js'],
+  testPathIgnorePatterns: ['/node_modules/', '/docs/'],
   collectCoverageFrom: [
     'js/**/*.js',
-    '!js/**/ai-mock-ui.js',
-    '!js/**/ui.js',
-    '!js/**/app.js'
+    '!js/**/*.test.js',
+    '!js/app.js',
+    '!js/router.js',
+    '!js/views.js',
+    '!js/project-view.js',
+    '!**/node_modules/**'
   ],
   coverageThreshold: {
     global: {
