@@ -1,53 +1,34 @@
-import { Workflow, PHASES, PHASE_NAMES } from "../js/workflow.js";
+import { getPhaseMetadata, generatePromptForPhase, exportFinalADR } from "../js/workflow.js";
 
 describe("Workflow Module", () => {
-  test("should initialize with phase 1", () => {
-    const project = { phase: 1 };
-    const workflow = new Workflow(project);
-
-    expect(workflow.getCurrentPhase()).toBe(1);
+  test("should export getPhaseMetadata function", () => {
+    expect(getPhaseMetadata).toBeInstanceOf(Function);
   });
 
-  test("should get current phase name", () => {
-    const project = { phase: 1 };
-    const workflow = new Workflow(project);
-
-    expect(workflow.getCurrentPhaseName()).toBe("Initial Draft");
+  test("should export generatePromptForPhase function", () => {
+    expect(generatePromptForPhase).toBeInstanceOf(Function);
   });
 
-  test("should advance to next phase", () => {
-    const project = { phase: 1 };
-    const workflow = new Workflow(project);
-
-    expect(workflow.canAdvanceToNextPhase()).toBe(true);
-    workflow.advancePhase();
-    expect(workflow.getCurrentPhase()).toBe(2);
+  test("should export exportFinalADR function", () => {
+    expect(exportFinalADR).toBeInstanceOf(Function);
   });
 
-  test("should not advance past phase 3", () => {
-    const project = { phase: 3 };
-    const workflow = new Workflow(project);
-
-    expect(workflow.canAdvanceToNextPhase()).toBe(false);
-    const advanced = workflow.advancePhase();
-    expect(advanced).toBe(false);
-    expect(workflow.getCurrentPhase()).toBe(3);
+  test("getPhaseMetadata should return metadata for phase 1", () => {
+    const metadata = getPhaseMetadata(1);
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBe("Initial Draft");
+    expect(metadata.ai).toBe("Claude");
   });
 
-  test("should jump to specific phase", () => {
-    const project = { phase: 1 };
-    const workflow = new Workflow(project);
-
-    workflow.goToPhase(3);
-    expect(workflow.getCurrentPhase()).toBe(3);
+  test("getPhaseMetadata should return metadata for phase 2", () => {
+    const metadata = getPhaseMetadata(2);
+    expect(metadata.title).toBe("Alternative Perspective");
+    expect(metadata.ai).toBe("Gemini");
   });
 
-  test("should not jump to invalid phase", () => {
-    const project = { phase: 1 };
-    const workflow = new Workflow(project);
-
-    const result = workflow.goToPhase(5);
-    expect(result).toBe(false);
-    expect(workflow.getCurrentPhase()).toBe(1);
+  test("getPhaseMetadata should return metadata for phase 3", () => {
+    const metadata = getPhaseMetadata(3);
+    expect(metadata.title).toBe("Final Synthesis");
+    expect(metadata.ai).toBe("Claude");
   });
 });

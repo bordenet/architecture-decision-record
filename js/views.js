@@ -1,530 +1,275 @@
 /**
  * Views Module
- * Handles view rendering for 3-phase ADR workflow
- *
- * Workflow Structure:
- * - Form Entry (pre-phase): Enter ADR details (title, context, etc.)
- * - Phase 1: Claude generates initial ADR draft
- * - Phase 2: Gemini reviews and critiques
- * - Phase 3: Claude synthesizes final version
+ * Handles rendering different views/screens
  */
+
+import { getAllProjects, createProject, deleteProject } from './projects.js';
+import { formatDate, escapeHtml, confirm, showToast } from './ui.js';
+import { navigateTo } from './router.js';
 
 /**
- * Render phase tabs header - shared across all phase forms
- * @param {Object} project - Project object
- * @param {number} activePhase - Currently active phase (1, 2, or 3)
- * @returns {string} HTML for phase tabs
+ * Render the projects list view
  */
-function renderPhaseTabs(project, activePhase) {
-  const phases = [
-    { num: 1, icon: '📝', title: 'Initial Draft', ai: 'Claude' },
-    { num: 2, icon: '🔄', title: 'Review', ai: 'Gemini' },
-    { num: 3, icon: '✨', title: 'Synthesize', ai: 'Claude' }
-  ];
+export async function renderProjectsList() {
+  const projects = await getAllProjects();
 
-  // Determine completion status for each phase
-  const isPhase1Complete = !!project.phase1Response;
-  const isPhase2Complete = !!project.phase2Review;
-  const isPhase3Complete = !!project.finalADR;
-  const completionStatus = [isPhase1Complete, isPhase2Complete, isPhase3Complete];
+  const container = document.getElementById('app-container');
+  container.innerHTML = `
+        <div class="mb-6 flex items-center justify-between">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
+                My ADRs
+            </h2>
+            <button id="new-project-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                + New ADR
+            </button>
+        </div>
 
-  return `
-    <div class="mb-6 flex items-center justify-between">
-      <button id="back-to-list-btn" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Back to Projects
-      </button>
-      ${isPhase3Complete ? `
-        <button id="export-adr-top-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-          📄 Export as Markdown
-        </button>
-      ` : ''}
-    </div>
+        ${projects.length === 0 ? `
+            <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <span class="text-6xl mb-4 block">📋</span>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    No ADRs yet
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Create your first Architecture Decision Record
+                </p>
+                <button id="new-project-btn-empty" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    + Create Your First ADR
+                </button>
+            </div>
+        ` : `
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                ${projects.map(project => `
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer" data-project-id="${project.id}">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
+                                    ${escapeHtml(project.title || 'Untitled ADR')}
+                                </h3>
+                                <button class="delete-project-btn text-gray-400 hover:text-red-600 transition-colors" data-project-id="${project.id}">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
 
-    <!-- Phase Progress Indicator (display-only) -->
-    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-      <div class="flex space-x-1">
-        ${phases.map(p => {
-    const isActive = activePhase === p.num;
-    const isCompleted = completionStatus[p.num - 1];
+                            <div class="mb-4">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Phase ${project.phase || 1}/3</span>
+                                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: ${((project.phase || 1) / 3) * 100}%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-1">
+                                    ${[1, 2, 3].map(phase => `
+                                        <div class="flex-1 h-1 rounded ${project.phases && project.phases[phase] && project.phases[phase].completed ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}"></div>
+                                    `).join('')}
+                                </div>
+                            </div>
 
-    return `
-          <div
-            class="px-6 py-3 font-medium ${
-  isActive
-    ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400'
-    : 'text-gray-600 dark:text-gray-400'
-}"
-          >
-            <span class="mr-2">${p.icon}</span>
-            Phase ${p.num}
-            ${isCompleted ? '<span class="ml-2 text-green-500">✓</span>' : ''}
-          </div>
-        `;
-  }).join('')}
-      </div>
-    </div>
-  `;
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                                ${escapeHtml(project.context || '')}
+                            </p>
+
+                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                <span>Updated ${formatDate(project.updatedAt)}</span>
+                                <span class="px-2 py-1 rounded text-xs ${project.status === 'Accepted' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}">${escapeHtml(project.status || 'Proposed')}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `}
+    `;
+
+  // Event listeners
+  const newProjectBtns = container.querySelectorAll('#new-project-btn, #new-project-btn-empty');
+  newProjectBtns.forEach(btn => {
+    btn.addEventListener('click', () => navigateTo('new-project'));
+  });
+
+  const projectCards = container.querySelectorAll('[data-project-id]');
+  projectCards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('.delete-project-btn')) {
+        navigateTo('project/' + card.dataset.projectId);
+      }
+    });
+  });
+
+  const deleteBtns = container.querySelectorAll('.delete-project-btn');
+  deleteBtns.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const projectId = btn.dataset.projectId;
+      const project = projects.find(p => p.id === projectId);
+
+      if (await confirm(`Are you sure you want to delete "${project.title}"?`, 'Delete ADR')) {
+        await deleteProject(projectId);
+        showToast('ADR deleted', 'success');
+        renderProjectsList();
+      }
+    });
+  });
 }
 
 /**
- * Render the ADR form entry view (before phases)
- * This is where users enter ADR details before starting the 3-phase AI workflow
+ * Render the new project form (edit details)
  */
-function renderFormEntry(project) {
-  const hasTitle = !!(project.title && project.title.trim());
-  const hasContext = !!(project.context && project.context.trim());
-  const isValid = hasTitle && hasContext;
+export function renderNewProjectForm(existingProject = null) {
+  const isEditing = !!existingProject;
+  const container = document.getElementById('app-container');
+  container.innerHTML = `
+        <div class="max-w-3xl mx-auto">
+            <div class="mb-6">
+                <button id="back-btn" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    ${isEditing ? 'Back to ADR' : 'Back to ADRs'}
+                </button>
+            </div>
 
-  return `
-    <div class="form-entry space-y-6">
-      <div class="mb-6 flex items-center justify-between">
-        <button id="back-to-list-btn" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
-          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          Back to Projects
-        </button>
-      </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                    ${isEditing ? 'Edit ADR Details' : 'Create New ADR'}
+                </h2>
+                ${isEditing ? `
+                    <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <p class="text-sm text-blue-800 dark:text-blue-300">
+                            💡 Update your ADR details below. Changes will be saved when you continue to Phase 1.
+                        </p>
+                    </div>
+                ` : ''}
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            📋 ADR Details
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400">
-            Enter your architectural decision details. These will be used to generate the ADR.
-          </p>
+                <form id="new-project-form" class="space-y-6">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Title <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            required
+                            value="${escapeHtml(existingProject?.title || '')}"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            placeholder="e.g., Use microservices architecture for scalability"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Status
+                        </label>
+                        <select
+                            id="status"
+                            name="status"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                        >
+                            <option value="Proposed" ${(existingProject?.status || 'Proposed') === 'Proposed' ? 'selected' : ''}>Proposed</option>
+                            <option value="Accepted" ${existingProject?.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
+                            <option value="Deprecated" ${existingProject?.status === 'Deprecated' ? 'selected' : ''}>Deprecated</option>
+                            <option value="Superseded" ${existingProject?.status === 'Superseded' ? 'selected' : ''}>Superseded</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="context" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Context <span class="text-red-500">*</span>
+                        </label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">What circumstances led to this decision? Include background, constraints, and current system state.</p>
+                        <textarea
+                            id="context"
+                            name="context"
+                            required
+                            rows="6"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            placeholder="Describe the background, constraints, and why this decision was necessary..."
+                        >${escapeHtml(existingProject?.context || '')}</textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer buttons -->
+            <div class="mt-6 flex justify-between items-center">
+                <button type="button" id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    ${isEditing ? 'Continue to Phase 1 →' : 'Create & Start Phase 1 →'}
+                </button>
+                <button type="button" id="delete-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                    ${isEditing ? 'Delete' : 'Cancel'}
+                </button>
+            </div>
         </div>
+    `;
 
-        <div class="grid grid-cols-1 gap-6">
-          <!-- Title -->
-          <div>
-            <label for="title-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Title <span class="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              id="title-input"
-              placeholder="e.g., Use microservices architecture for scalability"
-              value="${project.title || ''}"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-          </div>
+  // Helper function to get form data
+  const getFormData = () => {
+    const form = document.getElementById('new-project-form');
+    const formDataObj = new FormData(form);
+    return {
+      title: formDataObj.get('title'),
+      status: formDataObj.get('status'),
+      context: formDataObj.get('context')
+    };
+  };
 
-          <!-- Status -->
-          <div>
-            <label for="status-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Status <span class="text-red-600">*</span>
-            </label>
-            <select
-              id="status-select"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="Proposed" ${project.status === 'Proposed' ? 'selected' : ''}>Proposed</option>
-              <option value="Accepted" ${project.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
-              <option value="Deprecated" ${project.status === 'Deprecated' ? 'selected' : ''}>Deprecated</option>
-              <option value="Superseded" ${project.status === 'Superseded' ? 'selected' : ''}>Superseded</option>
-            </select>
-          </div>
+  // Helper function to save project
+  const saveProject = async (navigateAfter = false) => {
+    const formData = getFormData();
 
-          <!-- Context -->
-          <div>
-            <label for="context-textarea" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Context <span class="text-red-600">*</span>
-            </label>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">What circumstances led to this decision?</p>
-            <textarea
-              id="context-textarea"
-              rows="5"
-              placeholder="Include background, constraints, current system state, and why the decision was necessary..."
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            >${project.context || ''}</textarea>
-          </div>
-        </div>
+    if (!formData.title || !formData.context) {
+      showToast('Please fill in required fields', 'error');
+      return null;
+    }
 
-        <!-- Action Buttons -->
-        <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
-          <div class="flex gap-3">
-            <button id="save-form-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed" ${!isValid ? 'disabled' : ''}>
-              Save
-            </button>
-            <button id="start-workflow-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!isValid ? 'disabled' : ''}>
-              Start AI Workflow →
-            </button>
-          </div>
-          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
+    if (isEditing) {
+      const { updateProject } = await import('./projects.js');
+      await updateProject(existingProject.id, {
+        title: formData.title,
+        status: formData.status,
+        context: formData.context
+      });
+      showToast('ADR saved!', 'success');
+      if (navigateAfter) {
+        navigateTo('project/' + existingProject.id);
+      }
+      return existingProject;
+    } else {
+      const project = await createProject(formData.title, formData.context, formData.status);
+      showToast('ADR created!', 'success');
+      if (navigateAfter) {
+        navigateTo('project/' + project.id);
+      }
+      return project;
+    }
+  };
+
+  // Event listeners
+  document.getElementById('back-btn').addEventListener('click', () => {
+    if (isEditing) {
+      navigateTo('project/' + existingProject.id);
+    } else {
+      navigateTo('home');
+    }
+  });
+
+  // Next Phase button - saves and navigates to Phase 1
+  document.getElementById('next-phase-btn').addEventListener('click', async () => {
+    await saveProject(true);
+  });
+
+  // Delete button
+  document.getElementById('delete-btn').addEventListener('click', async () => {
+    if (isEditing) {
+      if (await confirm(`Are you sure you want to delete "${existingProject.title}"?`, 'Delete ADR')) {
+        await deleteProject(existingProject.id);
+        showToast('ADR deleted', 'success');
+        navigateTo('home');
+      }
+    } else {
+      // For new projects, just go back home
+      navigateTo('home');
+    }
+  });
 }
-
-/**
- * Render Phase 1 - Claude generates initial ADR draft
- */
-function renderPhase1Form(project) {
-  const hasPrompt = !!project.phase1Prompt;
-  const hasResponse = !!(project.phase1Response && project.phase1Response.trim());
-
-  return `
-    <div class="phase-1-form space-y-6">
-      ${renderPhaseTabs(project, 1)}
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            📝 Initial Draft
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-2">
-            Generate the first draft of your ADR using Claude
-          </p>
-          <div class="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-full text-sm">
-            <span class="mr-2">🤖</span>
-            Use with Claude
-          </div>
-        </div>
-
-        <!-- Step A: Copy Prompt -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step A: Copy Prompt to AI
-          </h4>
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex gap-3 flex-wrap">
-              <button id="generate-phase1-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                📋 ${hasPrompt ? 'Copy Prompt Again' : 'Generate & Copy Prompt'}
-              </button>
-              <a
-                id="open-ai-phase1-btn"
-                href="https://claude.ai"
-                target="ai-assistant-tab"
-                rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? 'hover:bg-green-700' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
-                ${hasPrompt ? '' : 'aria-disabled="true"'}
-              >
-                🔗 Open Claude
-              </a>
-            </div>
-            ${hasPrompt ? `
-            <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
-              👁️ View Prompt
-            </button>
-            ` : ''}
-          </div>
-        </div>
-
-        <!-- Step B: Paste Response -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step B: Paste Claude's Response
-          </h4>
-          <textarea
-            id="phase1-response-textarea"
-            rows="12"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
-            placeholder="Paste Claude's response here..."
-            ${!hasResponse && !hasPrompt ? 'disabled' : ''}
-          >${project.phase1Response || ''}</textarea>
-          <div class="mt-3 flex justify-between items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? '✓ Phase completed' : 'Paste response to complete this phase'}
-            </span>
-            <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? 'disabled' : ''}>
-              Save Response
-            </button>
-          </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <div class="flex gap-3">
-            <button id="edit-details-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              ← Edit Details
-            </button>
-            ${hasResponse ? `
-              <button id="next-phase2-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Next Phase →
-              </button>
-            ` : ''}
-          </div>
-          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Prompt Modal -->
-      <div id="phase1-prompt-modal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 1 Prompt</h3>
-              <button id="close-phase1-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                ✕
-              </button>
-            </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase1Prompt || 'No prompt generated yet'}</pre>
-            <div class="mt-4 flex justify-end">
-              <button id="copy-phase1-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-/**
- * Render Phase 2 - Gemini reviews and critiques the ADR
- */
-function renderPhase2Form(project) {
-  const hasPrompt = !!project.phase2Prompt;
-  const hasResponse = !!(project.phase2Review && project.phase2Review.trim());
-
-  return `
-    <div class="phase-2-form space-y-6">
-      ${renderPhaseTabs(project, 2)}
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            🔄 Alternative Perspective
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-2">
-            Get a different perspective and improvements from Gemini
-          </p>
-          <div class="inline-flex items-center px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-full text-sm">
-            <span class="mr-2">🤖</span>
-            Use with Gemini
-          </div>
-        </div>
-
-        <!-- Step A: Copy Prompt -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step A: Copy Prompt to AI
-          </h4>
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex gap-3 flex-wrap">
-              <button id="generate-phase2-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                📋 ${hasPrompt ? 'Copy Prompt Again' : 'Generate & Copy Prompt'}
-              </button>
-              <a
-                id="open-ai-phase2-btn"
-                href="https://gemini.google.com"
-                target="ai-assistant-tab"
-                rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? 'hover:bg-green-700' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
-                ${hasPrompt ? '' : 'aria-disabled="true"'}
-              >
-                🔗 Open Gemini
-              </a>
-            </div>
-            ${hasPrompt ? `
-            <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
-              👁️ View Prompt
-            </button>
-            ` : ''}
-          </div>
-        </div>
-
-        <!-- Step B: Paste Response -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step B: Paste Gemini's Response
-          </h4>
-          <textarea
-            id="phase2-response-textarea"
-            rows="12"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
-            placeholder="Paste Gemini's response here..."
-            ${!hasResponse && !hasPrompt ? 'disabled' : ''}
-          >${project.phase2Review || ''}</textarea>
-          <div class="mt-3 flex justify-between items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? '✓ Phase completed' : 'Paste response to complete this phase'}
-            </span>
-            <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? 'disabled' : ''}>
-              Save Response
-            </button>
-          </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <div class="flex gap-3">
-            <button id="prev-phase1-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              ← Previous Phase
-            </button>
-            ${hasResponse ? `
-              <button id="next-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Next Phase →
-              </button>
-            ` : ''}
-          </div>
-          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Prompt Modal -->
-      <div id="phase2-prompt-modal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 2 Prompt</h3>
-              <button id="close-phase2-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                ✕
-              </button>
-            </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase2Prompt || 'No prompt generated yet'}</pre>
-            <div class="mt-4 flex justify-end">
-              <button id="copy-phase2-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-/**
- * Render Phase 3 - Claude synthesizes final version from Phase 1 + Phase 2
- */
-function renderPhase3Form(project) {
-  const hasPrompt = !!project.phase3Prompt;
-  const hasResponse = !!(project.finalADR && project.finalADR.trim());
-
-  return `
-    <div class="phase-3-form space-y-6">
-      ${renderPhaseTabs(project, 3)}
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            ✨ Synthesize
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-2">
-            Generate the final ADR with Claude
-          </p>
-          <div class="inline-flex items-center px-3 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 rounded-full text-sm">
-            <span class="mr-2">🤖</span>
-            Use with Claude
-          </div>
-        </div>
-
-        <!-- Step A: Copy Prompt -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step A: Copy Prompt to AI
-          </h4>
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex gap-3 flex-wrap">
-              <button id="generate-phase3-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                📋 ${hasPrompt ? 'Copy Prompt Again' : 'Generate & Copy Prompt'}
-              </button>
-              <a
-                id="open-ai-phase3-btn"
-                href="https://claude.ai"
-                target="ai-assistant-tab"
-                rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? 'hover:bg-green-700' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
-                ${hasPrompt ? '' : 'aria-disabled="true"'}
-              >
-                🔗 Open Claude
-              </a>
-            </div>
-            ${hasPrompt ? `
-            <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
-              👁️ View Prompt
-            </button>
-            ` : ''}
-          </div>
-        </div>
-
-        <!-- Step B: Paste Response -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step B: Paste Claude's Response
-          </h4>
-          <textarea
-            id="phase3-response-textarea"
-            rows="16"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
-            placeholder="Paste Claude's response here..."
-            ${!hasResponse && !hasPrompt ? 'disabled' : ''}
-          >${project.finalADR || ''}</textarea>
-          <div class="mt-3 flex justify-between items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? '✓ Phase completed' : 'Paste response to complete your ADR'}
-            </span>
-            <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? 'disabled' : ''}>
-              Save Response
-            </button>
-          </div>
-        </div>
-
-        ${hasResponse ? `
-        <!-- Phase 3 Complete: Export Call-to-Action -->
-        <div class="mt-6 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-          <div class="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h4 class="text-lg font-semibold text-green-800 dark:text-green-300 flex items-center">
-                <span class="mr-2">🎉</span> Your ADR is Complete!
-              </h4>
-              <p class="text-green-700 dark:text-green-400 mt-1">
-                Download your finished architecture decision record as a Markdown (.md) file.
-              </p>
-            </div>
-            <button id="export-adr-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
-              📄 Export as Markdown
-            </button>
-          </div>
-        </div>
-        ` : ''}
-
-        <!-- Navigation -->
-        <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button id="prev-phase2-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-            ← Previous Phase
-          </button>
-          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Prompt Modal -->
-      <div id="phase3-prompt-modal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 3 Prompt</h3>
-              <button id="close-phase3-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                ✕
-              </button>
-            </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase3Prompt || 'No prompt generated yet'}</pre>
-            <div class="mt-4 flex justify-end">
-              <button id="copy-phase3-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-export { renderFormEntry, renderPhase1Form, renderPhase2Form, renderPhase3Form };
