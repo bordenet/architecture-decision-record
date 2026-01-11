@@ -13,7 +13,7 @@ function initializeTheme() {
 
 function showToast(message, type = 'info') {
   // Implementation for showing toast notifications
-  // eslint-disable-next-line no-console
+   
   console.log(`Toast [${type}]: ${message}`);
 }
 

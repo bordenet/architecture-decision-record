@@ -23,33 +23,33 @@ class App {
     }
 
     try {
-      // eslint-disable-next-line no-console
+       
       console.log('App initialization started');
 
       // Initialize theme
       initializeTheme();
       setupThemeToggle();
-      // eslint-disable-next-line no-console
+       
       console.log('Theme initialized');
 
       // Setup keyboard shortcuts
       setupKeyboardShortcuts();
-      // eslint-disable-next-line no-console
+       
       console.log('Keyboard shortcuts configured');
 
       // Load projects
       await this.loadProjects();
-      // eslint-disable-next-line no-console
+       
       console.log('Projects loaded:', this.projects.length);
 
       // Setup event listeners
       this.setupEventListeners();
-      // eslint-disable-next-line no-console
+       
       console.log('Event listeners set up');
 
       // Render initial view
       await this.renderProjectList();
-      // eslint-disable-next-line no-console
+       
       console.log('Project list rendered');
 
       showToast('Application loaded successfully', 'success');
