@@ -1,5 +1,4 @@
 import { ProjectManager } from "../js/projects.js";
-import { jest } from "@jest/globals";
 
 describe("Projects Module", () => {
   let mockStorage;

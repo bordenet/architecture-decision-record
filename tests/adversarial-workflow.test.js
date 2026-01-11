@@ -1,10 +1,8 @@
 /**
  * ADR Form Tests
- * 
+ *
  * These tests validate that the app implements the ADR standard form
  */
-
-import { jest } from "@jest/globals";
 
 describe("ADR Form", () => {
   beforeEach(() => {

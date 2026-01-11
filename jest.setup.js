@@ -1,5 +1,8 @@
 import "fake-indexeddb/auto";
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
+
+// Expose jest globally for test files
+global.jest = jest;
 
 // Polyfill structuredClone for fake-indexeddb
 if (!global.structuredClone) {
