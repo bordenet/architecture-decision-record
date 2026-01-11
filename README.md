@@ -1,405 +1,105 @@
-# Architecture Decision Record Assistant
+# Architecture Decision Record (ADR) Assistant
 
-An AI-assisted tool for drafting architecture decision records (ADRs) using the standard GitHub template format. Generate well-reasoned architectural decisions with context and consequences.
+Generate high-quality Architecture Decision Records using a three-phase AI workflow.
 
-**🌐 Try it now: <https://bordenet.github.io/architecture-decision-record/>**
+**Live Demo**: [bordenet.github.io/architecture-decision-record](https://bordenet.github.io/architecture-decision-record/)
 
-[![CI/CD](https://github.com/bordenet/architecture-decision-record/actions/workflows/ci.yml/badge.svg)](https://github.com/bordenet/architecture-decision-record/actions/workflows/ci.yml)
+[![CI](https://github.com/bordenet/architecture-decision-record/actions/workflows/ci.yml/badge.svg)](https://github.com/bordenet/architecture-decision-record/actions)
 [![codecov](https://codecov.io/gh/bordenet/architecture-decision-record/branch/main/graph/badge.svg)](https://codecov.io/gh/bordenet/architecture-decision-record)
-[![Node.js 18+](https://img.shields.io/badge/node-18+-brightgreen.svg)](https://nodejs.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Dependabot](https://img.shields.io/badge/dependabot-enabled-025E8C?logo=dependabot)](https://github.com/bordenet/architecture-decision-record/security/dependabot)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Linting: ESLint](https://img.shields.io/badge/linting-ESLint-4B32C3)](https://eslint.org/)
-[![Testing: Jest](https://img.shields.io/badge/testing-Jest-C21325)](https://jestjs.io/)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/bordenet/architecture-decision-record/graphs/commit-activity)
-[![GitHub issues](https://img.shields.io/github/issues/bordenet/architecture-decision-record.svg)](https://github.com/bordenet/architecture-decision-record/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/bordenet/architecture-decision-record.svg)](https://github.com/bordenet/architecture-decision-record/pulls)
-
----
-
-## Features
-
-- **100% Client-Side**: All processing happens in your browser. No server required.
-- **Privacy-First**: Your ADRs never leave your device. No data collection.
-- **3-Phase Workflow**: Structured approach to create comprehensive architectural decisions
-- **AI-Assisted**: Generate initial drafts, reviews, and synthesis
-- **Export/Import**: Save your work as markdown or JSON
-- **Dark Mode**: Full dark mode support for comfortable late-night coding
-- **Responsive Design**: Works on desktop, tablet, and mobile
-
----
-
-## How It Works
-
-### Template Structure
-
-Based on the [architecture-decision-record](https://github.com/joelparkerhenderson/architecture-decision-record) standard:
-
-**Title** : Clear, descriptive decision title
-
-**Status** : Proposed, Accepted, Deprecated, Superseded
-
-**Context** : What circumstances led to this decision?
-
-**Decision** : What did you decide and why?
-
-**Consequences** : What follow-up actions result from this decision?
-
-**Rationale** : Why this decision over alternatives?
-
----
-
-## The 3-Phase Workflow
-
-The assistant guides you through a structured 3-phase process for creating comprehensive ADRs:
-
-### Phase 1: Initial Draft (Mock Mode)
-
-1. Fill in the ADR form with your decision context
-2. AI generates a structured initial ADR draft
-3. Review and refine the generated draft
-4. Save your draft and proceed to Phase 2
-
-**What happens**: The system takes your inputs and organizes them into a formal ADR structure, creating a foundation for review.
-
-### Phase 2: Adversarial Review (Manual Mode)
-
-1. Copy the Phase 1 ADR to an external AI (Claude, ChatGPT, Gemini)
-2. Ask the AI to critique the decision from different angles
-3. Paste the AI feedback back into the tool
-4. Review how the original ADR holds up under scrutiny
-
-**What happens**: The external AI provides challenging questions and alternative perspectives to strengthen your decision. The tool automatically detects if you're using the same AI model as Phase 1 and applies adversarial strategies to maintain tension.
-
-### Phase 3: Final Synthesis (Mock Mode)
-
-1. The system synthesizes Phase 1 draft and Phase 2 feedback
-2. Produces a final, polished ADR incorporating all insights
-3. Export as markdown for GitHub or JSON for storage
-4. Archive the complete decision history
-
-**What happens**: The final ADR reflects both your original thinking and critical review, resulting in a more robust architectural decision document.
-
----
-
-## Key Features
-
-- **Same-LLM Detection**: When Phase 1 and Phase 2 use the same AI model, the tool automatically applies adversarial strategies to maintain quality and challenge your assumptions
-- **Multiple Projects**: Create and manage multiple ADRs in the same session
-- **Full History**: Each project maintains complete history through all 3 phases
-- **Privacy-First**: All processing happens in your browser—no data leaves your device
+[![Code Style: ESLint](https://img.shields.io/badge/code%20style-ESLint-4B32C3)](https://eslint.org/)
+[![Dependabot](https://img.shields.io/badge/dependabot-enabled-025E8C?logo=dependabot)](https://github.com/bordenet/architecture-decision-record/security/dependabot)
 
 ---
 
 ## Quick Start
 
-### Automated Setup (Recommended)
+1. Visit the [live demo](https://bordenet.github.io/architecture-decision-record/)
+2. Fill in your decision context, problem, and constraints
+3. Copy the generated prompt and paste into Claude
+4. Paste the AI response back, then proceed through review and synthesis phases
+5. Export your completed ADR as Markdown
 
-**macOS:**
-```bash
-./scripts/setup-macos.sh
-```
+## Features
 
-**Linux (Ubuntu/Debian):**
-```bash
-./scripts/setup-linux.sh
-```
+- **Three-Phase AI Workflow**: Initial draft → Adversarial review → Synthesis
+- **Privacy-First**: All data stored locally in your browser (IndexedDB)
+- **No Account Required**: Works immediately, no signup needed
+- **Export to Markdown**: Download your completed ADR
+- **Dark Mode**: Toggle between light and dark themes
+- **Project Management**: Create, save, and manage multiple ADRs
 
-**Windows (WSL):**
-```bash
-./scripts/setup-windows-wsl.sh
-```
+## Workflow
 
-### Manual Setup
+### Phase 1: Initial Draft
+Enter your decision context, problem statement, and constraints. Copy the generated prompt to Claude to create an initial ADR draft.
 
-```bash
-npm install
-./scripts/install-hooks.sh
-npm test
-```
+### Phase 2: Adversarial Review
+The initial draft is critically reviewed by Gemini to identify gaps, weaknesses, missing alternatives, and vague consequences.
 
----
+### Phase 3: Synthesis
+Claude synthesizes the initial draft with the adversarial feedback to produce a final, balanced ADR with clear consequences.
 
 ## Development
 
-### Running Locally
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Setup
 
 ```bash
-npm run serve
-# Opens: http://localhost:8000
+git clone https://github.com/bordenet/architecture-decision-record.git
+cd architecture-decision-record
+npm install
 ```
 
 ### Testing
 
 ```bash
-# Run all tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Watch mode
-npm run test:watch
+npm test        # Run all tests
+npm run lint    # Run linting
+npm run lint:fix # Fix lint issues
 ```
 
-### Linting
+### Local Development
 
 ```bash
-# Check for issues
-npm run lint
-
-# Fix automatically
-npm run lint:fix
+npm run serve   # Start local server at http://localhost:8000
 ```
-
----
-
-## Deployment
-
-### Automated Deployment
-
-This project uses GitHub Actions for continuous deployment. Every push to `main` triggers:
-
-1. Linting checks
-2. Unit tests
-3. Test coverage verification
-4. Automatic deployment to GitHub Pages
-
-**Live Site**: <https://bordenet.github.io/architecture-decision-record/>
-
-### Manual Deployment (Local)
-
-To deploy changes from your local machine:
-
-```bash
-./scripts/deploy-web.sh
-```
-
-The script will:
-
-1. Run linting checks (`npm run lint`)
-2. Run all unit tests (`npm test`)
-3. Verify test coverage meets requirements
-4. Commit changes with timestamp
-5. Push to GitHub (triggers CI/CD)
-6. Monitor deployment status
-
-### Deployment Workflow
-
-```text
-Your changes
-    ↓
-npm run lint (automated)
-    ↓
-npm test (automated)
-    ↓
-git commit + push (automated)
-    ↓
-GitHub Actions CI/CD
-    ├─ Quality Gates
-    │  ├─ Linting
-    │  ├─ Tests
-    │  └─ Coverage
-    ↓
-GitHub Pages Deploy
-    ↓
-https://bordenet.github.io/architecture-decision-record/ (live)
-```
-
----
 
 ## Project Structure
 
-```text
+```
 architecture-decision-record/
-├── index.html              # Main application
-├── css/
-│   └── styles.css          # Tailwind + custom styles
-├── js/
-│   ├── app.js              # Main application logic
-│   ├── workflow.js         # Phase workflow management
-│   ├── storage.js          # IndexedDB persistence
-│   ├── ai-mock.js          # AI mock responses
-│   ├── router.js           # Multi-project routing
-│   ├── views.js            # View rendering
-│   ├── projects.js         # Project CRUD operations
-│   ├── project-view.js     # Individual project view
-│   ├── ui.js               # UI utilities
-│   ├── same-llm-adversarial.js  # LLM strategy handling
-│   └── ai-mock-ui.js       # Mock mode UI
-├── tests/                  # Jest test suite
-│   ├── ai-mock.test.js
-│   ├── storage.test.js
-│   ├── workflow.test.js
-│   └── same-llm-adversarial.test.js
-├── prompts/                # AI prompt templates
+├── js/                    # JavaScript modules
+│   ├── app.js            # Main application entry
+│   ├── workflow.js       # Phase orchestration
+│   ├── storage.js        # IndexedDB operations
+│   └── ...
+├── tests/                 # Jest test files
+├── prompts/              # AI prompt templates
 │   ├── phase1.md
 │   ├── phase2.md
 │   └── phase3.md
-├── templates/              # Document templates
-│   └── adr-template.md
-├── scripts/                # Automation scripts
-│   ├── setup-macos.sh
-│   ├── setup-linux.sh
-│   ├── deploy-web.sh
-│   └── lib/
-│       ├── common.sh
-│       └── compact.sh
-└── .github/workflows/      # CI/CD workflows
-    └── ci.yml
+└── index.html            # Main HTML file
 ```
 
----
+## Part of Genesis Tools
 
-## Configuration
+This project is generated and maintained using [Genesis](https://github.com/bordenet/genesis), ensuring consistency across all document-generation tools:
 
-### Environment Variables
-
-Copy `.env.example` to `.env` and customize:
-
-```bash
-cp .env.example .env
-```
-
-Available options:
-
-- `AI_MODE`: "mock" (default) or "live"
-- `DEBUG`: "true" or "false"
-- `LOG_LEVEL`: "info" (default), "debug", "warn", "error"
-
----
-
-## Related Projects
-
-- **[One-Pager Assistant](https://bordenet.github.io/one-pager/)** - Create concise one-page documents
-- **[PR-FAQ Assistant](https://bordenet.github.io/pr-faq-assistant/)** - Create Amazon-style press releases
-- **[Product Requirements Assistant](https://bordenet.github.io/product-requirements-assistant/)** - Write professional PRDs
-- **[Power Statement Assistant](https://bordenet.github.io/power-statement-assistant/)** - Create compelling power statements
-- **[Architecture Decision Record Standard](https://github.com/joelparkerhenderson/architecture-decision-record)** - ADR documentation
-
----
+- [Architecture Decision Record](https://github.com/bordenet/architecture-decision-record) ← You are here
+- [One-Pager](https://github.com/bordenet/one-pager)
+- [Power Statement Assistant](https://github.com/bordenet/power-statement-assistant)
+- [PR/FAQ Assistant](https://github.com/bordenet/pr-faq-assistant)
+- [Product Requirements Assistant](https://github.com/bordenet/product-requirements-assistant)
 
 ## Contributing
 
-We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Make your changes
-4. Run tests (`npm test`)
-5. Run linting (`npm run lint:fix`)
-6. Commit with descriptive messages
-7. Push to GitHub
-8. Open a Pull Request
-
-### Code Quality
-
-- **Test Coverage**: ≥85% required
-- **Linting**: ESLint zero errors
-- **Testing**: All tests must pass
-- **Documentation**: Update docs with changes
-
----
-
-## Quality Standards
-
-This project maintains high quality standards:
-
-- **Testing**: Comprehensive test suite with 85%+ coverage
-- **Linting**: ESLint with strict rules
-- **CI/CD**: Automated quality gates on every push
-- **Documentation**: Clear architecture and contribution guides
-- **Accessibility**: WCAG AA compliance
-- **Performance**: Fast load times, optimized JavaScript
-
----
-
-## Architecture
-
-### Client-Side Only
-
-All processing happens in the browser. No backend server required.
-
-- **Storage**: IndexedDB for persistent local storage
-- **State Management**: JavaScript modules with explicit state
-- **UI Framework**: Vanilla JavaScript (no dependencies except testing libraries)
-
-### 3-Phase Workflow
-
-Each ADR goes through three distinct phases:
-
-1. **Phase 1 (Mock)**: Initial structured generation
-2. **Phase 2 (Manual)**: User-driven critique and improvement
-3. **Phase 3 (Mock)**: Final synthesis combining all inputs
-
-### Same-LLM Detection
-
-When Phase 1 and Phase 2 use the same AI model, the system automatically applies adversarial strategies to maintain tension and quality.
-
----
-
-## Troubleshooting
-
-### Tests Failing
-
-```bash
-# Ensure dependencies are installed
-npm install
-
-# Clear Jest cache
-npm test -- --clearCache
-
-# Run with verbose output
-npm test -- --verbose
-```
-
-### Dark Mode Not Working
-
-Dark mode is enabled via Tailwind CSS. If toggle doesn't work:
-
-1. Check browser DevTools for errors
-2. Verify `darkMode: 'class'` in Tailwind config
-3. Check `.github/workflows/ci.yml` for quality gate errors
-
-### Deployment Issues
-
-```bash
-# Verify deployment script exists
-ls -la scripts/deploy-web.sh
-
-# Test deployment locally
-./scripts/deploy-web.sh --help
-
-# Check GitHub Pages settings
-# Settings → Pages → Source should be: Deploy from a branch
-# Branch: main, Folder: /
-```
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details
-
----
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/bordenet/architecture-decision-record/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/bordenet/architecture-decision-record/discussions)
-- **Documentation**: See docs/ folder
-
----
-
-## Related Resources
-
-- [Documenting Architecture Decisions](https://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions) - Michael Nygard
-- [ADR Tools](https://github.com/npryce/adr-tools) - Command-line tools
-- [MADR](https://adr.github.io/madr/) - Markdown ADR format
-
----
-
-**Created with [Genesis](https://github.com/bordenet/genesis) project templates**
+MIT - See [LICENSE](LICENSE)
