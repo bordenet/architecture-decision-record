@@ -1,5 +1,4 @@
 import { Router } from "../js/router.js";
-import { jest } from "@jest/globals";
 
 describe("Router Module", () => {
   test("should register a route", () => {

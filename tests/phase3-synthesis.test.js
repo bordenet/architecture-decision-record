@@ -1,5 +1,4 @@
 import { synthesizeADR, exportAsMarkdown, exportAsJSON } from "../js/phase3-synthesis.js";
-import { jest } from "@jest/globals";
 
 describe("Phase 3 Synthesis Module", () => {
   const testProject = {

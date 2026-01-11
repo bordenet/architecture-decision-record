@@ -1,5 +1,4 @@
 import { setupKeyboardShortcuts, showToast } from "../js/keyboard-shortcuts.js";
-import { jest } from "@jest/globals";
 
 describe("Keyboard Shortcuts Module", () => {
   let mockContainer;
