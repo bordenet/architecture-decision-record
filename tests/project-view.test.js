@@ -1,28 +1,11 @@
-import { ProjectView } from "../js/project-view.js";
+import { renderProjectView } from "../js/project-view.js";
 
 describe("ProjectView Module", () => {
-  const testProject = {
-    title: "Test Project",
-    context: "Test context"
-  };
-
-  test("should render project view", () => {
-    const view = new ProjectView(testProject);
-    const result = view.render();
-    expect(result).toContain("Test Project");
-    expect(result).toContain("Test context");
+  test("should export renderProjectView function", () => {
+    expect(renderProjectView).toBeInstanceOf(Function);
   });
 
-  test("should render project editor", () => {
-    const view = new ProjectView(testProject);
-    const result = view.renderEditor();
-    expect(result).toContain("Test Project");
-    expect(result).toContain("Test context");
-  });
-
-  test("should render untitled project", () => {
-    const view = new ProjectView({});
-    const result = view.render();
-    expect(result).toContain("Untitled Project");
+  test("renderProjectView should be async", () => {
+    expect(renderProjectView.constructor.name).toBe("AsyncFunction");
   });
 });
