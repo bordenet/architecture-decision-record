@@ -28,13 +28,13 @@ class Storage {
 
         request.onsuccess = () => {
           this.db = request.result;
-          // eslint-disable-next-line no-console
+           
           console.log('IndexedDB initialized successfully');
           resolve();
         };
 
         request.onupgradeneeded = (event) => {
-          // eslint-disable-next-line no-console
+           
           console.log('IndexedDB upgrade needed');
           const db = event.target.result;
 

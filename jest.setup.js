@@ -1,5 +1,11 @@
-import "fake-indexeddb/auto";
-import { jest } from "@jest/globals";
+/**
+ * Jest Setup File
+ *
+ * This file runs before each test suite to set up the testing environment.
+ */
+
+import 'fake-indexeddb/auto';
+import { jest } from '@jest/globals';
 
 // Expose jest globally for test files
 global.jest = jest;
