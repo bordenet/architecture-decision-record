@@ -2,6 +2,8 @@
 
 **Project Status**: Production-ready. Live at https://bordenet.github.io/architecture-decision-record/
 
+**📐 Design Patterns**: See [DESIGN-PATTERNS.md](./DESIGN-PATTERNS.md) for architecture and coding patterns used across all genesis-tools repos.
+
 ---
 
 ## ⚠️ CRITICAL: Fix ALL Linting Issues Immediately
