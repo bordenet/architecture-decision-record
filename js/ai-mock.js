@@ -1,9 +1,13 @@
 /**
  * AI Mock Module
  * Provides mock AI responses for testing and demo
+ * @module ai-mock
  */
 
-// Safely access process.env in both browser and Node.js environments
+/**
+ * Safely access AI mode from environment
+ * @returns {string} AI mode ('mock' or 'live')
+ */
 const getAIMode = () => {
   // In Node.js (Jest/Node): process.env is available
   if (typeof process !== 'undefined' && process.env && process.env.AI_MODE) {

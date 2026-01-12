@@ -1,10 +1,13 @@
 /**
  * Workflow Module
  * Manages the 3-phase ADR creation workflow
+ * @module workflow
  */
 
 /**
  * Load prompt template from markdown file
+ * @param {import('./types.js').PhaseNumber} phaseNumber - Phase number
+ * @returns {Promise<string>} Template content
  */
 async function loadPromptTemplate(phaseNumber) {
   try {
@@ -21,6 +24,9 @@ async function loadPromptTemplate(phaseNumber) {
 
 /**
  * Replace template variables in prompt
+ * @param {string} template - Template string with {variable} placeholders
+ * @param {Object.<string, string>} vars - Variable values
+ * @returns {string} Template with variables replaced
  */
 function replaceTemplateVars(template, vars) {
   let result = template;
@@ -32,7 +38,18 @@ function replaceTemplateVars(template, vars) {
 }
 
 /**
+ * @typedef {Object} PhaseMetadata
+ * @property {string} title - Phase title
+ * @property {string} description - Phase description
+ * @property {string} ai - AI model name
+ * @property {string} icon - Emoji icon
+ * @property {string} color - Color theme
+ */
+
+/**
  * Get phase metadata for UI display
+ * @param {import('./types.js').PhaseNumber} phase - Phase number
+ * @returns {PhaseMetadata}
  */
 export function getPhaseMetadata(phase) {
   const phases = {
@@ -64,8 +81,9 @@ export function getPhaseMetadata(phase) {
 
 /**
  * Generate prompt for a specific phase
- * @param {object} project - The project object
- * @param {number} phaseNumber - The phase number (1, 2, or 3)
+ * @param {import('./types.js').Project} project - The project object
+ * @param {import('./types.js').PhaseNumber} phaseNumber - The phase number (1, 2, or 3)
+ * @returns {Promise<string>} Generated prompt
  */
 export async function generatePromptForPhase(project, phaseNumber) {
   const phase = phaseNumber || project.phase || 1;
@@ -107,6 +125,8 @@ export async function generatePromptForPhase(project, phaseNumber) {
 
 /**
  * Export final ADR document
+ * @param {import('./types.js').Project} project - Project to export
+ * @returns {void}
  */
 export function exportFinalADR(project) {
   let content = '';

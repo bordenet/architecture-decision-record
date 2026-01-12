@@ -1,6 +1,7 @@
 /**
  * Project View Module
  * Handles rendering project workflow view and phase interactions
+ * @module project-view
  */
 
 import { getProject, updatePhase, updateProject, deleteProject } from './projects.js';
@@ -10,6 +11,8 @@ import { navigateTo } from './router.js';
 
 /**
  * Render the project detail view
+ * @param {string} projectId - Project ID
+ * @returns {Promise<void>}
  */
 export async function renderProjectView(projectId) {
   const project = await getProject(projectId);
@@ -97,6 +100,8 @@ export async function renderProjectView(projectId) {
 
 /**
  * Update phase tab styles to reflect the active phase
+ * @param {import('./types.js').PhaseNumber} activePhase - Active phase number
+ * @returns {void}
  */
 function updatePhaseTabStyles(activePhase) {
   document.querySelectorAll('.phase-tab').forEach(tab => {
@@ -114,6 +119,9 @@ function updatePhaseTabStyles(activePhase) {
 
 /**
  * Render phase content based on phase number
+ * @param {import('./types.js').Project} project - Project data
+ * @param {import('./types.js').PhaseNumber} phase - Phase number
+ * @returns {string} HTML content
  */
 function renderPhaseContent(project, phase) {
   const meta = getPhaseMetadata(phase);
@@ -237,6 +245,9 @@ function renderPhaseContent(project, phase) {
 
 /**
  * Attach event listeners for phase interactions
+ * @param {import('./types.js').Project} project - Project data
+ * @param {import('./types.js').PhaseNumber} phase - Phase number
+ * @returns {void}
  */
 function attachPhaseEventListeners(project, phase) {
   const meta = getPhaseMetadata(phase);

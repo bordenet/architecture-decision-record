@@ -1,8 +1,17 @@
 /**
  * Error Handler Module
  * Provides user-friendly error messages and recovery hints
+ * @module error-handler
  */
 
+/**
+ * @typedef {Object} ErrorInfo
+ * @property {string} title - Error title
+ * @property {string} message - Error message
+ * @property {string} recoveryHint - Recovery hint
+ */
+
+/** @type {Object.<string, ErrorInfo>} */
 const ERROR_MESSAGES = {
   // IndexedDB errors
   QUOTA_EXCEEDED: {
@@ -20,7 +29,7 @@ const ERROR_MESSAGES = {
     message: 'The data appears to be corrupted. Some information may be lost.',
     recoveryHint: 'Try importing a recent backup if available'
   },
-  
+
   // Form errors
   VALIDATION_ERROR: {
     title: 'Missing Information',
@@ -32,7 +41,7 @@ const ERROR_MESSAGES = {
     message: 'The imported data format is not recognized.',
     recoveryHint: 'Make sure you\'re importing a previously exported file'
   },
-  
+
   // Export errors
   EXPORT_FAILED: {
     title: 'Export Failed',
@@ -44,7 +53,7 @@ const ERROR_MESSAGES = {
     message: 'Could not read the imported file.',
     recoveryHint: 'Ensure the file is a valid JSON export from this tool'
   },
-  
+
   // Generic errors
   UNKNOWN_ERROR: {
     title: 'Something Went Wrong',
@@ -62,9 +71,9 @@ function getErrorMessage(error) {
   if (typeof error === 'string' && ERROR_MESSAGES[error]) {
     return ERROR_MESSAGES[error];
   }
-  
+
   const errorStr = error?.message?.toUpperCase() || '';
-  
+
   // Check for specific error types
   if (errorStr.includes('QUOTA')) {
     return ERROR_MESSAGES.QUOTA_EXCEEDED;
@@ -78,7 +87,7 @@ function getErrorMessage(error) {
   if (errorStr.includes('VALIDATION')) {
     return ERROR_MESSAGES.VALIDATION_ERROR;
   }
-  
+
   return ERROR_MESSAGES.UNKNOWN_ERROR;
 }
 
@@ -89,16 +98,16 @@ function getErrorMessage(error) {
  * @param {string} context - Context for console logging
  */
 function handleStorageError(error, showToast, context = 'Storage Operation') {
-   
+
   console.error(`${context} Error:`, error);
-  
+
   const errorInfo = getErrorMessage(error);
   const message = `${errorInfo.message} (${errorInfo.recoveryHint})`;
-  
+
   if (showToast && typeof showToast === 'function') {
     showToast(message, 'error');
   }
-  
+
   return errorInfo;
 }
 
@@ -110,11 +119,11 @@ function handleStorageError(error, showToast, context = 'Storage Operation') {
 function handleValidationError(errors, showToast) {
   const errorArray = Array.isArray(errors) ? errors : [errors];
   const message = errorArray.join('\n');
-  
+
   if (showToast && typeof showToast === 'function') {
     showToast(message, 'error');
   }
-  
+
   return {
     title: 'Validation Error',
     message,

@@ -1,8 +1,10 @@
 /**
  * Phase 3 Synthesis Module
  * Synthesizes decision with adversarial feedback into final ADR
+ * @module phase3-synthesis
  */
 
+/** @type {string} */
 const ADR_TEMPLATE = `# ADR: {{TITLE}}
 
 ## Status
@@ -57,6 +59,11 @@ As discussed in the adversarial review phase, the following alternatives were co
 *Last Updated: {{DATE}}*
 `;
 
+/**
+ * Synthesize final ADR from project
+ * @param {import('./types.js').Project} project - Project data
+ * @returns {string} Synthesized ADR content
+ */
 function synthesizeADR(project) {
   let adr = ADR_TEMPLATE;
 
@@ -81,6 +88,12 @@ function synthesizeADR(project) {
   return adr;
 }
 
+/**
+ * Export ADR as markdown file
+ * @param {string} adr - ADR content
+ * @param {string} [filename='adr.md'] - Output filename
+ * @returns {void}
+ */
 function exportAsMarkdown(adr, filename = 'adr.md') {
   const blob = new Blob([adr], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
@@ -91,6 +104,11 @@ function exportAsMarkdown(adr, filename = 'adr.md') {
   URL.revokeObjectURL(url);
 }
 
+/**
+ * Export project as JSON file
+ * @param {import('./types.js').Project} project - Project data
+ * @returns {void}
+ */
 function exportAsJSON(project) {
   const data = {
     title: project.title,

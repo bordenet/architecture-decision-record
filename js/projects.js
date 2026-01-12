@@ -1,12 +1,17 @@
 /**
  * Project Management Module
  * Handles project CRUD operations and business logic
+ * @module projects
  */
 
 import { storage } from './storage.js';
 
 /**
  * Create a new project
+ * @param {string} title - ADR title
+ * @param {string} context - ADR context
+ * @param {string} [status='Proposed'] - ADR status
+ * @returns {Promise<import('./types.js').Project>}
  */
 export async function createProject(title, context, status = 'Proposed') {
   const project = {
@@ -30,6 +35,7 @@ export async function createProject(title, context, status = 'Proposed') {
 
 /**
  * Get all projects
+ * @returns {Promise<import('./types.js').Project[]>}
  */
 export async function getAllProjects() {
   return await storage.getAllProjects();
@@ -37,6 +43,8 @@ export async function getAllProjects() {
 
 /**
  * Get a single project
+ * @param {string} id - Project ID
+ * @returns {Promise<import('./types.js').Project | undefined>}
  */
 export async function getProject(id) {
   return await storage.getProject(id);
@@ -76,6 +84,9 @@ export async function updatePhase(projectId, phase, updates = {}) {
 
 /**
  * Update project metadata
+ * @param {string} projectId - Project ID
+ * @param {Partial<import('./types.js').Project>} updates - Updates to apply
+ * @returns {Promise<import('./types.js').Project>}
  */
 export async function updateProject(projectId, updates) {
   const project = await storage.getProject(projectId);
@@ -89,6 +100,8 @@ export async function updateProject(projectId, updates) {
 
 /**
  * Delete a project
+ * @param {string} id - Project ID
+ * @returns {Promise<void>}
  */
 export async function deleteProject(id) {
   await storage.deleteProject(id);
@@ -96,6 +109,8 @@ export async function deleteProject(id) {
 
 /**
  * Sanitize filename for export
+ * @param {string} filename - Filename to sanitize
+ * @returns {string}
  */
 function sanitizeFilename(filename) {
   return (filename || 'untitled')
@@ -108,6 +123,8 @@ function sanitizeFilename(filename) {
 
 /**
  * Export a single project as JSON
+ * @param {string} projectId - Project ID
+ * @returns {Promise<void>}
  */
 export async function exportProject(projectId) {
   const project = await storage.getProject(projectId);
@@ -124,6 +141,7 @@ export async function exportProject(projectId) {
 
 /**
  * Export all projects as a backup JSON
+ * @returns {Promise<void>}
  */
 export async function exportAllProjects() {
   const projects = await storage.getAllProjects();
@@ -146,6 +164,8 @@ export async function exportAllProjects() {
 
 /**
  * Import projects from JSON file
+ * @param {File} file - JSON file to import
+ * @returns {Promise<number>} Number of imported projects
  */
 export async function importProjects(file) {
   return new Promise((resolve, reject) => {

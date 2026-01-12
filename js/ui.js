@@ -1,8 +1,13 @@
 /**
  * UI Module
  * Handles theme, toasts, and UI utilities
+ * @module ui
  */
 
+/**
+ * Initialize theme from localStorage
+ * @returns {void}
+ */
 function initializeTheme() {
   // Initialize dark mode
   const isDark = localStorage.getItem('darkMode') === 'true';
@@ -11,17 +16,30 @@ function initializeTheme() {
   }
 }
 
+/**
+ * Show a toast notification
+ * @param {string} message - Message to display
+ * @param {import('./types.js').ToastType} [type='info'] - Toast type
+ * @returns {void}
+ */
 function showToast(message, type = 'info') {
   // Implementation for showing toast notifications
-
   console.log(`Toast [${type}]: ${message}`);
 }
 
+/**
+ * Toggle between light and dark themes
+ * @returns {void}
+ */
 function toggleTheme() {
   const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('darkMode', isDark);
+  localStorage.setItem('darkMode', String(isDark));
 }
 
+/**
+ * Set up theme toggle button listener
+ * @returns {void}
+ */
 function setupThemeToggle() {
   const themeToggle = document.getElementById('theme-toggle');
   if (themeToggle) {
@@ -29,7 +47,11 @@ function setupThemeToggle() {
   }
 }
 
-
+/**
+ * Escape HTML special characters
+ * @param {string} text - Text to escape
+ * @returns {string} Escaped text
+ */
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
