@@ -168,11 +168,9 @@ function renderPhaseContent(project, phase) {
                             🔗 Open ${aiInfo.name}
                         </a>
                     </div>
-                    ${hasPrompt ? `
-                        <button id="view-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
-                            👁️ View Prompt
-                        </button>
-                    ` : ''}
+                    <button id="view-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? '' : 'hidden'}">
+                        👁️ View Prompt
+                    </button>
                 </div>
             </div>
 
@@ -324,6 +322,14 @@ function attachPhaseEventListeners(project, phase) {
           openAiBtn.classList.add('hover:bg-green-700');
           openAiBtn.removeAttribute('aria-disabled');
         }
+
+        // Show and enable the View Prompt button now that prompt is generated
+        const viewPromptBtn = document.getElementById('view-prompt-btn');
+        if (viewPromptBtn) {
+          viewPromptBtn.classList.remove('hidden', 'opacity-50', 'cursor-not-allowed');
+          viewPromptBtn.disabled = false;
+        }
+
         const responseTextarea = document.getElementById('response-textarea');
         if (responseTextarea) {
           responseTextarea.disabled = false;
