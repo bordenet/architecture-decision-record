@@ -1,4 +1,15 @@
+"use strict";
 (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+
   // js/ui.js
   function initializeTheme() {
     const isDark = localStorage.getItem("darkMode") === "true";
@@ -11,13 +22,117 @@
   }
   function toggleTheme() {
     const isDark = document.documentElement.classList.toggle("dark");
-    localStorage.setItem("darkMode", isDark);
+    localStorage.setItem("darkMode", String(isDark));
   }
   function setupThemeToggle() {
     const themeToggle = document.getElementById("theme-toggle");
     if (themeToggle) {
       themeToggle.addEventListener("click", toggleTheme);
     }
+  }
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  function formatDate(dateString) {
+    if (!dateString) return "Unknown";
+    const date = new Date(dateString);
+    const now = /* @__PURE__ */ new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1e3 * 60 * 60 * 24));
+    if (diffDays === 0) {
+      return "Today";
+    } else if (diffDays === 1) {
+      return "Yesterday";
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  }
+  function confirm(message, title = "Confirm") {
+    return new Promise((resolve) => {
+      const modal = document.createElement("div");
+      modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+      modal.innerHTML = `
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${escapeHtml(title)}</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">${escapeHtml(message)}</p>
+                <div class="flex justify-end gap-3">
+                    <button id="confirm-cancel" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirm-ok" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        `;
+      document.body.appendChild(modal);
+      const closeModal = (result) => {
+        if (document.body.contains(modal)) document.body.removeChild(modal);
+        resolve(result);
+      };
+      modal.querySelector("#confirm-cancel").addEventListener("click", () => closeModal(false));
+      modal.querySelector("#confirm-ok").addEventListener("click", () => closeModal(true));
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal(false);
+      });
+      const handleEscape = (e) => {
+        if (e.key === "Escape") {
+          document.removeEventListener("keydown", handleEscape);
+          closeModal(false);
+        }
+      };
+      document.addEventListener("keydown", handleEscape);
+    });
+  }
+  function showPromptModal(promptText, title = "Full Prompt", onCopySuccess = null) {
+    const modal = document.createElement("div");
+    modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">${escapeHtml(title)}</h3>
+                <button id="close-prompt-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <pre class="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 font-mono">${escapeHtml(promptText)}</pre>
+            </div>
+            <div class="mt-4 flex justify-end gap-2">
+                <button id="copy-prompt-modal-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    \u{1F4CB} Copy to Clipboard
+                </button>
+                <button id="close-prompt-modal-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const handleEscape = (e) => {
+      if (e.key === "Escape") closeModal();
+    };
+    const closeModal = () => {
+      if (document.body.contains(modal)) document.body.removeChild(modal);
+      document.removeEventListener("keydown", handleEscape);
+    };
+    modal.querySelector("#close-prompt-modal").addEventListener("click", closeModal);
+    modal.querySelector("#close-prompt-modal-btn").addEventListener("click", closeModal);
+    modal.querySelector("#copy-prompt-modal-btn").addEventListener("click", async () => {
+      try {
+        await copyToClipboard(promptText);
+        showToast("Prompt copied to clipboard!", "success");
+        if (onCopySuccess) onCopySuccess();
+      } catch {
+        showToast("Failed to copy to clipboard", "error");
+      }
+    });
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", handleEscape);
   }
   async function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -49,136 +164,627 @@
       throw new Error("Failed to copy to clipboard");
     }
   }
-
-  // js/workflow.js
-  async function loadPrompt(phase) {
-    try {
-      const response = await fetch(`./prompts/phase${phase}.md`);
-      if (!response.ok) throw new Error("Prompt not found");
-      return await response.text();
-    } catch (error) {
-      console.error(`Failed to load phase ${phase} prompt:`, error);
-      return `# Phase ${phase} Prompt
-
-Prompt loading failed.`;
+  var init_ui = __esm({
+    "js/ui.js"() {
+      "use strict";
     }
-  }
+  });
 
   // js/storage.js
-  var DB_NAME = "adr-assistant";
-  var DB_VERSION = 1;
-  var STORE_NAME = "projects";
-  var Storage = class {
-    constructor() {
-      this.db = null;
+  var DB_NAME, DB_VERSION, STORE_NAME, Storage, storage;
+  var init_storage = __esm({
+    "js/storage.js"() {
+      "use strict";
+      DB_NAME = "adr-assistant";
+      DB_VERSION = 1;
+      STORE_NAME = "projects";
+      Storage = class {
+        constructor() {
+          this.db = null;
+        }
+        /**
+         * Initialize the database
+         * @returns {Promise<void>}
+         */
+        async init() {
+          return new Promise((resolve, reject) => {
+            try {
+              const request = indexedDB.open(DB_NAME, DB_VERSION);
+              request.onerror = () => {
+                console.error("IndexedDB open error:", request.error);
+                reject(request.error);
+              };
+              request.onsuccess = () => {
+                this.db = request.result;
+                console.log("IndexedDB initialized successfully");
+                resolve();
+              };
+              request.onupgradeneeded = (event) => {
+                console.log("IndexedDB upgrade needed");
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                  const projectStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+                  projectStore.createIndex("updatedAt", "updatedAt", { unique: false });
+                  projectStore.createIndex("title", "title", { unique: false });
+                }
+                if (!db.objectStoreNames.contains("prompts")) {
+                  db.createObjectStore("prompts", { keyPath: "phase" });
+                }
+                if (!db.objectStoreNames.contains("settings")) {
+                  db.createObjectStore("settings", { keyPath: "key" });
+                }
+              };
+            } catch (error) {
+              console.error("IndexedDB init error:", error);
+              reject(error);
+            }
+          });
+        }
+        /**
+         * Save a project
+         * @param {import('./types.js').Project} project - Project to save
+         * @returns {Promise<IDBValidKey>}
+         */
+        async saveProject(project) {
+          if (!this.db) await this.init();
+          return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([STORE_NAME], "readwrite");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.put({
+              ...project,
+              updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+            });
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+          });
+        }
+        /**
+         * Get all projects
+         * @returns {Promise<import('./types.js').Project[]>}
+         */
+        async getAllProjects() {
+          if (!this.db) await this.init();
+          return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([STORE_NAME], "readonly");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+          });
+        }
+        /**
+         * Get project by ID
+         * @param {string} id - Project ID
+         * @returns {Promise<import('./types.js').Project | undefined>}
+         */
+        async getProject(id) {
+          if (!this.db) await this.init();
+          return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([STORE_NAME], "readonly");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(id);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+          });
+        }
+        /**
+         * Delete project
+         * @param {string} id - Project ID
+         * @returns {Promise<void>}
+         */
+        async deleteProject(id) {
+          if (!this.db) await this.init();
+          return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([STORE_NAME], "readwrite");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve();
+          });
+        }
+        /**
+         * Get storage size estimate
+         * @returns {Promise<import('./types.js').StorageEstimate>}
+         */
+        async getStorageSize() {
+          if (!navigator.storage || !navigator.storage.estimate) {
+            return { usage: 0, quota: 0 };
+          }
+          return navigator.storage.estimate();
+        }
+        /**
+         * Alias for getStorageSize for API consistency
+         * @returns {Promise<import('./types.js').StorageEstimate>}
+         */
+        async getStorageEstimate() {
+          return this.getStorageSize();
+        }
+      };
+      storage = new Storage();
     }
-    /**
-     * Initialize the database
-     */
-    async init() {
-      return new Promise((resolve, reject) => {
+  });
+
+  // js/projects.js
+  var projects_exports = {};
+  __export(projects_exports, {
+    createProject: () => createProject,
+    deleteProject: () => deleteProject,
+    exportAllProjects: () => exportAllProjects,
+    exportProject: () => exportProject,
+    getAllProjects: () => getAllProjects,
+    getProject: () => getProject,
+    importProjects: () => importProjects,
+    updatePhase: () => updatePhase,
+    updateProject: () => updateProject
+  });
+  async function createProject(title, context, status = "Proposed") {
+    const project = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      title: title.trim(),
+      context: context.trim(),
+      status,
+      phase: 1,
+      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+      updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      phases: {
+        1: { prompt: "", response: "", completed: false },
+        2: { prompt: "", response: "", completed: false },
+        3: { prompt: "", response: "", completed: false }
+      }
+    };
+    await storage.saveProject(project);
+    return project;
+  }
+  async function getAllProjects() {
+    return await storage.getAllProjects();
+  }
+  async function getProject(id) {
+    return await storage.getProject(id);
+  }
+  async function updatePhase(projectId, phase, updates = {}) {
+    const project = await storage.getProject(projectId);
+    if (!project) throw new Error("Project not found");
+    if (!project.phases) project.phases = {};
+    if (!project.phases[phase]) {
+      project.phases[phase] = { prompt: "", response: "", completed: false };
+    }
+    if (updates.prompt !== void 0) {
+      project.phases[phase].prompt = updates.prompt;
+    }
+    if (updates.response !== void 0) {
+      project.phases[phase].response = updates.response;
+    }
+    if (updates.completed !== void 0) {
+      project.phases[phase].completed = updates.completed;
+    }
+    project.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+    await storage.saveProject(project);
+    return project;
+  }
+  async function updateProject(projectId, updates) {
+    const project = await storage.getProject(projectId);
+    if (!project) throw new Error("Project not found");
+    Object.assign(project, updates);
+    project.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+    await storage.saveProject(project);
+    return project;
+  }
+  async function deleteProject(id) {
+    await storage.deleteProject(id);
+  }
+  function sanitizeFilename(filename) {
+    return (filename || "untitled").replace(/[^a-z0-9]/gi, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").toLowerCase().substring(0, 50);
+  }
+  async function exportProject(projectId) {
+    const project = await storage.getProject(projectId);
+    if (!project) throw new Error("Project not found");
+    const blob = new Blob([JSON.stringify(project, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sanitizeFilename(project.title)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  async function exportAllProjects() {
+    const projects = await storage.getAllProjects();
+    const backup = {
+      version: "1.0",
+      exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      projectCount: projects.length,
+      projects
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `adr-backup-${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  async function importProjects(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
         try {
-          const request = indexedDB.open(DB_NAME, DB_VERSION);
-          request.onerror = () => {
-            console.error("IndexedDB open error:", request.error);
-            reject(request.error);
-          };
-          request.onsuccess = () => {
-            this.db = request.result;
-            console.log("IndexedDB initialized successfully");
-            resolve();
-          };
-          request.onupgradeneeded = (event) => {
-            console.log("IndexedDB upgrade needed");
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-              const projectStore = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-              projectStore.createIndex("updatedAt", "updatedAt", { unique: false });
-              projectStore.createIndex("title", "title", { unique: false });
+          const content = JSON.parse(e.target.result);
+          let imported = 0;
+          if (content.version && content.projects) {
+            for (const project of content.projects) {
+              await storage.saveProject(project);
+              imported++;
             }
-            if (!db.objectStoreNames.contains("prompts")) {
-              db.createObjectStore("prompts", { keyPath: "phase" });
-            }
-            if (!db.objectStoreNames.contains("settings")) {
-              db.createObjectStore("settings", { keyPath: "key" });
-            }
-          };
+          } else if (content.id && content.title) {
+            await storage.saveProject(content);
+            imported = 1;
+          } else {
+            throw new Error("Invalid file format");
+          }
+          resolve(imported);
         } catch (error) {
-          console.error("IndexedDB init error:", error);
           reject(error);
         }
-      });
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+  }
+  var init_projects = __esm({
+    "js/projects.js"() {
+      "use strict";
+      init_storage();
     }
-    /**
-     * Save a project
-     */
-    async saveProject(project) {
-      if (!this.db) await this.init();
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction([STORE_NAME], "readwrite");
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.put({
-          ...project,
-          updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-        });
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
-      });
-    }
-    /**
-     * Get all projects
-     */
-    async getAllProjects() {
-      if (!this.db) await this.init();
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction([STORE_NAME], "readonly");
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.getAll();
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
-      });
-    }
-    /**
-     * Get project by ID
-     */
-    async getProject(id) {
-      if (!this.db) await this.init();
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction([STORE_NAME], "readonly");
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.get(id);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
-      });
-    }
-    /**
-     * Delete project
-     */
-    async deleteProject(id) {
-      if (!this.db) await this.init();
-      return new Promise((resolve, reject) => {
-        const transaction = this.db.transaction([STORE_NAME], "readwrite");
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.delete(id);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve();
-      });
-    }
-    /**
-     * Get storage size
-     */
-    async getStorageSize() {
-      if (!navigator.storage || !navigator.storage.estimate) {
-        return { usage: 0, quota: 0 };
-      }
-      return navigator.storage.estimate();
-    }
-  };
-  var storage = new Storage();
+  });
 
-  // js/phase3-synthesis.js
-  function exportAsMarkdown(adr, filename = "adr.md") {
-    const blob = new Blob([adr], { type: "text/markdown" });
+  // js/views.js
+  var views_exports = {};
+  __export(views_exports, {
+    renderNewProjectForm: () => renderNewProjectForm,
+    renderProjectsList: () => renderProjectsList
+  });
+  async function renderProjectsList() {
+    const projects = await getAllProjects();
+    const container = document.getElementById("app-container");
+    container.innerHTML = `
+        <div class="mb-6 flex items-center justify-between">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
+                My ADRs
+            </h2>
+            <button id="new-project-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                + New ADR
+            </button>
+        </div>
+
+        ${projects.length === 0 ? `
+            <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <span class="text-6xl mb-4 block">\u{1F4CB}</span>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    No ADRs yet
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Create your first Architecture Decision Record
+                </p>
+                <button id="new-project-btn-empty" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    + Create Your First ADR
+                </button>
+            </div>
+        ` : `
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                ${projects.map((project) => `
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer" data-project-id="${project.id}">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
+                                    ${escapeHtml(project.title || "Untitled ADR")}
+                                </h3>
+                                <button class="delete-project-btn text-gray-400 hover:text-red-600 transition-colors" data-project-id="${project.id}">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Phase ${project.phase || 1}/3</span>
+                                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: ${(project.phase || 1) / 3 * 100}%"></div>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-1">
+                                    ${[1, 2, 3].map((phase) => `
+                                        <div class="flex-1 h-1 rounded ${project.phases && project.phases[phase] && project.phases[phase].completed ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}"></div>
+                                    `).join("")}
+                                </div>
+                            </div>
+
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                                ${escapeHtml(project.context || "")}
+                            </p>
+
+                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                <span>Updated ${formatDate(project.updatedAt)}</span>
+                                <span class="px-2 py-1 rounded text-xs ${project.status === "Accepted" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300" : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"}">${escapeHtml(project.status || "Proposed")}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        `}
+    `;
+    const newProjectBtns = container.querySelectorAll("#new-project-btn, #new-project-btn-empty");
+    newProjectBtns.forEach((btn) => {
+      btn.addEventListener("click", () => navigateTo("new-project"));
+    });
+    const projectCards = container.querySelectorAll("[data-project-id]");
+    projectCards.forEach((card) => {
+      card.addEventListener("click", (e) => {
+        if (!e.target.closest(".delete-project-btn")) {
+          navigateTo("project/" + card.dataset.projectId);
+        }
+      });
+    });
+    const deleteBtns = container.querySelectorAll(".delete-project-btn");
+    deleteBtns.forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const projectId = btn.dataset.projectId;
+        const project = projects.find((p) => p.id === projectId);
+        if (await confirm(`Are you sure you want to delete "${project.title}"?`, "Delete ADR")) {
+          await deleteProject(projectId);
+          showToast("ADR deleted", "success");
+          renderProjectsList();
+        }
+      });
+    });
+  }
+  function renderNewProjectForm(existingProject = null) {
+    const isEditing = !!existingProject;
+    const container = document.getElementById("app-container");
+    container.innerHTML = `
+        <div class="max-w-3xl mx-auto">
+            <div class="mb-6">
+                <button id="back-btn" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    ${isEditing ? "Back to ADR" : "Back to ADRs"}
+                </button>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                    ${isEditing ? "Edit ADR Details" : "Create New ADR"}
+                </h2>
+                ${isEditing ? `
+                    <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <p class="text-sm text-blue-800 dark:text-blue-300">
+                            \u{1F4A1} Update your ADR details below. Changes will be saved when you continue to Phase 1.
+                        </p>
+                    </div>
+                ` : ""}
+
+                <form id="new-project-form" class="space-y-6">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Title <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            required
+                            value="${escapeHtml(existingProject?.title || "")}"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            placeholder="e.g., Use microservices architecture for scalability"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Status
+                        </label>
+                        <select
+                            id="status"
+                            name="status"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                        >
+                            <option value="Proposed" ${(existingProject?.status || "Proposed") === "Proposed" ? "selected" : ""}>Proposed</option>
+                            <option value="Accepted" ${existingProject?.status === "Accepted" ? "selected" : ""}>Accepted</option>
+                            <option value="Deprecated" ${existingProject?.status === "Deprecated" ? "selected" : ""}>Deprecated</option>
+                            <option value="Superseded" ${existingProject?.status === "Superseded" ? "selected" : ""}>Superseded</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="context" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Context <span class="text-red-500">*</span>
+                        </label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">What circumstances led to this decision? Include background, constraints, and current system state.</p>
+                        <textarea
+                            id="context"
+                            name="context"
+                            required
+                            rows="6"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                            placeholder="Describe the background, constraints, and why this decision was necessary..."
+                        >${escapeHtml(existingProject?.context || "")}</textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer buttons -->
+            <div class="mt-6 flex justify-between items-center">
+                <button type="button" id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    ${isEditing ? "Continue to Phase 1 \u2192" : "Create & Start Phase 1 \u2192"}
+                </button>
+                <button type="button" id="delete-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                    ${isEditing ? "Delete" : "Cancel"}
+                </button>
+            </div>
+        </div>
+    `;
+    const getFormData = () => {
+      const form = document.getElementById("new-project-form");
+      const formDataObj = new FormData(form);
+      return {
+        title: formDataObj.get("title"),
+        status: formDataObj.get("status"),
+        context: formDataObj.get("context")
+      };
+    };
+    const saveProject = async (navigateAfter = false) => {
+      const formData = getFormData();
+      if (!formData.title || !formData.context) {
+        showToast("Please fill in required fields", "error");
+        return null;
+      }
+      if (isEditing) {
+        const { updateProject: updateProject2 } = await Promise.resolve().then(() => (init_projects(), projects_exports));
+        await updateProject2(existingProject.id, {
+          title: formData.title,
+          status: formData.status,
+          context: formData.context
+        });
+        showToast("ADR saved!", "success");
+        if (navigateAfter) {
+          navigateTo("project/" + existingProject.id);
+        }
+        return existingProject;
+      } else {
+        const project = await createProject(formData.title, formData.context, formData.status);
+        showToast("ADR created!", "success");
+        if (navigateAfter) {
+          navigateTo("project/" + project.id);
+        }
+        return project;
+      }
+    };
+    document.getElementById("back-btn").addEventListener("click", () => {
+      if (isEditing) {
+        navigateTo("project/" + existingProject.id);
+      } else {
+        navigateTo("home");
+      }
+    });
+    document.getElementById("next-phase-btn").addEventListener("click", async () => {
+      await saveProject(true);
+    });
+    document.getElementById("delete-btn").addEventListener("click", async () => {
+      if (isEditing) {
+        if (await confirm(`Are you sure you want to delete "${existingProject.title}"?`, "Delete ADR")) {
+          await deleteProject(existingProject.id);
+          showToast("ADR deleted", "success");
+          navigateTo("home");
+        }
+      } else {
+        navigateTo("home");
+      }
+    });
+  }
+  var init_views = __esm({
+    "js/views.js"() {
+      "use strict";
+      init_projects();
+      init_ui();
+      init_router();
+    }
+  });
+
+  // js/workflow.js
+  async function loadPromptTemplate(phaseNumber) {
+    try {
+      const response = await fetch(`prompts/phase${phaseNumber}.md`);
+      if (!response.ok) {
+        throw new Error(`Failed to load prompt template for phase ${phaseNumber}`);
+      }
+      return await response.text();
+    } catch (error) {
+      console.error("Error loading prompt template:", error);
+      return "";
+    }
+  }
+  function replaceTemplateVars(template, vars) {
+    let result = template;
+    for (const [key, value] of Object.entries(vars)) {
+      const regex = new RegExp(`\\{${key}\\}`, "g");
+      result = result.replace(regex, value || "[Not provided]");
+    }
+    return result;
+  }
+  function getPhaseMetadata(phase) {
+    const phases = {
+      1: {
+        title: "Initial Draft",
+        description: "Generate the first draft of your ADR using Claude",
+        ai: "Claude",
+        icon: "\u{1F4DD}",
+        color: "blue"
+      },
+      2: {
+        title: "Alternative Perspective",
+        description: "Get a different perspective and improvements from Gemini",
+        ai: "Gemini",
+        icon: "\u{1F504}",
+        color: "green"
+      },
+      3: {
+        title: "Final Synthesis",
+        description: "Combine the best elements into a polished final ADR",
+        ai: "Claude",
+        icon: "\u2728",
+        color: "purple"
+      }
+    };
+    return phases[phase] || phases[1];
+  }
+  async function generatePromptForPhase(project, phaseNumber) {
+    const phase = phaseNumber || project.phase || 1;
+    const template = await loadPromptTemplate(phase);
+    const getPhaseResponse = (phaseNum) => {
+      if (project.phases && project.phases[phaseNum]) {
+        return project.phases[phaseNum].response || "";
+      }
+      return "";
+    };
+    if (phase === 1) {
+      const vars = {
+        title: project.title || "",
+        status: project.status || "Proposed",
+        context: project.context || ""
+      };
+      return replaceTemplateVars(template, vars);
+    } else if (phase === 2) {
+      const vars = {
+        phase1Output: getPhaseResponse(1) || "[No Phase 1 output yet]"
+      };
+      return replaceTemplateVars(template, vars);
+    } else if (phase === 3) {
+      const vars = {
+        phase1Output: getPhaseResponse(1) || "[No Phase 1 output yet]",
+        phase2Output: getPhaseResponse(2) || "[No Phase 2 output yet]"
+      };
+      return replaceTemplateVars(template, vars);
+    }
+    return template;
+  }
+  function exportFinalADR(project) {
+    let content = "";
+    if (project.phases && project.phases[3] && project.phases[3].response) {
+      content = project.phases[3].response;
+    } else if (project.phases && project.phases[1] && project.phases[1].response) {
+      content = project.phases[1].response;
+    } else {
+      content = `# ${project.title || "Untitled ADR"}
+
+**Status:** ${project.status || "Proposed"}
+
+## Context
+
+${project.context || ""}`;
+    }
+    const filename = `${(project.title || "adr").replace(/[^a-z0-9]/gi, "-").toLowerCase()}-adr.md`;
+    const blob = new Blob([content], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -186,490 +792,412 @@ Prompt loading failed.`;
     a.click();
     URL.revokeObjectURL(url);
   }
+  var init_workflow = __esm({
+    "js/workflow.js"() {
+      "use strict";
+    }
+  });
 
-  // js/views.js
-  function renderPhaseTabs(project, activePhase) {
-    const phases = [
-      { num: 1, icon: "\u{1F4DD}", title: "Initial Draft", ai: "Claude" },
-      { num: 2, icon: "\u{1F504}", title: "Review", ai: "Gemini" },
-      { num: 3, icon: "\u2728", title: "Synthesize", ai: "Claude" }
-    ];
-    const isPhase1Complete = !!project.phase1Response;
-    const isPhase2Complete = !!project.phase2Review;
-    const isPhase3Complete = !!project.finalADR;
-    const completionStatus = [isPhase1Complete, isPhase2Complete, isPhase3Complete];
-    return `
-    <div class="mb-6 flex items-center justify-between">
-      <button id="back-to-list-btn" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
-        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Back to Projects
-      </button>
-      ${isPhase3Complete ? `
-        <button id="export-adr-top-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-          \u{1F4C4} Export as Markdown
-        </button>
-      ` : ""}
-    </div>
+  // js/project-view.js
+  async function renderProjectView(projectId) {
+    const project = await getProject(projectId);
+    if (!project) {
+      showToast("ADR not found", "error");
+      navigateTo("home");
+      return;
+    }
+    if (!project.title || !project.context) {
+      navigateTo("edit-project/" + projectId);
+      return;
+    }
+    const container = document.getElementById("app-container");
+    container.innerHTML = `
+        <div class="mb-6 flex items-center justify-between">
+            <button id="back-btn" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to ADRs
+            </button>
+            ${project.phases && project.phases[3] && project.phases[3].completed ? `
+                <button id="export-adr-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    \u2713 Export as Markdown
+                </button>
+            ` : ""}
+        </div>
 
-    <!-- Phase Progress Indicator (display-only) -->
-    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-      <div class="flex space-x-1">
-        ${phases.map((p) => {
-      const isActive = activePhase === p.num;
-      const isCompleted = completionStatus[p.num - 1];
+        <!-- Phase Tabs -->
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex space-x-1">
+                ${[1, 2, 3].map((phase) => {
+      const meta = getPhaseMetadata(phase);
+      const isActive = (project.phase || 1) === phase;
+      const isCompleted = project.phases && project.phases[phase] && project.phases[phase].completed;
       return `
-          <div
-            class="px-6 py-3 font-medium ${isActive ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"}"
-          >
-            <span class="mr-2">${p.icon}</span>
-            Phase ${p.num}
-            ${isCompleted ? '<span class="ml-2 text-green-500">\u2713</span>' : ""}
-          </div>
-        `;
+                        <button
+                            class="phase-tab px-6 py-3 font-medium transition-colors ${isActive ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"}"
+                            data-phase="${phase}"
+                        >
+                            <span class="mr-2">${meta.icon}</span>
+                            Phase ${phase}
+                            ${isCompleted ? '<span class="ml-2 text-green-500">\u2713</span>' : ""}
+                        </button>
+                    `;
     }).join("")}
-      </div>
-    </div>
-  `;
+            </div>
+        </div>
+
+        <!-- Phase Content -->
+        <div id="phase-content">
+            ${renderPhaseContent(project, project.phase || 1)}
+        </div>
+    `;
+    document.getElementById("back-btn").addEventListener("click", () => navigateTo("home"));
+    const exportBtn = document.getElementById("export-adr-btn");
+    if (exportBtn) {
+      exportBtn.addEventListener("click", () => exportFinalADR(project));
+    }
+    document.querySelectorAll(".phase-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const phase = parseInt(tab.dataset.phase);
+        project.phase = phase;
+        updatePhaseTabStyles(phase);
+        document.getElementById("phase-content").innerHTML = renderPhaseContent(project, phase);
+        attachPhaseEventListeners(project, phase);
+      });
+    });
+    attachPhaseEventListeners(project, project.phase || 1);
   }
-  function renderFormEntry(project) {
-    const hasTitle = !!(project.title && project.title.trim());
-    const hasContext = !!(project.context && project.context.trim());
-    const isValid = hasTitle && hasContext;
+  function updatePhaseTabStyles(activePhase) {
+    document.querySelectorAll(".phase-tab").forEach((tab) => {
+      const tabPhase = parseInt(tab.dataset.phase);
+      if (tabPhase === activePhase) {
+        tab.classList.remove("text-gray-600", "dark:text-gray-400", "hover:text-gray-900", "dark:hover:text-gray-200");
+        tab.classList.add("border-b-2", "border-blue-600", "text-blue-600", "dark:text-blue-400");
+      } else {
+        tab.classList.remove("border-b-2", "border-blue-600", "text-blue-600", "dark:text-blue-400");
+        tab.classList.add("text-gray-600", "dark:text-gray-400", "hover:text-gray-900", "dark:hover:text-gray-200");
+      }
+    });
+  }
+  function renderPhaseContent(project, phase) {
+    const meta = getPhaseMetadata(phase);
+    const phaseData = project.phases && project.phases[phase] ? project.phases[phase] : {};
+    const hasPrompt = !!phaseData.prompt;
+    const hasResponse = !!(phaseData.response && phaseData.response.trim());
+    const aiInfo = phase === 2 ? { name: "Gemini", url: "https://gemini.google.com", color: "green" } : { name: "Claude", url: "https://claude.ai", color: "blue" };
     return `
-    <div class="form-entry space-y-6">
-      <div class="mb-6 flex items-center justify-between">
-        <button id="back-to-list-btn" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
-          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          Back to Projects
-        </button>
-      </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    ${meta.icon} ${meta.title}
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-2">${meta.description}</p>
+                <div class="inline-flex items-center px-3 py-1 bg-${aiInfo.color}-100 dark:bg-${aiInfo.color}-900/20 text-${aiInfo.color}-800 dark:text-${aiInfo.color}-300 rounded-full text-sm">
+                    <span class="mr-2">\u{1F916}</span>
+                    Use with ${aiInfo.name}
+                </div>
+            </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            \u{1F4CB} ADR Details
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400">
-            Enter your architectural decision details. These will be used to generate the ADR.
-          </p>
+            <!-- Step A: Copy Prompt -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                    Step A: Copy Prompt to AI
+                </h4>
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex gap-3 flex-wrap">
+                        <button id="copy-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                            \u{1F4CB} ${hasPrompt ? "Copy Prompt Again" : "Generate & Copy Prompt"}
+                        </button>
+                        <a
+                            id="open-ai-btn"
+                            href="${aiInfo.url}"
+                            target="ai-assistant-tab"
+                            rel="noopener noreferrer"
+                            class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
+                            ${hasPrompt ? "" : 'aria-disabled="true"'}
+                        >
+                            \u{1F517} Open ${aiInfo.name}
+                        </a>
+                    </div>
+                    ${hasPrompt ? `
+                        <button id="view-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
+                            \u{1F441}\uFE0F View Prompt
+                        </button>
+                    ` : ""}
+                </div>
+            </div>
+
+            <!-- Step B: Paste Response -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                    Step B: Paste ${aiInfo.name}'s Response
+                </h4>
+                <textarea
+                    id="response-textarea"
+                    rows="12"
+                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                    placeholder="Paste ${aiInfo.name}'s response here..."
+                    ${!hasResponse && !hasPrompt ? "disabled" : ""}
+                >${escapeHtml(phaseData.response || "")}</textarea>
+                <div class="mt-3 flex justify-between items-center">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                        ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete this phase"}
+                    </span>
+                    <button id="save-response-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? "disabled" : ""}>
+                        Save Response
+                    </button>
+                </div>
+            </div>
+
+            ${phase === 3 && hasResponse ? `
+                <!-- Phase 3 Complete: Export Call-to-Action -->
+                <div class="mt-6 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <h4 class="text-lg font-semibold text-green-800 dark:text-green-300 flex items-center">
+                                <span class="mr-2">\u{1F389}</span> Your ADR is Complete!
+                            </h4>
+                            <p class="text-green-700 dark:text-green-400 mt-1">
+                                Download your finished architecture decision record as a Markdown (.md) file.
+                            </p>
+                        </div>
+                        <button id="export-phase-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
+                            \u{1F4C4} Export as Markdown
+                        </button>
+                    </div>
+                </div>
+            ` : ""}
+
+            <!-- Navigation -->
+            <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex gap-3">
+                    ${phase === 1 ? `
+                        <button id="edit-details-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            \u2190 Edit Details
+                        </button>
+                    ` : `
+                        <button id="prev-phase-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            \u2190 Previous Phase
+                        </button>
+                    `}
+                    ${hasResponse && phase < 3 ? `
+                        <button id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Next Phase \u2192
+                        </button>
+                    ` : ""}
+                </div>
+                <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                    Delete
+                </button>
+            </div>
         </div>
-
-        <div class="grid grid-cols-1 gap-6">
-          <!-- Title -->
-          <div>
-            <label for="title-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Title <span class="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              id="title-input"
-              placeholder="e.g., Use microservices architecture for scalability"
-              value="${project.title || ""}"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-          </div>
-
-          <!-- Status -->
-          <div>
-            <label for="status-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Status <span class="text-red-600">*</span>
-            </label>
-            <select
-              id="status-select"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="Proposed" ${project.status === "Proposed" ? "selected" : ""}>Proposed</option>
-              <option value="Accepted" ${project.status === "Accepted" ? "selected" : ""}>Accepted</option>
-              <option value="Deprecated" ${project.status === "Deprecated" ? "selected" : ""}>Deprecated</option>
-              <option value="Superseded" ${project.status === "Superseded" ? "selected" : ""}>Superseded</option>
-            </select>
-          </div>
-
-          <!-- Context -->
-          <div>
-            <label for="context-textarea" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Context <span class="text-red-600">*</span>
-            </label>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">What circumstances led to this decision?</p>
-            <textarea
-              id="context-textarea"
-              rows="5"
-              placeholder="Include background, constraints, current system state, and why the decision was necessary..."
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            >${project.context || ""}</textarea>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
-          <div class="flex gap-3">
-            <button id="save-form-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed" ${!isValid ? "disabled" : ""}>
-              Save
-            </button>
-            <button id="start-workflow-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!isValid ? "disabled" : ""}>
-              Start AI Workflow \u2192
-            </button>
-          </div>
-          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
+    `;
   }
-  function renderPhase1Form(project) {
-    const hasPrompt = !!project.phase1Prompt;
-    const hasResponse = !!(project.phase1Response && project.phase1Response.trim());
-    return `
-    <div class="phase-1-form space-y-6">
-      ${renderPhaseTabs(project, 1)}
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            \u{1F4DD} Initial Draft
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-2">
-            Generate the first draft of your ADR using Claude
-          </p>
-          <div class="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-full text-sm">
-            <span class="mr-2">\u{1F916}</span>
-            Use with Claude
-          </div>
-        </div>
-
-        <!-- Step A: Copy Prompt -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step A: Copy Prompt to AI
-          </h4>
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex gap-3 flex-wrap">
-              <button id="generate-phase1-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                \u{1F4CB} ${hasPrompt ? "Copy Prompt Again" : "Generate & Copy Prompt"}
-              </button>
-              <a
-                id="open-ai-phase1-btn"
-                href="https://claude.ai"
-                target="ai-assistant-tab"
-                rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
-                ${hasPrompt ? "" : 'aria-disabled="true"'}
-              >
-                \u{1F517} Open Claude
-              </a>
-            </div>
-            ${hasPrompt ? `
-            <button id="view-phase1-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
-              \u{1F441}\uFE0F View Prompt
-            </button>
-            ` : ""}
-          </div>
-        </div>
-
-        <!-- Step B: Paste Response -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step B: Paste Claude's Response
-          </h4>
-          <textarea
-            id="phase1-response-textarea"
-            rows="12"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
-            placeholder="Paste Claude's response here..."
-            ${!hasResponse && !hasPrompt ? "disabled" : ""}
-          >${project.phase1Response || ""}</textarea>
-          <div class="mt-3 flex justify-between items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete this phase"}
-            </span>
-            <button id="save-phase1-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? "disabled" : ""}>
-              Save Response
-            </button>
-          </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <div class="flex gap-3">
-            <button id="edit-details-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              \u2190 Edit Details
-            </button>
-            ${hasResponse ? `
-              <button id="next-phase2-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Next Phase \u2192
-              </button>
-            ` : ""}
-          </div>
-          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Prompt Modal -->
-      <div id="phase1-prompt-modal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 1 Prompt</h3>
-              <button id="close-phase1-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                \u2715
-              </button>
-            </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase1Prompt || "No prompt generated yet"}</pre>
-            <div class="mt-4 flex justify-end">
-              <button id="copy-phase1-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  function attachPhaseEventListeners(project, phase) {
+    const meta = getPhaseMetadata(phase);
+    const deleteBtn = document.getElementById("delete-project-btn");
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", async () => {
+        if (await confirm(`Are you sure you want to delete "${project.title}"?`, "Delete ADR")) {
+          await deleteProject(project.id);
+          showToast("ADR deleted", "success");
+          navigateTo("home");
+        }
+      });
+    }
+    const editDetailsBtn = document.getElementById("edit-details-btn");
+    if (editDetailsBtn) {
+      editDetailsBtn.addEventListener("click", () => {
+        navigateTo("edit-project/" + project.id);
+      });
+    }
+    const prevPhaseBtn = document.getElementById("prev-phase-btn");
+    if (prevPhaseBtn) {
+      prevPhaseBtn.addEventListener("click", () => {
+        project.phase = phase - 1;
+        updatePhaseTabStyles(phase - 1);
+        document.getElementById("phase-content").innerHTML = renderPhaseContent(project, phase - 1);
+        attachPhaseEventListeners(project, phase - 1);
+      });
+    }
+    const nextPhaseBtn = document.getElementById("next-phase-btn");
+    if (nextPhaseBtn) {
+      nextPhaseBtn.addEventListener("click", () => {
+        project.phase = phase + 1;
+        updatePhaseTabStyles(phase + 1);
+        document.getElementById("phase-content").innerHTML = renderPhaseContent(project, phase + 1);
+        attachPhaseEventListeners(project, phase + 1);
+      });
+    }
+    const exportPhaseBtn = document.getElementById("export-phase-btn");
+    if (exportPhaseBtn) {
+      exportPhaseBtn.addEventListener("click", () => exportFinalADR(project));
+    }
+    const copyPromptBtn = document.getElementById("copy-prompt-btn");
+    if (copyPromptBtn) {
+      copyPromptBtn.addEventListener("click", async () => {
+        try {
+          const prompt = await generatePromptForPhase(project, phase);
+          if (!project.phases) project.phases = {};
+          if (!project.phases[phase]) project.phases[phase] = {};
+          project.phases[phase].prompt = prompt;
+          await updatePhase(project.id, phase, { prompt });
+          await copyToClipboard(prompt);
+          showToast("Prompt copied to clipboard!", "success");
+          const openAiBtn = document.getElementById("open-ai-btn");
+          if (openAiBtn) {
+            openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+            openAiBtn.classList.add("hover:bg-green-700");
+            openAiBtn.removeAttribute("aria-disabled");
+          }
+          const responseTextarea2 = document.getElementById("response-textarea");
+          if (responseTextarea2) {
+            responseTextarea2.disabled = false;
+          }
+        } catch (error) {
+          console.error("Error generating prompt:", error);
+          showToast("Failed to generate prompt", "error");
+        }
+      });
+    }
+    const viewPromptBtn = document.getElementById("view-prompt-btn");
+    if (viewPromptBtn) {
+      viewPromptBtn.addEventListener("click", () => {
+        const phaseData = project.phases && project.phases[phase] ? project.phases[phase] : {};
+        if (phaseData.prompt) {
+          showPromptModal(phaseData.prompt, `Phase ${phase}: ${meta.title} Prompt`);
+        }
+      });
+    }
+    const responseTextarea = document.getElementById("response-textarea");
+    const saveResponseBtn = document.getElementById("save-response-btn");
+    if (responseTextarea) {
+      responseTextarea.addEventListener("input", () => {
+        const hasContent = responseTextarea.value.trim().length > 0;
+        if (saveResponseBtn) saveResponseBtn.disabled = !hasContent;
+      });
+    }
+    if (saveResponseBtn) {
+      saveResponseBtn.addEventListener("click", async () => {
+        const response = responseTextarea?.value.trim();
+        if (response) {
+          if (!project.phases) project.phases = {};
+          if (!project.phases[phase]) project.phases[phase] = {};
+          project.phases[phase].response = response;
+          project.phases[phase].completed = true;
+          await updatePhase(project.id, phase, { response, completed: true });
+          showToast("Response saved!", "success");
+          document.getElementById("phase-content").innerHTML = renderPhaseContent(project, phase);
+          attachPhaseEventListeners(project, phase);
+          const tab = document.querySelector(`.phase-tab[data-phase="${phase}"]`);
+          if (tab && !tab.innerHTML.includes("\u2713")) {
+            tab.innerHTML += '<span class="ml-2 text-green-500">\u2713</span>';
+          }
+        }
+      });
+    }
   }
-  function renderPhase2Form(project) {
-    const hasPrompt = !!project.phase2Prompt;
-    const hasResponse = !!(project.phase2Review && project.phase2Review.trim());
-    return `
-    <div class="phase-2-form space-y-6">
-      ${renderPhaseTabs(project, 2)}
+  var init_project_view = __esm({
+    "js/project-view.js"() {
+      "use strict";
+      init_projects();
+      init_workflow();
+      init_ui();
+      init_router();
+    }
+  });
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            \u{1F504} Alternative Perspective
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-2">
-            Get a different perspective and improvements from Gemini
-          </p>
-          <div class="inline-flex items-center px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-full text-sm">
-            <span class="mr-2">\u{1F916}</span>
-            Use with Gemini
-          </div>
-        </div>
-
-        <!-- Step A: Copy Prompt -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step A: Copy Prompt to AI
-          </h4>
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex gap-3 flex-wrap">
-              <button id="generate-phase2-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                \u{1F4CB} ${hasPrompt ? "Copy Prompt Again" : "Generate & Copy Prompt"}
-              </button>
-              <a
-                id="open-ai-phase2-btn"
-                href="https://gemini.google.com"
-                target="ai-assistant-tab"
-                rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
-                ${hasPrompt ? "" : 'aria-disabled="true"'}
-              >
-                \u{1F517} Open Gemini
-              </a>
-            </div>
-            ${hasPrompt ? `
-            <button id="view-phase2-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
-              \u{1F441}\uFE0F View Prompt
-            </button>
-            ` : ""}
-          </div>
-        </div>
-
-        <!-- Step B: Paste Response -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step B: Paste Gemini's Response
-          </h4>
-          <textarea
-            id="phase2-response-textarea"
-            rows="12"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
-            placeholder="Paste Gemini's response here..."
-            ${!hasResponse && !hasPrompt ? "disabled" : ""}
-          >${project.phase2Review || ""}</textarea>
-          <div class="mt-3 flex justify-between items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete this phase"}
-            </span>
-            <button id="save-phase2-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? "disabled" : ""}>
-              Save Response
-            </button>
-          </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <div class="flex gap-3">
-            <button id="prev-phase1-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              \u2190 Previous Phase
-            </button>
-            ${hasResponse ? `
-              <button id="next-phase3-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Next Phase \u2192
-              </button>
-            ` : ""}
-          </div>
-          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Prompt Modal -->
-      <div id="phase2-prompt-modal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 2 Prompt</h3>
-              <button id="close-phase2-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                \u2715
-              </button>
-            </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase2Prompt || "No prompt generated yet"}</pre>
-            <div class="mt-4 flex justify-end">
-              <button id="copy-phase2-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  // js/router.js
+  function initRouter() {
+    window.addEventListener("popstate", handlePopState);
+    const path = window.location.hash.slice(1) || "home";
+    navigateTo(path, false);
   }
-  function renderPhase3Form(project) {
-    const hasPrompt = !!project.phase3Prompt;
-    const hasResponse = !!(project.finalADR && project.finalADR.trim());
-    return `
-    <div class="phase-3-form space-y-6">
-      ${renderPhaseTabs(project, 3)}
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            \u2728 Synthesize
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-2">
-            Generate the final ADR with Claude
-          </p>
-          <div class="inline-flex items-center px-3 py-1 bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 rounded-full text-sm">
-            <span class="mr-2">\u{1F916}</span>
-            Use with Claude
-          </div>
-        </div>
-
-        <!-- Step A: Copy Prompt -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step A: Copy Prompt to AI
-          </h4>
-          <div class="flex items-center justify-between flex-wrap gap-3">
-            <div class="flex gap-3 flex-wrap">
-              <button id="generate-phase3-prompt-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                \u{1F4CB} ${hasPrompt ? "Copy Prompt Again" : "Generate & Copy Prompt"}
-              </button>
-              <a
-                id="open-ai-phase3-btn"
-                href="https://claude.ai"
-                target="ai-assistant-tab"
-                rel="noopener noreferrer"
-                class="px-6 py-3 bg-green-600 text-white rounded-lg transition-colors font-medium ${hasPrompt ? "hover:bg-green-700" : "opacity-50 cursor-not-allowed pointer-events-none"}"
-                ${hasPrompt ? "" : 'aria-disabled="true"'}
-              >
-                \u{1F517} Open Claude
-              </a>
-            </div>
-            ${hasPrompt ? `
-            <button id="view-phase3-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
-              \u{1F441}\uFE0F View Prompt
-            </button>
-            ` : ""}
-          </div>
-        </div>
-
-        <!-- Step B: Paste Response -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            Step B: Paste Claude's Response
-          </h4>
-          <textarea
-            id="phase3-response-textarea"
-            rows="16"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
-            placeholder="Paste Claude's response here..."
-            ${!hasResponse && !hasPrompt ? "disabled" : ""}
-          >${project.finalADR || ""}</textarea>
-          <div class="mt-3 flex justify-between items-center">
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              ${hasResponse ? "\u2713 Phase completed" : "Paste response to complete your ADR"}
-            </span>
-            <button id="save-phase3-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? "disabled" : ""}>
-              Save Response
-            </button>
-          </div>
-        </div>
-
-        ${hasResponse ? `
-        <!-- Phase 3 Complete: Export Call-to-Action -->
-        <div class="mt-6 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-          <div class="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h4 class="text-lg font-semibold text-green-800 dark:text-green-300 flex items-center">
-                <span class="mr-2">\u{1F389}</span> Your ADR is Complete!
-              </h4>
-              <p class="text-green-700 dark:text-green-400 mt-1">
-                Download your finished architecture decision record as a Markdown (.md) file.
-              </p>
-            </div>
-            <button id="export-adr-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
-              \u{1F4C4} Export as Markdown
-            </button>
-          </div>
-        </div>
-        ` : ""}
-
-        <!-- Navigation -->
-        <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button id="prev-phase2-btn" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-            \u2190 Previous Phase
-          </button>
-          <button id="delete-project-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Prompt Modal -->
-      <div id="phase3-prompt-modal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 3 Prompt</h3>
-              <button id="close-phase3-modal-btn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                \u2715
-              </button>
-            </div>
-            <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">${project.phase3Prompt || "No prompt generated yet"}</pre>
-            <div class="mt-4 flex justify-end">
-              <button id="copy-phase3-prompt-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  function navigateTo(route, pushState = true) {
+    const [path, param] = route.split("/");
+    if (pushState) {
+      window.history.pushState({ route }, "", `#${route}`);
+    }
+    currentRoute = route;
+    renderRoute(path, param);
   }
+  function handlePopState(event) {
+    const route = event.state?.route || "home";
+    navigateTo(route, false);
+  }
+  async function updateStorageInfo() {
+    try {
+      const estimate = await storage.getStorageEstimate();
+      const projects = await storage.getAllProjects();
+      const storageInfo = document.getElementById("storage-info");
+      if (storageInfo) {
+        if (estimate) {
+          const usedMB = (estimate.usage / (1024 * 1024)).toFixed(1);
+          const quotaMB = (estimate.quota / (1024 * 1024)).toFixed(0);
+          storageInfo.textContent = `${projects.length} ADRs \u2022 ${usedMB}MB used of ${quotaMB}MB`;
+        } else {
+          storageInfo.textContent = `${projects.length} ADRs stored locally`;
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update storage info:", error);
+    }
+  }
+  async function renderRoute(path, param) {
+    try {
+      switch (path) {
+        case "home":
+        case "":
+          await renderProjectsList();
+          break;
+        case "new-project":
+          renderNewProjectForm();
+          break;
+        case "edit-project":
+          if (param) {
+            const project = await storage.getProject(param);
+            if (project) {
+              const { renderNewProjectForm: renderNewProjectForm2 } = await Promise.resolve().then(() => (init_views(), views_exports));
+              renderNewProjectForm2(project);
+            } else {
+              navigateTo("home");
+            }
+          } else {
+            navigateTo("home");
+          }
+          break;
+        case "project":
+          if (param) {
+            await renderProjectView(param);
+          } else {
+            navigateTo("home");
+          }
+          break;
+        default:
+          navigateTo("home");
+          break;
+      }
+      await updateStorageInfo();
+    } catch (error) {
+      console.error("Route rendering error:", error);
+      navigateTo("home");
+    }
+  }
+  var currentRoute;
+  var init_router = __esm({
+    "js/router.js"() {
+      "use strict";
+      init_views();
+      init_project_view();
+      init_storage();
+      currentRoute = null;
+    }
+  });
+
+  // js/app.js
+  init_ui();
+  init_router();
 
   // js/keyboard-shortcuts.js
   function setupKeyboardShortcuts() {
@@ -704,11 +1232,17 @@ Prompt loading failed.`;
   }
 
   // js/app.js
+  init_storage();
+  init_projects();
   var App = class {
     constructor() {
       this.currentProject = null;
       this.projects = [];
     }
+    /**
+     * Initialize the application
+     * @returns {Promise<void>}
+     */
     async init() {
       if (typeof document === "undefined" || !document.getElementById) {
         return;
@@ -720,33 +1254,30 @@ Prompt loading failed.`;
         console.log("Theme initialized");
         setupKeyboardShortcuts();
         console.log("Keyboard shortcuts configured");
-        await this.loadProjects();
-        console.log("Projects loaded:", this.projects.length);
         this.setupEventListeners();
         console.log("Event listeners set up");
-        await this.renderProjectList();
-        console.log("Project list rendered");
+        initRouter();
+        console.log("Router initialized");
         showToast("Application loaded successfully", "success");
       } catch (error) {
         console.error("App initialization error:", error);
         showToast("Failed to initialize application", "error");
       }
     }
-    async loadProjects() {
-      try {
-        this.projects = await storage.getAllProjects();
-      } catch (error) {
-        console.error("Failed to load projects:", error);
-        showToast("Failed to load projects", "error");
-      }
-    }
+    /**
+     * Set up global event listeners
+     * @returns {void}
+     */
     setupEventListeners() {
       if (typeof document === "undefined" || !document.body) {
         return;
       }
       const exportBtn = document.getElementById("export-all-btn");
       if (exportBtn) {
-        exportBtn.addEventListener("click", () => this.exportAll());
+        exportBtn.addEventListener("click", async () => {
+          await exportAllProjects();
+          showToast("All ADRs exported", "success");
+        });
       }
       const importBtn = document.getElementById("import-btn");
       if (importBtn) {
@@ -756,7 +1287,20 @@ Prompt loading failed.`;
       }
       const fileInput = document.getElementById("import-file-input");
       if (fileInput) {
-        fileInput.addEventListener("change", (e) => this.importFile(e));
+        fileInput.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            try {
+              const count = await importProjects(file);
+              showToast(`Imported ${count} ADR(s)`, "success");
+              window.location.reload();
+            } catch (error) {
+              console.error("Import failed:", error);
+              showToast("Failed to import ADRs", "error");
+            }
+          }
+          e.target.value = "";
+        });
       }
       const relatedBtn = document.getElementById("related-projects-btn");
       const relatedMenu = document.getElementById("related-projects-menu");
@@ -836,787 +1380,6 @@ Prompt loading failed.`;
         }
       };
       document.addEventListener("keydown", handleEscape);
-    }
-    async renderProjectList() {
-      const container = document.getElementById("app-container");
-      container.innerHTML = `
-      <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-          My ADRs
-        </h2>
-        <button id="new-project-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-          + New ADR
-        </button>
-      </div>
-
-      ${this.projects.length === 0 ? `
-        <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-          <span class="text-6xl mb-4 block">\u{1F3D7}\uFE0F</span>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            No ADRs yet
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Create your first Architecture Decision Record
-          </p>
-          <button id="new-project-btn-empty" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-            + Create Your First ADR
-          </button>
-        </div>
-      ` : `
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          ${this.projects.map((p) => {
-        const phase = p.phase || 1;
-        const completedPhases = this.countCompletedPhases(p);
-        return `
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer" data-project-id="${p.id}">
-              <div class="p-6">
-                <div class="flex items-start justify-between mb-3">
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                    ${this.escapeHtml(p.title || p.name) || "Untitled"}
-                  </h3>
-                  <button class="delete-project-btn text-gray-400 hover:text-red-600 transition-colors" data-project-id="${p.id}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                  </button>
-                </div>
-
-                <div class="mb-4">
-                  <div class="flex items-center space-x-2 mb-2">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Phase ${phase}/3</span>
-                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: ${phase / 3 * 100}%"></div>
-                    </div>
-                  </div>
-                  <div class="flex space-x-1">
-                    ${[1, 2, 3].map((phaseNum) => `
-                      <div class="flex-1 h-1 rounded ${phaseNum <= completedPhases ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}"></div>
-                    `).join("")}
-                  </div>
-                </div>
-
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                  ${this.escapeHtml(p.context) || "No context"}
-                </p>
-
-                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span>Updated ${this.formatDate(p.updatedAt)}</span>
-                  <span>${completedPhases}/3 complete</span>
-                </div>
-              </div>
-            </div>
-            `;
-      }).join("")}
-        </div>
-      `}
-    `;
-      const newProjectBtns = container.querySelectorAll("#new-project-btn, #new-project-btn-empty");
-      newProjectBtns.forEach((btn) => {
-        btn.addEventListener("click", () => this.createNewProject());
-      });
-      const projectCards = container.querySelectorAll("[data-project-id]");
-      projectCards.forEach((card) => {
-        card.addEventListener("click", (e) => {
-          if (!e.target.closest(".delete-project-btn")) {
-            this.openProject(card.dataset.projectId);
-          }
-        });
-      });
-      const deleteBtns = container.querySelectorAll(".delete-project-btn");
-      deleteBtns.forEach((btn) => {
-        btn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          const projectId = btn.dataset.projectId;
-          await this.deleteProject(projectId);
-        });
-      });
-      await this.updateStorageInfo();
-    }
-    /**
-     * Update footer storage info - called after every route/view change
-     */
-    async updateStorageInfo() {
-      const estimate = await storage.getStorageSize();
-      const used = (estimate.usage / (1024 * 1024)).toFixed(2);
-      const total = (estimate.quota / (1024 * 1024)).toFixed(2);
-      const storageInfo = document.getElementById("storage-info");
-      if (storageInfo) {
-        storageInfo.textContent = `${this.projects.length} ADRs \u2022 ${used}MB used of ${total}MB`;
-      }
-    }
-    async createNewProject() {
-      const project = {
-        id: Date.now().toString(),
-        title: "",
-        status: "Proposed",
-        context: "",
-        // Phase 0 is form entry, phases 1-3 are AI round-trips
-        phase: 0,
-        // Phase 1: Claude initial draft
-        phase1Prompt: "",
-        phase1Response: "",
-        // Phase 2: Gemini review
-        phase2Prompt: "",
-        phase2Review: "",
-        // Phase 3: Claude synthesis
-        phase3Prompt: "",
-        finalADR: "",
-        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-      };
-      await storage.saveProject(project);
-      await this.loadProjects();
-      await this.renderProjectList();
-      this.openProject(project.id);
-    }
-    async openProject(id) {
-      this.currentProject = await storage.getProject(id);
-      if (this.currentProject) {
-        this.renderCurrentPhase();
-      }
-    }
-    async renderCurrentPhase() {
-      const phase = this.currentProject.phase || 0;
-      const container = document.getElementById("app-container");
-      if (phase === 0) {
-        container.innerHTML = renderFormEntry(this.currentProject);
-        this.setupFormEntryHandlers();
-      } else if (phase === 1) {
-        container.innerHTML = renderPhase1Form(this.currentProject);
-        this.setupPhase1Handlers();
-      } else if (phase === 2) {
-        container.innerHTML = renderPhase2Form(this.currentProject);
-        this.setupPhase2Handlers();
-      } else {
-        container.innerHTML = renderPhase3Form(this.currentProject);
-        this.setupPhase3Handlers();
-      }
-      if (phase >= 1) {
-        this.setupPhaseTabHandlers();
-      }
-      await this.updateStorageInfo();
-    }
-    /**
-     * Setup shared phase handlers - back button and export button
-     * Phase tabs are now display-only (no click navigation)
-     */
-    setupPhaseTabHandlers() {
-      const backBtn = document.getElementById("back-to-list-btn");
-      if (backBtn) {
-        backBtn.addEventListener("click", () => {
-          this.currentProject = null;
-          this.renderProjectList();
-        });
-      }
-      const exportTopBtn = document.getElementById("export-adr-top-btn");
-      if (exportTopBtn) {
-        exportTopBtn.addEventListener("click", () => this.exportADR());
-      }
-    }
-    /**
-     * Setup form entry handlers (phase 0 - before AI workflow)
-     */
-    setupFormEntryHandlers() {
-      const backBtn = document.getElementById("back-to-list-btn");
-      if (backBtn) {
-        backBtn.addEventListener("click", () => {
-          this.currentProject = null;
-          this.renderProjectList();
-        });
-      }
-      const saveBtn = document.getElementById("save-form-btn");
-      if (saveBtn) {
-        saveBtn.addEventListener("click", () => this.saveFormData());
-      }
-      const startBtn = document.getElementById("start-workflow-btn");
-      if (startBtn) {
-        startBtn.addEventListener("click", () => this.startAIWorkflow());
-      }
-      const deleteBtn = document.getElementById("delete-project-btn");
-      if (deleteBtn) {
-        deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
-      }
-      const titleInput = document.getElementById("title-input");
-      const contextTextarea = document.getElementById("context-textarea");
-      const updateButtonStates = () => {
-        const hasTitle = titleInput && titleInput.value.trim().length > 0;
-        const hasContext = contextTextarea && contextTextarea.value.trim().length > 0;
-        const isValid = hasTitle && hasContext;
-        if (saveBtn) saveBtn.disabled = !isValid;
-        if (startBtn) startBtn.disabled = !isValid;
-      };
-      if (titleInput) {
-        titleInput.addEventListener("input", updateButtonStates);
-      }
-      if (contextTextarea) {
-        contextTextarea.addEventListener("input", updateButtonStates);
-      }
-    }
-    /**
-     * Save form data (phase 0)
-     */
-    async saveFormData() {
-      const title = document.getElementById("title-input").value.trim();
-      const status = document.getElementById("status-select").value;
-      const context = document.getElementById("context-textarea").value.trim();
-      if (!title || !context) {
-        showToast("Title and Context are required", "error");
-        return;
-      }
-      const updatedProject = {
-        ...this.currentProject,
-        title,
-        status,
-        context,
-        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-      };
-      try {
-        await storage.saveProject(updatedProject);
-        this.currentProject = updatedProject;
-        showToast("Saved successfully", "success");
-      } catch (error) {
-        console.error("Save failed:", error);
-        showToast("Failed to save", "error");
-      }
-    }
-    /**
-     * Start AI workflow - advance from form entry to Phase 1
-     */
-    async startAIWorkflow() {
-      const title = document.getElementById("title-input").value.trim();
-      const context = document.getElementById("context-textarea").value.trim();
-      if (!title || !context) {
-        showToast("Please fill in Title and Context first", "error");
-        return;
-      }
-      await this.saveFormData();
-      this.currentProject.phase = 1;
-      await storage.saveProject(this.currentProject);
-      this.renderCurrentPhase();
-    }
-    /**
-     * Setup Phase 1 handlers (Claude initial draft - AI round-trip)
-     */
-    setupPhase1Handlers() {
-      const editBtn = document.getElementById("edit-details-btn");
-      if (editBtn) {
-        editBtn.addEventListener("click", async () => {
-          this.currentProject.phase = 0;
-          await storage.saveProject(this.currentProject);
-          this.renderCurrentPhase();
-        });
-      }
-      const generateBtn = document.getElementById("generate-phase1-prompt-btn");
-      if (generateBtn) {
-        generateBtn.addEventListener("click", () => this.generatePhase1Prompt());
-      }
-      const responseTextarea = document.getElementById("phase1-response-textarea");
-      const saveBtn = document.getElementById("save-phase1-btn");
-      const nextBtn = document.getElementById("next-phase2-btn");
-      if (responseTextarea && saveBtn) {
-        responseTextarea.addEventListener("input", () => {
-          const hasEnoughContent = responseTextarea.value.trim().length >= 3;
-          saveBtn.disabled = !hasEnoughContent;
-        });
-        saveBtn.addEventListener("click", () => this.savePhase1Response());
-      }
-      if (nextBtn) {
-        nextBtn.addEventListener("click", async () => {
-          await this.savePhase1Response();
-        });
-      }
-      const viewBtn = document.getElementById("view-phase1-prompt-btn");
-      if (viewBtn) {
-        viewBtn.addEventListener("click", () => {
-          const modal = document.getElementById("phase1-prompt-modal");
-          if (modal) modal.classList.remove("hidden");
-        });
-      }
-      const closeBtn = document.getElementById("close-phase1-modal-btn");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-          const modal = document.getElementById("phase1-prompt-modal");
-          if (modal) modal.classList.add("hidden");
-        });
-      }
-      const copyBtn = document.getElementById("copy-phase1-prompt-btn");
-      if (copyBtn) {
-        copyBtn.addEventListener("click", async () => {
-          if (this.currentProject.phase1Prompt) {
-            try {
-              await copyToClipboard(this.currentProject.phase1Prompt);
-              showToast("Copied to clipboard!", "success");
-              this.enablePhase1Workflow();
-            } catch {
-              showToast("Failed to copy to clipboard", "error");
-            }
-          }
-        });
-      }
-      const deleteBtn = document.getElementById("delete-project-btn");
-      if (deleteBtn) {
-        deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
-      }
-    }
-    /**
-     * Enable Phase 1 workflow progression (Open AI button, textarea)
-     * Called from both main copy button and modal copy button
-     */
-    enablePhase1Workflow() {
-      const openAiBtn = document.getElementById("open-ai-phase1-btn");
-      if (openAiBtn) {
-        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-        openAiBtn.classList.add("hover:bg-green-700");
-        openAiBtn.removeAttribute("aria-disabled");
-      }
-      const responseTextarea = document.getElementById("phase1-response-textarea");
-      if (responseTextarea) {
-        responseTextarea.disabled = false;
-        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
-        responseTextarea.focus();
-      }
-    }
-    /**
-     * Generate Phase 1 prompt (Claude initial draft)
-     */
-    async generatePhase1Prompt() {
-      try {
-        let promptTemplate = await loadPrompt(1);
-        promptTemplate = promptTemplate.replace(/{title}/g, this.currentProject.title || "[No title]");
-        promptTemplate = promptTemplate.replace(/{status}/g, this.currentProject.status || "Proposed");
-        promptTemplate = promptTemplate.replace(/{context}/g, this.currentProject.context || "[No context]");
-        this.currentProject.phase1Prompt = promptTemplate;
-        await storage.saveProject(this.currentProject);
-        try {
-          await copyToClipboard(promptTemplate);
-          showToast("Prompt copied to clipboard! Paste it to Claude", "success");
-          this.enablePhase1Workflow();
-        } catch {
-          showToast("Failed to copy to clipboard", "error");
-        }
-        this.renderCurrentPhase();
-      } catch (error) {
-        console.error("Failed to generate prompt:", error);
-        showToast("Failed to generate prompt", "error");
-      }
-    }
-    /**
-     * Save Phase 1 response (Claude's initial draft)
-     */
-    async savePhase1Response() {
-      const response = document.getElementById("phase1-response-textarea").value.trim();
-      if (!response || response.length < 3) {
-        showToast("Please enter at least 3 characters", "warning");
-        return;
-      }
-      const updatedProject = {
-        ...this.currentProject,
-        phase1Response: response,
-        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-      };
-      try {
-        await storage.saveProject(updatedProject);
-        this.currentProject = updatedProject;
-        showToast("Response saved! Moving to Phase 2...", "success");
-        this.currentProject.phase = 2;
-        await storage.saveProject(this.currentProject);
-        this.renderCurrentPhase();
-      } catch (error) {
-        console.error("Save failed:", error);
-        showToast("Failed to save", "error");
-      }
-    }
-    setupPhase2Handlers() {
-      const prevBtn = document.getElementById("prev-phase1-btn");
-      if (prevBtn) {
-        prevBtn.addEventListener("click", async () => {
-          this.currentProject.phase = 1;
-          await storage.saveProject(this.currentProject);
-          this.renderCurrentPhase();
-        });
-      }
-      const generateBtn = document.getElementById("generate-phase2-prompt-btn");
-      if (generateBtn) {
-        generateBtn.addEventListener("click", () => this.generatePhase2Prompt());
-      }
-      const responseTextarea = document.getElementById("phase2-response-textarea");
-      const saveBtn = document.getElementById("save-phase2-btn");
-      const nextBtn = document.getElementById("next-phase3-btn");
-      if (responseTextarea && saveBtn) {
-        responseTextarea.addEventListener("input", () => {
-          const hasEnoughContent = responseTextarea.value.trim().length >= 3;
-          saveBtn.disabled = !hasEnoughContent;
-        });
-        saveBtn.addEventListener("click", () => this.savePhase2Data());
-      }
-      if (nextBtn) {
-        nextBtn.addEventListener("click", async () => {
-          await this.savePhase2Data();
-        });
-      }
-      const viewBtn = document.getElementById("view-phase2-prompt-btn");
-      if (viewBtn) {
-        viewBtn.addEventListener("click", () => {
-          const modal = document.getElementById("phase2-prompt-modal");
-          if (modal) modal.classList.remove("hidden");
-        });
-      }
-      const closeBtn = document.getElementById("close-phase2-modal-btn");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-          const modal = document.getElementById("phase2-prompt-modal");
-          if (modal) modal.classList.add("hidden");
-        });
-      }
-      const copyBtn = document.getElementById("copy-phase2-prompt-btn");
-      if (copyBtn) {
-        copyBtn.addEventListener("click", async () => {
-          if (this.currentProject.phase2Prompt) {
-            try {
-              await copyToClipboard(this.currentProject.phase2Prompt);
-              showToast("Copied to clipboard!", "success");
-              this.enablePhase2Workflow();
-            } catch {
-              showToast("Failed to copy to clipboard", "error");
-            }
-          }
-        });
-      }
-      const deleteBtn = document.getElementById("delete-project-btn");
-      if (deleteBtn) {
-        deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
-      }
-    }
-    /**
-     * Enable Phase 2 workflow progression (Open AI button, textarea)
-     * Called from both main copy button and modal copy button
-     */
-    enablePhase2Workflow() {
-      const openAiBtn = document.getElementById("open-ai-phase2-btn");
-      if (openAiBtn) {
-        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-        openAiBtn.classList.add("hover:bg-green-700");
-        openAiBtn.removeAttribute("aria-disabled");
-      }
-      const responseTextarea = document.getElementById("phase2-response-textarea");
-      if (responseTextarea) {
-        responseTextarea.disabled = false;
-        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
-        responseTextarea.focus();
-      }
-    }
-    async generatePhase2Prompt() {
-      try {
-        let promptTemplate = await loadPrompt(2);
-        const phase1Output = this.currentProject.phase1Response || "[No Phase 1 response]";
-        promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
-        this.currentProject.phase2Prompt = promptTemplate;
-        await storage.saveProject(this.currentProject);
-        try {
-          await copyToClipboard(promptTemplate);
-          showToast("Prompt copied to clipboard! Paste it to Gemini", "success");
-          this.enablePhase2Workflow();
-        } catch {
-          showToast("Failed to copy to clipboard", "error");
-        }
-        this.renderCurrentPhase();
-      } catch (error) {
-        console.error("Failed to generate prompt:", error);
-        showToast("Failed to generate prompt", "error");
-      }
-    }
-    async savePhase2Data() {
-      const review = document.getElementById("phase2-response-textarea").value.trim();
-      if (!review || review.length < 3) {
-        showToast("Please enter at least 3 characters", "warning");
-        return;
-      }
-      const updatedProject = {
-        ...this.currentProject,
-        phase2Review: review,
-        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-      };
-      try {
-        await storage.saveProject(updatedProject);
-        this.currentProject = updatedProject;
-        showToast("Response saved! Moving to Phase 3...", "success");
-        this.currentProject.phase = 3;
-        await storage.saveProject(this.currentProject);
-        this.renderCurrentPhase();
-      } catch (error) {
-        console.error("Save failed:", error);
-        showToast("Failed to save", "error");
-      }
-    }
-    setupPhase3Handlers() {
-      const prevBtn = document.getElementById("prev-phase2-btn");
-      if (prevBtn) {
-        prevBtn.addEventListener("click", async () => {
-          this.currentProject.phase = 2;
-          await storage.saveProject(this.currentProject);
-          this.renderCurrentPhase();
-        });
-      }
-      const generateBtn = document.getElementById("generate-phase3-prompt-btn");
-      if (generateBtn) {
-        generateBtn.addEventListener("click", () => this.generatePhase3Prompt());
-      }
-      const responseTextarea = document.getElementById("phase3-response-textarea");
-      const saveBtn = document.getElementById("save-phase3-btn");
-      if (responseTextarea && saveBtn) {
-        responseTextarea.addEventListener("input", () => {
-          const hasEnoughContent = responseTextarea.value.trim().length >= 3;
-          saveBtn.disabled = !hasEnoughContent;
-        });
-        saveBtn.addEventListener("click", () => this.savePhase3Data());
-      }
-      const exportBtn = document.getElementById("export-adr-btn");
-      if (exportBtn) {
-        exportBtn.addEventListener("click", () => this.exportADR());
-      }
-      const viewBtn = document.getElementById("view-phase3-prompt-btn");
-      if (viewBtn) {
-        viewBtn.addEventListener("click", () => {
-          const modal = document.getElementById("phase3-prompt-modal");
-          if (modal) modal.classList.remove("hidden");
-        });
-      }
-      const closeBtn = document.getElementById("close-phase3-modal-btn");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-          const modal = document.getElementById("phase3-prompt-modal");
-          if (modal) modal.classList.add("hidden");
-        });
-      }
-      const copyBtn = document.getElementById("copy-phase3-prompt-btn");
-      if (copyBtn) {
-        copyBtn.addEventListener("click", async () => {
-          if (this.currentProject.phase3Prompt) {
-            try {
-              await copyToClipboard(this.currentProject.phase3Prompt);
-              showToast("Copied to clipboard!", "success");
-              this.enablePhase3Workflow();
-            } catch {
-              showToast("Failed to copy to clipboard", "error");
-            }
-          }
-        });
-      }
-      const deleteBtn = document.getElementById("delete-project-btn");
-      if (deleteBtn) {
-        deleteBtn.addEventListener("click", () => this.deleteCurrentProject());
-      }
-    }
-    /**
-     * Enable Phase 3 workflow progression (Open AI button, textarea)
-     * Called from both main copy button and modal copy button
-     */
-    enablePhase3Workflow() {
-      const openAiBtn = document.getElementById("open-ai-phase3-btn");
-      if (openAiBtn) {
-        openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
-        openAiBtn.classList.add("hover:bg-green-700");
-        openAiBtn.removeAttribute("aria-disabled");
-      }
-      const responseTextarea = document.getElementById("phase3-response-textarea");
-      if (responseTextarea) {
-        responseTextarea.disabled = false;
-        responseTextarea.classList.remove("opacity-50", "cursor-not-allowed");
-        responseTextarea.focus();
-      }
-    }
-    async generatePhase3Prompt() {
-      try {
-        let promptTemplate = await loadPrompt(3);
-        const phase1Output = this.currentProject.phase1Response || "[No Phase 1 response]";
-        const phase2Review = this.currentProject.phase2Review || "[No Phase 2 feedback provided]";
-        promptTemplate = promptTemplate.replace(/{phase1_output}/g, phase1Output);
-        promptTemplate = promptTemplate.replace(/{phase2_review}/g, phase2Review);
-        this.currentProject.phase3Prompt = promptTemplate;
-        await storage.saveProject(this.currentProject);
-        try {
-          await copyToClipboard(promptTemplate);
-          showToast("Prompt copied to clipboard! Paste it to Claude", "success");
-          this.enablePhase3Workflow();
-        } catch {
-          showToast("Failed to copy to clipboard", "error");
-        }
-        this.renderCurrentPhase();
-      } catch (error) {
-        console.error("Failed to generate prompt:", error);
-        showToast("Failed to generate prompt", "error");
-      }
-    }
-    /**
-     * Extract title from markdown content (looks for # Title at the beginning)
-     * @param {string} markdown - The markdown content
-     * @returns {string|null} - The extracted title or null if not found
-     */
-    extractTitleFromMarkdown(markdown) {
-      if (!markdown) return null;
-      const match = markdown.match(/^#\s+(.+?)$/m);
-      if (match && match[1]) {
-        return match[1].trim();
-      }
-      return null;
-    }
-    async savePhase3Data() {
-      const finalADR = document.getElementById("phase3-response-textarea").value.trim();
-      if (!finalADR || finalADR.length < 3) {
-        showToast("Please enter at least 3 characters", "warning");
-        return;
-      }
-      const extractedTitle = this.extractTitleFromMarkdown(finalADR);
-      const updatedProject = {
-        ...this.currentProject,
-        finalADR,
-        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-      };
-      if (extractedTitle && extractedTitle !== this.currentProject.title) {
-        updatedProject.title = extractedTitle;
-        updatedProject.name = extractedTitle;
-      }
-      try {
-        await storage.saveProject(updatedProject);
-        this.currentProject = updatedProject;
-        if (extractedTitle && extractedTitle !== this.currentProject.title) {
-          showToast(`ADR saved! Title updated to "${extractedTitle}"`, "success");
-        } else {
-          showToast("Phase 3 complete! Your ADR is ready for export.", "success");
-        }
-        this.renderCurrentPhase();
-      } catch (error) {
-        console.error("Save failed:", error);
-        showToast("Failed to save", "error");
-      }
-    }
-    async exportADR() {
-      const adrContent = document.getElementById("phase3-response-textarea").value.trim();
-      if (!adrContent) {
-        showToast("Please enter the final ADR content first", "error");
-        return;
-      }
-      try {
-        const filename = `${this.currentProject.title.replace(/\s+/g, "-")}.md`;
-        exportAsMarkdown(adrContent, filename);
-        showToast("ADR exported as Markdown", "success");
-      } catch (error) {
-        console.error("Export failed:", error);
-        showToast("Failed to export ADR", "error");
-      }
-    }
-    async deleteCurrentProject() {
-      if (!window.confirm("Are you sure you want to delete this ADR?")) {
-        return;
-      }
-      try {
-        await storage.deleteProject(this.currentProject.id);
-        showToast("ADR deleted", "success");
-        await this.loadProjects();
-        await this.renderProjectList();
-      } catch (error) {
-        console.error("Delete failed:", error);
-        showToast("Failed to delete ADR", "error");
-      }
-    }
-    async exportAll() {
-      const data = {
-        version: "1.0.0",
-        exportDate: (/* @__PURE__ */ new Date()).toISOString(),
-        projects: this.projects
-      };
-      const json = JSON.stringify(data, null, 2);
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `adr-projects-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast(`Exported ${this.projects.length} ADRs`, "success");
-    }
-    async importFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      try {
-        const content = await file.text();
-        const data = JSON.parse(content);
-        if (Array.isArray(data.projects)) {
-          for (const project of data.projects) {
-            await storage.saveProject(project);
-          }
-          await this.loadProjects();
-          await this.renderProjectList();
-          showToast(`Imported ${data.projects.length} ADRs`, "success");
-        }
-      } catch (error) {
-        console.error("Import failed:", error);
-        showToast("Failed to import ADRs", "error");
-      }
-      event.target.value = "";
-    }
-    /**
-     * Delete a project by ID (called from project list)
-     * @param {string} projectId - Project ID to delete
-     */
-    async deleteProject(projectId) {
-      const project = this.projects.find((p) => p.id === projectId);
-      const title = project?.title || project?.name || "Untitled";
-      if (!window.confirm(`Are you sure you want to delete "${title}"?`)) {
-        return;
-      }
-      try {
-        await storage.deleteProject(projectId);
-        showToast("ADR deleted", "success");
-        await this.loadProjects();
-        await this.renderProjectList();
-      } catch (error) {
-        console.error("Delete failed:", error);
-        showToast("Failed to delete ADR", "error");
-      }
-    }
-    /**
-     * Count completed phases for a project
-     * Phase 0 (form entry) is not counted - only AI phases 1-3
-     * @param {Object} project - Project object
-     * @returns {number} Number of completed phases (0-3)
-     */
-    countCompletedPhases(project) {
-      let count = 0;
-      if (project.phase1Response) count++;
-      if (project.phase2Review) count++;
-      if (project.finalADR) count++;
-      return count;
-    }
-    /**
-     * Escape HTML to prevent XSS
-     * @param {string} str - String to escape
-     * @returns {string} Escaped string
-     */
-    escapeHtml(str) {
-      if (!str) return "";
-      const div = document.createElement("div");
-      div.textContent = str;
-      return div.innerHTML;
-    }
-    /**
-     * Format date for display
-     * @param {string} dateStr - ISO date string
-     * @returns {string} Formatted date string
-     */
-    formatDate(dateStr) {
-      if (!dateStr) return "Never";
-      const date = new Date(dateStr);
-      const now = /* @__PURE__ */ new Date();
-      const diffMs = now - date;
-      const diffMins = Math.floor(diffMs / 6e4);
-      const diffHours = Math.floor(diffMs / 36e5);
-      const diffDays = Math.floor(diffMs / 864e5);
-      if (diffMins < 1) return "Just now";
-      if (diffMins < 60) return `${diffMins}m ago`;
-      if (diffHours < 24) return `${diffHours}h ago`;
-      if (diffDays < 7) return `${diffDays}d ago`;
-      return date.toLocaleDateString();
     }
   };
   var isTestEnvironment = typeof process !== "undefined" && (process.env?.JEST_WORKER_ID !== void 0 || false);
