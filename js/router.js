@@ -1,16 +1,19 @@
 /**
  * Simple Router Module
  * Handles client-side routing and navigation
+ * @module router
  */
 
 import { renderProjectsList, renderNewProjectForm } from './views.js';
 import { renderProjectView } from './project-view.js';
 import { storage } from './storage.js';
 
+/** @type {string | null} */
 let currentRoute = null;
 
 /**
  * Initialize the router
+ * @returns {void}
  */
 export function initRouter() {
   // Handle browser back/forward buttons
@@ -23,6 +26,9 @@ export function initRouter() {
 
 /**
  * Navigate to a route
+ * @param {string} route - Route path (e.g., 'home', 'project/123')
+ * @param {boolean} [pushState=true] - Whether to push to browser history
+ * @returns {void}
  */
 export function navigateTo(route, pushState = true) {
   const [path, param] = route.split('/');
@@ -37,6 +43,8 @@ export function navigateTo(route, pushState = true) {
 
 /**
  * Handle browser back/forward
+ * @param {PopStateEvent} event - PopState event
+ * @returns {void}
  */
 function handlePopState(event) {
   const route = event.state?.route || 'home';
@@ -45,6 +53,7 @@ function handlePopState(event) {
 
 /**
  * Update storage info in footer
+ * @returns {Promise<void>}
  */
 export async function updateStorageInfo() {
   try {
@@ -68,6 +77,9 @@ export async function updateStorageInfo() {
 
 /**
  * Render the current route
+ * @param {string} path - Route path
+ * @param {string} [param] - Route parameter (e.g., project ID)
+ * @returns {Promise<void>}
  */
 async function renderRoute(path, param) {
   try {
@@ -118,6 +130,7 @@ async function renderRoute(path, param) {
 
 /**
  * Get current route
+ * @returns {string | null}
  */
 export function getCurrentRoute() {
   return currentRoute;

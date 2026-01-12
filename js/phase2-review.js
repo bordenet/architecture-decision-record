@@ -1,10 +1,19 @@
 /**
  * Phase 2 Review Module
  * Generates adversarial reviews using same-LLM detection
+ * @module phase2-review
  */
 
 import { getAdversarialStrategy } from './same-llm-adversarial.js';
 
+/**
+ * Generate an adversarial review for Phase 2
+ * @param {string} title - ADR title
+ * @param {string} context - ADR context
+ * @param {string} decision - Proposed decision
+ * @param {string} [currentModel='Claude'] - Current LLM model
+ * @returns {Promise<string>} Generated review
+ */
 async function generatePhase2Review(title, context, decision, currentModel = 'Claude') {
   const strategy = getAdversarialStrategy(currentModel);
 

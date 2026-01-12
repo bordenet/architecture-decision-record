@@ -1,6 +1,7 @@
 /**
  * Views Module
  * Handles rendering different views/screens
+ * @module views
  */
 
 import { getAllProjects, createProject, deleteProject } from './projects.js';
@@ -9,6 +10,7 @@ import { navigateTo } from './router.js';
 
 /**
  * Render the projects list view
+ * @returns {Promise<void>}
  */
 export async function renderProjectsList() {
   const projects = await getAllProjects();
@@ -115,6 +117,8 @@ export async function renderProjectsList() {
 
 /**
  * Render the new project form (edit details)
+ * @param {import('./types.js').Project | null} [existingProject=null] - Existing project for editing
+ * @returns {void}
  */
 export function renderNewProjectForm(existingProject = null) {
   const isEditing = !!existingProject;

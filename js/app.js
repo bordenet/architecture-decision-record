@@ -1,6 +1,7 @@
 /**
  * Main Application Module
  * Architecture Decision Record Assistant with 3-phase workflow
+ * @module app
  */
 
 import { initializeTheme, setupThemeToggle, showToast } from './ui.js';
@@ -9,12 +10,21 @@ import { setupKeyboardShortcuts } from './keyboard-shortcuts.js';
 import { storage } from './storage.js';
 import { exportAllProjects, importProjects } from './projects.js';
 
+/**
+ * Main application class
+ */
 class App {
   constructor() {
+    /** @type {import('./types.js').Project | null} */
     this.currentProject = null;
+    /** @type {import('./types.js').Project[]} */
     this.projects = [];
   }
 
+  /**
+   * Initialize the application
+   * @returns {Promise<void>}
+   */
   async init() {
     // Guard against test environment without proper DOM
     if (typeof document === 'undefined' || !document.getElementById) {
@@ -48,6 +58,10 @@ class App {
     }
   }
 
+  /**
+   * Set up global event listeners
+   * @returns {void}
+   */
   setupEventListeners() {
     // Guard against test environment without proper DOM
     if (typeof document === 'undefined' || !document.body) {

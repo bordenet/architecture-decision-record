@@ -1,19 +1,30 @@
 /**
  * IndexedDB Storage Module
  * Handles all client-side data persistence
+ * @module storage
  */
 
+/** @type {string} */
 const DB_NAME = 'adr-assistant';
+
+/** @type {number} */
 const DB_VERSION = 1;
+
+/** @type {string} */
 const STORE_NAME = 'projects';
 
+/**
+ * Storage class for IndexedDB operations
+ */
 class Storage {
   constructor() {
+    /** @type {IDBDatabase | null} */
     this.db = null;
   }
 
   /**
    * Initialize the database
+   * @returns {Promise<void>}
    */
   async init() {
     return new Promise((resolve, reject) => {
@@ -21,20 +32,20 @@ class Storage {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
 
         request.onerror = () => {
-           
+
           console.error('IndexedDB open error:', request.error);
           reject(request.error);
         };
 
         request.onsuccess = () => {
           this.db = request.result;
-           
+
           console.log('IndexedDB initialized successfully');
           resolve();
         };
 
         request.onupgradeneeded = (event) => {
-           
+
           console.log('IndexedDB upgrade needed');
           const db = event.target.result;
 
@@ -53,7 +64,7 @@ class Storage {
           }
         };
       } catch (error) {
-         
+
         console.error('IndexedDB init error:', error);
         reject(error);
       }
@@ -62,6 +73,8 @@ class Storage {
 
   /**
    * Save a project
+   * @param {import('./types.js').Project} project - Project to save
+   * @returns {Promise<IDBValidKey>}
    */
   async saveProject(project) {
     if (!this.db) await this.init();
@@ -80,6 +93,7 @@ class Storage {
 
   /**
    * Get all projects
+   * @returns {Promise<import('./types.js').Project[]>}
    */
   async getAllProjects() {
     if (!this.db) await this.init();
@@ -95,6 +109,8 @@ class Storage {
 
   /**
    * Get project by ID
+   * @param {string} id - Project ID
+   * @returns {Promise<import('./types.js').Project | undefined>}
    */
   async getProject(id) {
     if (!this.db) await this.init();
@@ -110,6 +126,8 @@ class Storage {
 
   /**
    * Delete project
+   * @param {string} id - Project ID
+   * @returns {Promise<void>}
    */
   async deleteProject(id) {
     if (!this.db) await this.init();
@@ -124,13 +142,22 @@ class Storage {
   }
 
   /**
-   * Get storage size
+   * Get storage size estimate
+   * @returns {Promise<import('./types.js').StorageEstimate>}
    */
   async getStorageSize() {
     if (!navigator.storage || !navigator.storage.estimate) {
       return { usage: 0, quota: 0 };
     }
     return navigator.storage.estimate();
+  }
+
+  /**
+   * Alias for getStorageSize for API consistency
+   * @returns {Promise<import('./types.js').StorageEstimate>}
+   */
+  async getStorageEstimate() {
+    return this.getStorageSize();
   }
 }
 
