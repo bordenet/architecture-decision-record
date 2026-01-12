@@ -920,11 +920,9 @@ ${project.context || ""}`;
                             \u{1F517} Open ${aiInfo.name}
                         </a>
                     </div>
-                    ${hasPrompt ? `
-                        <button id="view-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium">
-                            \u{1F441}\uFE0F View Prompt
-                        </button>
-                    ` : ""}
+                    <button id="view-prompt-btn" class="px-6 py-3 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors font-medium ${hasPrompt ? "" : "hidden"}">
+                        \u{1F441}\uFE0F View Prompt
+                    </button>
                 </div>
             </div>
 
@@ -1050,6 +1048,11 @@ ${project.context || ""}`;
             openAiBtn.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
             openAiBtn.classList.add("hover:bg-green-700");
             openAiBtn.removeAttribute("aria-disabled");
+          }
+          const viewPromptBtn2 = document.getElementById("view-prompt-btn");
+          if (viewPromptBtn2) {
+            viewPromptBtn2.classList.remove("hidden", "opacity-50", "cursor-not-allowed");
+            viewPromptBtn2.disabled = false;
           }
           const responseTextarea2 = document.getElementById("response-textarea");
           if (responseTextarea2) {
