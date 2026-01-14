@@ -4,38 +4,10 @@
  * @module workflow
  */
 
-/**
- * Load prompt template from markdown file
- * @param {import('./types.js').PhaseNumber} phaseNumber - Phase number
- * @returns {Promise<string>} Template content
- */
-async function loadPromptTemplate(phaseNumber) {
-  try {
-    const response = await fetch(`prompts/phase${phaseNumber}.md`);
-    if (!response.ok) {
-      throw new Error(`Failed to load prompt template for phase ${phaseNumber}`);
-    }
-    return await response.text();
-  } catch (error) {
-    console.error('Error loading prompt template:', error);
-    return '';
-  }
-}
+import { WORKFLOW_CONFIG, generatePhase1Prompt, generatePhase2Prompt, generatePhase3Prompt } from './prompts.js';
 
-/**
- * Replace template variables in prompt
- * @param {string} template - Template string with {variable} placeholders
- * @param {Object.<string, string>} vars - Variable values
- * @returns {string} Template with variables replaced
- */
-function replaceTemplateVars(template, vars) {
-  let result = template;
-  for (const [key, value] of Object.entries(vars)) {
-    const regex = new RegExp(`\\{${key}\\}`, 'g');
-    result = result.replace(regex, value || '[Not provided]');
-  }
-  return result;
-}
+// Re-export WORKFLOW_CONFIG for backward compatibility
+export { WORKFLOW_CONFIG };
 
 /**
  * @typedef {Object} PhaseMetadata
@@ -80,47 +52,56 @@ export function getPhaseMetadata(phase) {
 }
 
 /**
+ * Helper to get phase data, handling both object and array formats
+ * @param {Object} project - Project object
+ * @param {number} phaseNum - 1-based phase number
+ * @returns {Object} Phase data object with prompt, response, completed
+ */
+function getPhaseData(project, phaseNum) {
+  const defaultPhase = { prompt: '', response: '', completed: false };
+  if (!project.phases) return defaultPhase;
+
+  // Array format first (legacy)
+  if (Array.isArray(project.phases) && project.phases[phaseNum - 1]) {
+    return project.phases[phaseNum - 1];
+  }
+  // Object format (canonical)
+  if (project.phases[phaseNum] && typeof project.phases[phaseNum] === 'object') {
+    return project.phases[phaseNum];
+  }
+  return defaultPhase;
+}
+
+/**
  * Generate prompt for a specific phase
+ * Uses prompts.js module for template loading and variable replacement
  * @param {import('./types.js').Project} project - The project object
  * @param {import('./types.js').PhaseNumber} phaseNumber - The phase number (1, 2, or 3)
  * @returns {Promise<string>} Generated prompt
  */
 export async function generatePromptForPhase(project, phaseNumber) {
   const phase = phaseNumber || project.phase || 1;
-  const template = await loadPromptTemplate(phase);
-
-  // Helper to get phase response
-  const getPhaseResponse = (phaseNum) => {
-    if (project.phases && project.phases[phaseNum]) {
-      return project.phases[phaseNum].response || '';
-    }
-    return '';
-  };
 
   if (phase === 1) {
     // Phase 1: Initial Draft - use project fields
-    const vars = {
+    const formData = {
       title: project.title || '',
       status: project.status || 'Proposed',
       context: project.context || ''
     };
-    return replaceTemplateVars(template, vars);
+    return generatePhase1Prompt(formData);
   } else if (phase === 2) {
     // Phase 2: Gemini Review - include Phase 1 output
-    const vars = {
-      phase1Output: getPhaseResponse(1) || '[No Phase 1 output yet]'
-    };
-    return replaceTemplateVars(template, vars);
+    const phase1Output = getPhaseData(project, 1).response || '[No Phase 1 output yet]';
+    return generatePhase2Prompt(phase1Output);
   } else if (phase === 3) {
     // Phase 3: Final Synthesis - include both Phase 1 and Phase 2 outputs
-    const vars = {
-      phase1Output: getPhaseResponse(1) || '[No Phase 1 output yet]',
-      phase2Output: getPhaseResponse(2) || '[No Phase 2 output yet]'
-    };
-    return replaceTemplateVars(template, vars);
+    const phase1Output = getPhaseData(project, 1).response || '[No Phase 1 output yet]';
+    const phase2Output = getPhaseData(project, 2).response || '[No Phase 2 output yet]';
+    return generatePhase3Prompt(phase1Output, phase2Output);
   }
 
-  return template;
+  return '';
 }
 
 /**

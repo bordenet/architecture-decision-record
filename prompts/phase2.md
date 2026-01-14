@@ -6,7 +6,7 @@ Reference the official ADR format: https://github.com/joelparkerhenderson/archit
 
 ## Draft ADR (Original)
 
-{phase1_output}
+{{PHASE1_OUTPUT}}
 
 ## Your Refinement Task
 
