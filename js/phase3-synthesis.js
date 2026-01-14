@@ -95,7 +95,9 @@ function synthesizeADR(project) {
  * @returns {void}
  */
 function exportAsMarkdown(adr, filename = 'adr.md') {
-  const blob = new Blob([adr], { type: 'text/markdown' });
+  const attribution = '\n\n---\n\n*Generated with [Architecture Decision Record Assistant](https://bordenet.github.io/architecture-decision-record/)*';
+  const content = adr + attribution;
+  const blob = new Blob([content], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
