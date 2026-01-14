@@ -5,7 +5,7 @@
  */
 
 import { getProject, updatePhase, updateProject, deleteProject } from './projects.js';
-import { getPhaseMetadata, generatePromptForPhase, getFinalMarkdown, getExportFilename } from './workflow.js';
+import { getPhaseMetadata, generatePromptForPhase, getFinalMarkdown, getExportFilename, WORKFLOW_CONFIG } from './workflow.js';
 import { escapeHtml, showToast, copyToClipboard, confirm, showPromptModal, showDocumentPreviewModal } from './ui.js';
 import { navigateTo } from './router.js';
 
@@ -393,7 +393,7 @@ function attachPhaseEventListeners(project, phase) {
     });
   }
 
-  // Save response button
+  // Save response button - auto-advance to next phase
   if (saveResponseBtn) {
     saveResponseBtn.addEventListener('click', async () => {
       const response = responseTextarea?.value.trim();
@@ -406,16 +406,25 @@ function attachPhaseEventListeners(project, phase) {
         project.phases[phase].completed = true;
         await updatePhase(project.id, phase, { response, completed: true });
 
-        showToast('Response saved!', 'success');
-
-        // Re-render to show completion status and next button
-        document.getElementById('phase-content').innerHTML = renderPhaseContent(project, phase);
-        attachPhaseEventListeners(project, phase);
-
         // Update tab to show checkmark
         const tab = document.querySelector(`.phase-tab[data-phase="${phase}"]`);
         if (tab && !tab.innerHTML.includes('✓')) {
           tab.innerHTML += '<span class="ml-2 text-green-500">✓</span>';
+        }
+
+        // Auto-advance to next phase if not on final phase
+        if (phase < WORKFLOW_CONFIG.phaseCount) {
+          const nextPhase = phase + 1;
+          project.phase = nextPhase;
+          showToast('Response saved! Moving to next phase...', 'success');
+          updatePhaseTabStyles(nextPhase);
+          document.getElementById('phase-content').innerHTML = renderPhaseContent(project, nextPhase);
+          attachPhaseEventListeners(project, nextPhase);
+        } else {
+          // Final phase - show completion message
+          showToast('ADR Complete! You can now export your document.', 'success');
+          document.getElementById('phase-content').innerHTML = renderPhaseContent(project, phase);
+          attachPhaseEventListeners(project, phase);
         }
       }
     });
