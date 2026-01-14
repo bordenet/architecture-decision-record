@@ -18,24 +18,26 @@ function readTemplate(templateName) {
 }
 
 describe("Form-to-Prompt Integration Tests", () => {
+  // Tests use {{VAR_NAME}} double-brace syntax (standard for all genesis-tools)
+
   describe("Phase 1 Template Variable Matching", () => {
     const phase1Template = readTemplate("phase1.md");
 
-    test("CRITICAL: phase1.md MUST contain {title} placeholder", () => {
-      expect(phase1Template).toContain("{title}");
+    test("CRITICAL: phase1.md MUST contain {{TITLE}} placeholder", () => {
+      expect(phase1Template).toContain("{{TITLE}}");
     });
 
-    test("CRITICAL: phase1.md MUST contain {status} placeholder", () => {
-      expect(phase1Template).toContain("{status}");
+    test("CRITICAL: phase1.md MUST contain {{STATUS}} placeholder", () => {
+      expect(phase1Template).toContain("{{STATUS}}");
     });
 
-    test("CRITICAL: phase1.md MUST contain {context} placeholder", () => {
-      expect(phase1Template).toContain("{context}");
+    test("CRITICAL: phase1.md MUST contain {{CONTEXT}} placeholder", () => {
+      expect(phase1Template).toContain("{{CONTEXT}}");
     });
 
     test("phase1.md should contain all required input placeholders", () => {
-      // These are the fields the user fills out in the form
-      const requiredPlaceholders = ["{title}", "{status}", "{context}"];
+      // These are the fields the user fills out in the form (using {{VAR}} syntax)
+      const requiredPlaceholders = ["{{TITLE}}", "{{STATUS}}", "{{CONTEXT}}"];
 
       for (const placeholder of requiredPlaceholders) {
         expect(phase1Template).toContain(placeholder);
@@ -46,8 +48,8 @@ describe("Form-to-Prompt Integration Tests", () => {
   describe("Phase 2 Template Variable Matching", () => {
     const phase2Template = readTemplate("phase2.md");
 
-    test("CRITICAL: phase2.md MUST contain {phase1_output} placeholder", () => {
-      expect(phase2Template).toContain("{phase1_output}");
+    test("CRITICAL: phase2.md MUST contain {{PHASE1_OUTPUT}} placeholder", () => {
+      expect(phase2Template).toContain("{{PHASE1_OUTPUT}}");
     });
 
     test("phase2.md should include review criteria", () => {
@@ -60,12 +62,12 @@ describe("Form-to-Prompt Integration Tests", () => {
   describe("Phase 3 Template Variable Matching", () => {
     const phase3Template = readTemplate("phase3.md");
 
-    test("CRITICAL: phase3.md MUST contain {phase1_output} placeholder", () => {
-      expect(phase3Template).toContain("{phase1_output}");
+    test("CRITICAL: phase3.md MUST contain {{PHASE1_OUTPUT}} placeholder", () => {
+      expect(phase3Template).toContain("{{PHASE1_OUTPUT}}");
     });
 
-    test("CRITICAL: phase3.md MUST contain {phase2_review} placeholder", () => {
-      expect(phase3Template).toContain("{phase2_review}");
+    test("CRITICAL: phase3.md MUST contain {{PHASE2_OUTPUT}} placeholder", () => {
+      expect(phase3Template).toContain("{{PHASE2_OUTPUT}}");
     });
 
     test("phase3.md should include synthesis instructions", () => {
@@ -78,13 +80,13 @@ describe("Form-to-Prompt Integration Tests", () => {
   describe("Form Field Coverage", () => {
     test("All form fields should have corresponding prompt placeholders", () => {
       // Form fields in ADR: title, status, context
-      // Phase 1 placeholders: {title}, {status}, {context}
+      // Phase 1 placeholders: {{TITLE}}, {{STATUS}}, {{CONTEXT}} (using {{VAR}} syntax)
       const phase1Template = readTemplate("phase1.md");
 
-      const formFields = ["title", "status", "context"];
+      const formFields = ["TITLE", "STATUS", "CONTEXT"];
 
       for (const field of formFields) {
-        expect(phase1Template).toContain(`{${field}}`);
+        expect(phase1Template).toContain(`{{${field}}}`);
       }
     });
 
@@ -93,11 +95,11 @@ describe("Form-to-Prompt Integration Tests", () => {
       const phase3Template = readTemplate("phase3.md");
 
       // Phase 2 needs Phase 1 output
-      expect(phase2Template).toContain("{phase1_output}");
+      expect(phase2Template).toContain("{{PHASE1_OUTPUT}}");
 
       // Phase 3 needs both Phase 1 and Phase 2 outputs
-      expect(phase3Template).toContain("{phase1_output}");
-      expect(phase3Template).toContain("{phase2_review}");
+      expect(phase3Template).toContain("{{PHASE1_OUTPUT}}");
+      expect(phase3Template).toContain("{{PHASE2_OUTPUT}}");
     });
   });
 
@@ -105,38 +107,37 @@ describe("Form-to-Prompt Integration Tests", () => {
     test("Phase 1 prompt should have no unfilled placeholders after replacement", () => {
       let template = readTemplate("phase1.md");
 
-      // Simulate the replacement that happens in app.js generatePhase1Prompt
-      template = template.replace(/{title}/g, "Test ADR Title");
-      template = template.replace(/{status}/g, "Proposed");
-      template = template.replace(/{context}/g, "Test context description");
+      // Simulate the replacement using {{VAR}} syntax
+      template = template.replace(/\{\{TITLE\}\}/g, "Test ADR Title");
+      template = template.replace(/\{\{STATUS\}\}/g, "Proposed");
+      template = template.replace(/\{\{CONTEXT\}\}/g, "Test context description");
 
       // No placeholders should remain
-      expect(template).not.toContain("{title}");
-      expect(template).not.toContain("{status}");
-      expect(template).not.toContain("{context}");
+      expect(template).not.toContain("{{TITLE}}");
+      expect(template).not.toContain("{{STATUS}}");
+      expect(template).not.toContain("{{CONTEXT}}");
     });
 
     test("Phase 2 prompt should have no unfilled placeholders after replacement", () => {
       let template = readTemplate("phase2.md");
 
-      // Simulate the replacement that happens in app.js generatePhase2Prompt
-      template = template.replace(/{phase1_output}/g, "Phase 1 ADR content");
+      // Simulate the replacement using {{VAR}} syntax
+      template = template.replace(/\{\{PHASE1_OUTPUT\}\}/g, "Phase 1 ADR content");
 
       // No placeholders should remain
-      expect(template).not.toContain("{phase1_output}");
+      expect(template).not.toContain("{{PHASE1_OUTPUT}}");
     });
 
     test("Phase 3 prompt should have no unfilled placeholders after replacement", () => {
       let template = readTemplate("phase3.md");
 
-      // Simulate the replacement that happens in app.js generatePhase3Prompt
-      template = template.replace(/{phase1_output}/g, "Phase 1 ADR content");
-      template = template.replace(/{phase2_review}/g, "Phase 2 review feedback");
+      // Simulate the replacement using {{VAR}} syntax
+      template = template.replace(/\{\{PHASE1_OUTPUT\}\}/g, "Phase 1 ADR content");
+      template = template.replace(/\{\{PHASE2_OUTPUT\}\}/g, "Phase 2 review feedback");
 
       // No placeholders should remain
-      expect(template).not.toContain("{phase1_output}");
-      expect(template).not.toContain("{phase2_review}");
+      expect(template).not.toContain("{{PHASE1_OUTPUT}}");
+      expect(template).not.toContain("{{PHASE2_OUTPUT}}");
     });
   });
 });
-

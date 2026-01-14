@@ -6,11 +6,11 @@ Reference the official ADR format: https://github.com/joelparkerhenderson/archit
 
 ## Original ADR (Phase 1 - Initial Draft)
 
-{phase1_output}
+{{PHASE1_OUTPUT}}
 
 ## Critical Feedback (Phase 2 - Review)
 
-{phase2_review}
+{{PHASE2_OUTPUT}}
 
 ## Your Synthesis Task
 

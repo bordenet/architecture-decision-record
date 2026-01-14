@@ -4,11 +4,11 @@ Your goal is to produce a clear, implementable architectural decision that will 
 
 ## Input
 
-**Title**: {title}
+**Title**: {{TITLE}}
 
-**Status**: {status}
+**Status**: {{STATUS}}
 
-**Context**: {context}
+**Context**: {{CONTEXT}}
 
 ## Your Task
 
@@ -144,7 +144,7 @@ This is a **living document**. If circumstances change (new tools, new constrain
 [Date]: [What changed]
 Impact on decision: [How does this affect the original decision? Still valid? Needs revision?]
 
-Example: 
+Example:
 ### Amendment - 2025-12-15
 Kubernetes became the standard for orchestration (was Mesos). Impact: Our service mesh strategy (Istio) is now more aligned with industry standard. Decision remains valid; implementation easier than initially planned.
 ```
