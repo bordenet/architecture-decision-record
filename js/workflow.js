@@ -149,3 +149,26 @@ export function exportFinalADR(project) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+/**
+ * Get the final markdown content from a project
+ * @param {import('./types.js').Project} project - Project object
+ * @returns {string|null} The markdown content or null if none exists
+ */
+export function getFinalMarkdown(project) {
+  if (project.phases && project.phases[3] && project.phases[3].response) {
+    return project.phases[3].response;
+  } else if (project.phases && project.phases[1] && project.phases[1].response) {
+    return project.phases[1].response;
+  }
+  return null;
+}
+
+/**
+ * Generate export filename for a project
+ * @param {import('./types.js').Project} project - Project object
+ * @returns {string} Filename with .md extension
+ */
+export function getExportFilename(project) {
+  return `${(project.title || 'adr').replace(/[^a-z0-9]/gi, '-').toLowerCase()}-adr.md`;
+}
