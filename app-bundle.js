@@ -164,6 +164,104 @@
       throw new Error("Failed to copy to clipboard");
     }
   }
+  function showDocumentPreviewModal(markdown, title = "Your Document is Ready", filename = "document.md", onDownload = null) {
+    const renderedHtml = typeof marked !== "undefined" ? marked.parse(markdown) : escapeHtml(markdown).replace(/\n/g, "<br>");
+    const modal = document.createElement("div");
+    modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4";
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">${escapeHtml(title)}</h3>
+                <button id="close-preview-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-auto p-6">
+                <div id="preview-content" class="prose prose-sm dark:prose-invert max-w-none
+                    prose-headings:text-gray-900 dark:prose-headings:text-white
+                    prose-p:text-gray-700 dark:prose-p:text-gray-300
+                    prose-strong:text-gray-900 dark:prose-strong:text-white
+                    prose-ul:text-gray-700 dark:prose-ul:text-gray-300
+                    prose-ol:text-gray-700 dark:prose-ol:text-gray-300
+                    prose-li:text-gray-700 dark:prose-li:text-gray-300">
+                    ${renderedHtml}
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    \u{1F4A1} <strong>Tip:</strong> Click "Copy Formatted Text", then paste into Word or Google Docs \u2014 the formatting transfers automatically.
+                </p>
+                <div class="flex flex-wrap justify-end gap-3">
+                    <button id="copy-formatted-btn" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        \u{1F4CB} Copy Formatted Text
+                    </button>
+                    <button id="download-md-btn" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        \u{1F4C4} Download .md File
+                    </button>
+                    <button id="close-modal-btn" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    const closeModal = () => modal.remove();
+    modal.querySelector("#close-preview-modal").addEventListener("click", closeModal);
+    modal.querySelector("#close-modal-btn").addEventListener("click", closeModal);
+    modal.querySelector("#copy-formatted-btn").addEventListener("click", async () => {
+      try {
+        const previewContent = modal.querySelector("#preview-content");
+        const range = document.createRange();
+        range.selectNodeContents(previewContent);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const successful = document.execCommand("copy");
+        selection.removeAllRanges();
+        if (successful) {
+          showToast("Formatted text copied! Paste into Word or Google Docs.", "success");
+        } else {
+          await copyToClipboard(markdown);
+          showToast("Text copied! Paste into Word or Google Docs.", "success");
+        }
+      } catch {
+        try {
+          await copyToClipboard(markdown);
+          showToast("Text copied to clipboard.", "success");
+        } catch {
+          showToast("Failed to copy. Please select and copy manually.", "error");
+        }
+      }
+    });
+    modal.querySelector("#download-md-btn").addEventListener("click", () => {
+      const blob = new Blob([markdown], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("File downloaded!", "success");
+      if (onDownload) {
+        onDownload();
+      }
+    });
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        closeModal();
+        document.removeEventListener("keydown", handleEscape);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+  }
   var init_ui = __esm({
     "js/ui.js"() {
       "use strict";
@@ -436,6 +534,100 @@
     }
   });
 
+  // js/workflow.js
+  async function loadPromptTemplate(phaseNumber) {
+    try {
+      const response = await fetch(`prompts/phase${phaseNumber}.md`);
+      if (!response.ok) {
+        throw new Error(`Failed to load prompt template for phase ${phaseNumber}`);
+      }
+      return await response.text();
+    } catch (error) {
+      console.error("Error loading prompt template:", error);
+      return "";
+    }
+  }
+  function replaceTemplateVars(template, vars) {
+    let result = template;
+    for (const [key, value] of Object.entries(vars)) {
+      const regex = new RegExp(`\\{${key}\\}`, "g");
+      result = result.replace(regex, value || "[Not provided]");
+    }
+    return result;
+  }
+  function getPhaseMetadata(phase) {
+    const phases = {
+      1: {
+        title: "Initial Draft",
+        description: "Generate the first draft of your ADR using Claude",
+        ai: "Claude",
+        icon: "\u{1F4DD}",
+        color: "blue"
+      },
+      2: {
+        title: "Alternative Perspective",
+        description: "Get a different perspective and improvements from Gemini",
+        ai: "Gemini",
+        icon: "\u{1F504}",
+        color: "green"
+      },
+      3: {
+        title: "Final Synthesis",
+        description: "Combine the best elements into a polished final ADR",
+        ai: "Claude",
+        icon: "\u2728",
+        color: "purple"
+      }
+    };
+    return phases[phase] || phases[1];
+  }
+  async function generatePromptForPhase(project, phaseNumber) {
+    const phase = phaseNumber || project.phase || 1;
+    const template = await loadPromptTemplate(phase);
+    const getPhaseResponse = (phaseNum) => {
+      if (project.phases && project.phases[phaseNum]) {
+        return project.phases[phaseNum].response || "";
+      }
+      return "";
+    };
+    if (phase === 1) {
+      const vars = {
+        title: project.title || "",
+        status: project.status || "Proposed",
+        context: project.context || ""
+      };
+      return replaceTemplateVars(template, vars);
+    } else if (phase === 2) {
+      const vars = {
+        phase1Output: getPhaseResponse(1) || "[No Phase 1 output yet]"
+      };
+      return replaceTemplateVars(template, vars);
+    } else if (phase === 3) {
+      const vars = {
+        phase1Output: getPhaseResponse(1) || "[No Phase 1 output yet]",
+        phase2Output: getPhaseResponse(2) || "[No Phase 2 output yet]"
+      };
+      return replaceTemplateVars(template, vars);
+    }
+    return template;
+  }
+  function getFinalMarkdown(project) {
+    if (project.phases && project.phases[3] && project.phases[3].response) {
+      return project.phases[3].response;
+    } else if (project.phases && project.phases[1] && project.phases[1].response) {
+      return project.phases[1].response;
+    }
+    return null;
+  }
+  function getExportFilename(project) {
+    return `${(project.title || "adr").replace(/[^a-z0-9]/gi, "-").toLowerCase()}-adr.md`;
+  }
+  var init_workflow = __esm({
+    "js/workflow.js"() {
+      "use strict";
+    }
+  });
+
   // js/views.js
   var views_exports = {};
   __export(views_exports, {
@@ -477,11 +669,21 @@
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
                                     ${escapeHtml(project.title || "Untitled ADR")}
                                 </h3>
-                                <button class="delete-project-btn text-gray-400 hover:text-red-600 transition-colors" data-project-id="${project.id}">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
+                                <div class="flex items-center space-x-2">
+                                    ${project.phases && project.phases[3] && project.phases[3].completed ? `
+                                    <button class="preview-project-btn text-gray-400 hover:text-blue-600 transition-colors" data-project-id="${project.id}" title="Preview & Copy">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
+                                    ` : ""}
+                                    <button class="delete-project-btn text-gray-400 hover:text-red-600 transition-colors" data-project-id="${project.id}" title="Delete">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="mb-4">
@@ -519,8 +721,24 @@
     const projectCards = container.querySelectorAll("[data-project-id]");
     projectCards.forEach((card) => {
       card.addEventListener("click", (e) => {
-        if (!e.target.closest(".delete-project-btn")) {
+        if (!e.target.closest(".delete-project-btn") && !e.target.closest(".preview-project-btn")) {
           navigateTo("project/" + card.dataset.projectId);
+        }
+      });
+    });
+    const previewBtns = container.querySelectorAll(".preview-project-btn");
+    previewBtns.forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const projectId = btn.dataset.projectId;
+        const project = projects.find((p) => p.id === projectId);
+        if (project) {
+          const markdown = getFinalMarkdown(project);
+          if (markdown) {
+            showDocumentPreviewModal(markdown, "Your ADR is Ready", getExportFilename(project));
+          } else {
+            showToast("No content to preview", "warning");
+          }
         }
       });
     });
@@ -688,113 +906,7 @@
       init_projects();
       init_ui();
       init_router();
-    }
-  });
-
-  // js/workflow.js
-  async function loadPromptTemplate(phaseNumber) {
-    try {
-      const response = await fetch(`prompts/phase${phaseNumber}.md`);
-      if (!response.ok) {
-        throw new Error(`Failed to load prompt template for phase ${phaseNumber}`);
-      }
-      return await response.text();
-    } catch (error) {
-      console.error("Error loading prompt template:", error);
-      return "";
-    }
-  }
-  function replaceTemplateVars(template, vars) {
-    let result = template;
-    for (const [key, value] of Object.entries(vars)) {
-      const regex = new RegExp(`\\{${key}\\}`, "g");
-      result = result.replace(regex, value || "[Not provided]");
-    }
-    return result;
-  }
-  function getPhaseMetadata(phase) {
-    const phases = {
-      1: {
-        title: "Initial Draft",
-        description: "Generate the first draft of your ADR using Claude",
-        ai: "Claude",
-        icon: "\u{1F4DD}",
-        color: "blue"
-      },
-      2: {
-        title: "Alternative Perspective",
-        description: "Get a different perspective and improvements from Gemini",
-        ai: "Gemini",
-        icon: "\u{1F504}",
-        color: "green"
-      },
-      3: {
-        title: "Final Synthesis",
-        description: "Combine the best elements into a polished final ADR",
-        ai: "Claude",
-        icon: "\u2728",
-        color: "purple"
-      }
-    };
-    return phases[phase] || phases[1];
-  }
-  async function generatePromptForPhase(project, phaseNumber) {
-    const phase = phaseNumber || project.phase || 1;
-    const template = await loadPromptTemplate(phase);
-    const getPhaseResponse = (phaseNum) => {
-      if (project.phases && project.phases[phaseNum]) {
-        return project.phases[phaseNum].response || "";
-      }
-      return "";
-    };
-    if (phase === 1) {
-      const vars = {
-        title: project.title || "",
-        status: project.status || "Proposed",
-        context: project.context || ""
-      };
-      return replaceTemplateVars(template, vars);
-    } else if (phase === 2) {
-      const vars = {
-        phase1Output: getPhaseResponse(1) || "[No Phase 1 output yet]"
-      };
-      return replaceTemplateVars(template, vars);
-    } else if (phase === 3) {
-      const vars = {
-        phase1Output: getPhaseResponse(1) || "[No Phase 1 output yet]",
-        phase2Output: getPhaseResponse(2) || "[No Phase 2 output yet]"
-      };
-      return replaceTemplateVars(template, vars);
-    }
-    return template;
-  }
-  function exportFinalADR(project) {
-    let content = "";
-    if (project.phases && project.phases[3] && project.phases[3].response) {
-      content = project.phases[3].response;
-    } else if (project.phases && project.phases[1] && project.phases[1].response) {
-      content = project.phases[1].response;
-    } else {
-      content = `# ${project.title || "Untitled ADR"}
-
-**Status:** ${project.status || "Proposed"}
-
-## Context
-
-${project.context || ""}`;
-    }
-    const filename = `${(project.title || "adr").replace(/[^a-z0-9]/gi, "-").toLowerCase()}-adr.md`;
-    const blob = new Blob([content], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-  var init_workflow = __esm({
-    "js/workflow.js"() {
-      "use strict";
+      init_workflow();
     }
   });
 
@@ -821,7 +933,7 @@ ${project.context || ""}`;
             </button>
             ${project.phases && project.phases[3] && project.phases[3].completed ? `
                 <button id="export-adr-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    \u2713 Export as Markdown
+                    \u{1F4C4} Preview & Copy
                 </button>
             ` : ""}
         </div>
@@ -855,7 +967,14 @@ ${project.context || ""}`;
     document.getElementById("back-btn").addEventListener("click", () => navigateTo("home"));
     const exportBtn = document.getElementById("export-adr-btn");
     if (exportBtn) {
-      exportBtn.addEventListener("click", () => exportFinalADR(project));
+      exportBtn.addEventListener("click", () => {
+        const markdown = getFinalMarkdown(project);
+        if (markdown) {
+          showDocumentPreviewModal(markdown, "Your ADR is Ready", getExportFilename(project));
+        } else {
+          showToast("No ADR content to export", "warning");
+        }
+      });
     }
     document.querySelectorAll(".phase-tab").forEach((tab) => {
       tab.addEventListener("click", () => {
@@ -957,13 +1076,30 @@ ${project.context || ""}`;
                                 <span class="mr-2">\u{1F389}</span> Your ADR is Complete!
                             </h4>
                             <p class="text-green-700 dark:text-green-400 mt-1">
-                                Download your finished architecture decision record as a Markdown (.md) file.
+                                <strong>Next step:</strong> Copy this into Word or Google Docs so you can edit and share it.
                             </p>
                         </div>
                         <button id="export-phase-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
-                            \u{1F4C4} Export as Markdown
+                            \u{1F4C4} Preview & Copy
                         </button>
                     </div>
+                    <!-- Expandable Help Section -->
+                    <details class="mt-4">
+                        <summary class="text-sm text-green-700 dark:text-green-400 cursor-pointer hover:text-green-800 dark:hover:text-green-300">
+                            Need help using your document?
+                        </summary>
+                        <div class="mt-3 p-4 bg-white dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li>Click <strong>"Preview & Copy"</strong> above to see your formatted document</li>
+                                <li>Click <strong>"Copy Formatted Text"</strong> in the preview</li>
+                                <li>Open <strong>Microsoft Word</strong> or <strong>Google Docs</strong></li>
+                                <li>Paste (Ctrl+V / \u2318V) \u2014 your headings and bullets will appear automatically</li>
+                            </ol>
+                            <p class="mt-3 text-gray-500 dark:text-gray-400 text-xs">
+                                \u{1F4A1} You can also download the raw file (.md format) if needed.
+                            </p>
+                        </div>
+                    </details>
                 </div>
             ` : ""}
 
@@ -1030,7 +1166,14 @@ ${project.context || ""}`;
     }
     const exportPhaseBtn = document.getElementById("export-phase-btn");
     if (exportPhaseBtn) {
-      exportPhaseBtn.addEventListener("click", () => exportFinalADR(project));
+      exportPhaseBtn.addEventListener("click", () => {
+        const markdown = getFinalMarkdown(project);
+        if (markdown) {
+          showDocumentPreviewModal(markdown, "Your ADR is Ready", getExportFilename(project));
+        } else {
+          showToast("No ADR content to export", "warning");
+        }
+      });
     }
     const copyPromptBtn = document.getElementById("copy-prompt-btn");
     if (copyPromptBtn) {
