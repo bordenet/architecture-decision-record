@@ -137,10 +137,12 @@ export function exportFinalADR(project) {
  * @returns {string|null} The markdown content or null if none exists
  */
 export function getFinalMarkdown(project) {
+  const attribution = '\n\n---\n\n*Generated with [Architecture Decision Record Assistant](https://bordenet.github.io/architecture-decision-record/)*';
+
   if (project.phases && project.phases[3] && project.phases[3].response) {
-    return project.phases[3].response;
+    return project.phases[3].response + attribution;
   } else if (project.phases && project.phases[1] && project.phases[1].response) {
-    return project.phases[1].response;
+    return project.phases[1].response + attribution;
   }
   return null;
 }
