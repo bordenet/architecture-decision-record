@@ -14,7 +14,7 @@ We welcome contributions to this project!
 ### Before You Start
 
 Read these documents:
-- [`CLAUDE.md`](CLAUDE.md) - AI assistant instructions and standards
+- [`CLAUDE.md`](docs/CLAUDE.md) - AI assistant instructions and standards
 - [`README.md`](README.md) - Project overview
 - [Architecture Decision Record Standard](https://github.com/joelparkerhenderson/architecture-decision-record)
 
@@ -69,7 +69,7 @@ export async function saveProject(project) {
   if (!project.title) {
     throw new Error("Project title is required");
   }
-  
+
   const result = await storage.saveProject(project);
   return result;
 }
@@ -141,7 +141,7 @@ describe("Module Name", () => {
     const result = functionToTest(input);
     expect(result).toBe(expectedValue);
   });
-  
+
   test("should handle error cases", () => {
     expect(() => functionToTest(invalid)).toThrow();
   });
