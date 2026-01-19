@@ -58,6 +58,10 @@ test-results/
 build/
 dist/
 *.log
+app-bundle.js
+
+# Prompt tuning results (generated output)
+prompt_tuning_results_*/
 
 ################################################################################
 # GitHub Pages Architecture B: Serving from root (/)
