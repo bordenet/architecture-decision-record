@@ -6,7 +6,7 @@
 
 import { getProject, updatePhase, updateProject, deleteProject } from './projects.js';
 import { getPhaseMetadata, generatePromptForPhase, getFinalMarkdown, getExportFilename, WORKFLOW_CONFIG } from './workflow.js';
-import { escapeHtml, showToast, copyToClipboard, confirm, showPromptModal, showDocumentPreviewModal } from './ui.js';
+import { escapeHtml, showToast, copyToClipboardAsync, confirm, showPromptModal, showDocumentPreviewModal } from './ui.js';
 import { navigateTo } from './router.js';
 import { preloadPromptTemplates } from './prompts.js';
 
@@ -349,8 +349,12 @@ function attachPhaseEventListeners(project, phase) {
   // Copy prompt button
   const copyPromptBtn = document.getElementById('copy-prompt-btn');
   if (copyPromptBtn) {
-    copyPromptBtn.addEventListener('click', async () => {
-      try {
+    copyPromptBtn.addEventListener('click', () => {
+      // CRITICAL: Safari transient activation fix
+      // We must call copyToClipboardAsync SYNCHRONOUSLY within the click handler
+      // Pass a Promise that resolves to the prompt text - the clipboard write happens
+      // immediately, preserving Safari's transient activation window
+      const promptPromise = (async () => {
         const prompt = await generatePromptForPhase(project, phase);
 
         // Initialize phases object if needed
@@ -360,32 +364,38 @@ function attachPhaseEventListeners(project, phase) {
         project.phases[phase].prompt = prompt;
         await updatePhase(project.id, phase, { prompt });
 
-        await copyToClipboard(prompt);
-        showToast('Prompt copied to clipboard!', 'success');
+        return prompt;
+      })();
 
-        // Enable the Open AI button and textarea
-        const openAiBtn = document.getElementById('open-ai-btn');
-        if (openAiBtn) {
-          openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
-          openAiBtn.classList.add('hover:bg-green-700');
-          openAiBtn.removeAttribute('aria-disabled');
-        }
+      // Call clipboard API synchronously with Promise - preserves transient activation
+      copyToClipboardAsync(promptPromise)
+        .then(() => {
+          showToast('Prompt copied to clipboard!', 'success');
 
-        // Show and enable the View Prompt button now that prompt is generated
-        const viewPromptBtn = document.getElementById('view-prompt-btn');
-        if (viewPromptBtn) {
-          viewPromptBtn.classList.remove('hidden', 'opacity-50', 'cursor-not-allowed');
-          viewPromptBtn.disabled = false;
-        }
+          // Enable the Open AI button and textarea
+          const openAiBtn = document.getElementById('open-ai-btn');
+          if (openAiBtn) {
+            openAiBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+            openAiBtn.classList.add('hover:bg-green-700');
+            openAiBtn.removeAttribute('aria-disabled');
+          }
 
-        const responseTextarea = document.getElementById('response-textarea');
-        if (responseTextarea) {
-          responseTextarea.disabled = false;
-        }
-      } catch (error) {
-        console.error('Error generating prompt:', error);
-        showToast('Failed to generate prompt', 'error');
-      }
+          // Show and enable the View Prompt button now that prompt is generated
+          const viewPromptBtn = document.getElementById('view-prompt-btn');
+          if (viewPromptBtn) {
+            viewPromptBtn.classList.remove('hidden', 'opacity-50', 'cursor-not-allowed');
+            viewPromptBtn.disabled = false;
+          }
+
+          const responseTextarea = document.getElementById('response-textarea');
+          if (responseTextarea) {
+            responseTextarea.disabled = false;
+          }
+        })
+        .catch((error) => {
+          console.error('Error generating prompt:', error);
+          showToast('Failed to generate prompt', 'error');
+        });
     });
   }
 
