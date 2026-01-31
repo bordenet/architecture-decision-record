@@ -9,6 +9,9 @@ import { formatDate, escapeHtml, confirm, showToast, showDocumentPreviewModal } 
 import { navigateTo } from './router.js';
 import { getFinalMarkdown, getExportFilename } from './workflow.js';
 
+/** @constant {string} ADR documentation URL */
+const ADR_DOCS_URL = 'https://adr.github.io/';
+
 /**
  * Render the projects list view
  * @returns {Promise<void>}
@@ -20,7 +23,7 @@ export async function renderProjectsList() {
   container.innerHTML = `
         <div class="mb-6 flex items-center justify-between">
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-                My ADRs
+                My <a href="${ADR_DOCS_URL}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300">ADRs</a>
             </h2>
             <button id="new-project-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                 + New ADR
