@@ -97,25 +97,29 @@ export async function renderProjectView(projectId) {
     });
   }
 
+  // Phase tabs - re-fetch project to ensure fresh data
   document.querySelectorAll('.phase-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', async () => {
       const targetPhase = parseInt(tab.dataset.phase);
+
+      // Re-fetch project from storage to get fresh data
+      const freshProject = await getProject(project.id);
 
       // Guard: Can only navigate to a phase if all prior phases are complete
       // Phase 1 is always accessible
       if (targetPhase > 1) {
         const priorPhase = targetPhase - 1;
-        const priorPhaseComplete = project.phases?.[priorPhase]?.completed;
+        const priorPhaseComplete = freshProject.phases?.[priorPhase]?.completed;
         if (!priorPhaseComplete) {
           showToast(`Complete Phase ${priorPhase} before proceeding to Phase ${targetPhase}`, 'warning');
           return;
         }
       }
 
-      project.phase = targetPhase;
+      freshProject.phase = targetPhase;
       updatePhaseTabStyles(targetPhase);
-      document.getElementById('phase-content').innerHTML = renderPhaseContent(project, targetPhase);
-      attachPhaseEventListeners(project, targetPhase);
+      document.getElementById('phase-content').innerHTML = renderPhaseContent(freshProject, targetPhase);
+      attachPhaseEventListeners(freshProject, targetPhase);
     });
   });
 
@@ -311,25 +315,36 @@ function attachPhaseEventListeners(project, phase) {
     });
   }
 
-  // Previous phase button
+  // Previous phase button - re-fetch project to ensure fresh data
   const prevPhaseBtn = document.getElementById('prev-phase-btn');
   if (prevPhaseBtn) {
-    prevPhaseBtn.addEventListener('click', () => {
-      project.phase = phase - 1;
-      updatePhaseTabStyles(phase - 1);
-      document.getElementById('phase-content').innerHTML = renderPhaseContent(project, phase - 1);
-      attachPhaseEventListeners(project, phase - 1);
+    prevPhaseBtn.addEventListener('click', async () => {
+      const prevPhase = phase - 1;
+      if (prevPhase < 1) return;
+
+      // Re-fetch project from storage to get fresh data
+      const freshProject = await getProject(project.id);
+      freshProject.phase = prevPhase;
+
+      updatePhaseTabStyles(prevPhase);
+      document.getElementById('phase-content').innerHTML = renderPhaseContent(freshProject, prevPhase);
+      attachPhaseEventListeners(freshProject, prevPhase);
     });
   }
 
-  // Next phase button
+  // Next phase button - re-fetch project to ensure fresh data
   const nextPhaseBtn = document.getElementById('next-phase-btn');
   if (nextPhaseBtn) {
-    nextPhaseBtn.addEventListener('click', () => {
-      project.phase = phase + 1;
-      updatePhaseTabStyles(phase + 1);
-      document.getElementById('phase-content').innerHTML = renderPhaseContent(project, phase + 1);
-      attachPhaseEventListeners(project, phase + 1);
+    nextPhaseBtn.addEventListener('click', async () => {
+      const nextPhase = phase + 1;
+
+      // Re-fetch project from storage to get fresh data
+      const freshProject = await getProject(project.id);
+      freshProject.phase = nextPhase;
+
+      updatePhaseTabStyles(nextPhase);
+      document.getElementById('phase-content').innerHTML = renderPhaseContent(freshProject, nextPhase);
+      attachPhaseEventListeners(freshProject, nextPhase);
     });
   }
 
@@ -433,6 +448,9 @@ function attachPhaseEventListeners(project, phase) {
         project.phases[phase].completed = true;
         await updatePhase(project.id, phase, { response, completed: true });
 
+        // Re-fetch project from storage to get fresh data after saving
+        const freshProject = await getProject(project.id);
+
         // Update tab to show checkmark
         const tab = document.querySelector(`.phase-tab[data-phase="${phase}"]`);
         if (tab && !tab.innerHTML.includes('✓')) {
@@ -442,16 +460,16 @@ function attachPhaseEventListeners(project, phase) {
         // Auto-advance to next phase if not on final phase
         if (phase < WORKFLOW_CONFIG.phaseCount) {
           const nextPhase = phase + 1;
-          project.phase = nextPhase;
+          freshProject.phase = nextPhase;
           showToast('Response saved! Moving to next phase...', 'success');
           updatePhaseTabStyles(nextPhase);
-          document.getElementById('phase-content').innerHTML = renderPhaseContent(project, nextPhase);
-          attachPhaseEventListeners(project, nextPhase);
+          document.getElementById('phase-content').innerHTML = renderPhaseContent(freshProject, nextPhase);
+          attachPhaseEventListeners(freshProject, nextPhase);
         } else {
           // Final phase - show completion message
           showToast('ADR Complete! You can now export your document.', 'success');
-          document.getElementById('phase-content').innerHTML = renderPhaseContent(project, phase);
-          attachPhaseEventListeners(project, phase);
+          document.getElementById('phase-content').innerHTML = renderPhaseContent(freshProject, phase);
+          attachPhaseEventListeners(freshProject, phase);
         }
       }
     });
