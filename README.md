@@ -2,6 +2,8 @@
 
 Write Architecture Decision Records with AI. Three phases: draft, review, refine.
 
+[![Star this repo](https://img.shields.io/github/stars/bordenet/architecture-decision-record?style=social)](https://github.com/bordenet/architecture-decision-record)
+
 **Try it**: [bordenet.github.io/architecture-decision-record](https://bordenet.github.io/architecture-decision-record/)
 
 > **What is an ADR?** An Architecture Decision Record captures a significant architectural decision along with its context and consequences. ADRs document *why* a decision was made, not just *what* was decided. See [adr.github.io](https://adr.github.io/) for the full specification.
