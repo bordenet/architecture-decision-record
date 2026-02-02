@@ -47,40 +47,36 @@ describe("Workflow Module", () => {
   describe("getPhaseMetadata", () => {
     test("should return correct metadata for phase 1", () => {
       const metadata = getPhaseMetadata(1);
-      expect(metadata.title).toBe("Initial Draft");
-      expect(metadata.ai).toBe("Claude");
+      expect(metadata.name).toBe("Initial Draft");
+      expect(metadata.aiModel).toBe("Claude");
       expect(metadata.icon).toBe("📝");
-      expect(metadata.color).toBe("blue");
       expect(metadata.description).toBeTruthy();
     });
 
     test("should return correct metadata for phase 2", () => {
       const metadata = getPhaseMetadata(2);
-      expect(metadata.title).toBe("Alternative Perspective");
-      expect(metadata.ai).toBe("Gemini");
-      expect(metadata.icon).toBe("🔄");
-      expect(metadata.color).toBe("green");
+      expect(metadata.name).toBe("Alternative Perspective");
+      expect(metadata.aiModel).toBe("Gemini");
+      expect(metadata.icon).toBe("🔍");
       expect(metadata.description).toBeTruthy();
     });
 
     test("should return correct metadata for phase 3", () => {
       const metadata = getPhaseMetadata(3);
-      expect(metadata.title).toBe("Final Synthesis");
-      expect(metadata.ai).toBe("Claude");
+      expect(metadata.name).toBe("Final Synthesis");
+      expect(metadata.aiModel).toBe("Claude");
       expect(metadata.icon).toBe("✨");
-      expect(metadata.color).toBe("purple");
       expect(metadata.description).toBeTruthy();
     });
 
-    test("should return phase 1 metadata for invalid phase number", () => {
+    test("should return undefined for invalid phase number", () => {
       const metadata = getPhaseMetadata(999);
-      expect(metadata.title).toBe("Initial Draft");
-      expect(metadata.ai).toBe("Claude");
+      expect(metadata).toBeUndefined();
     });
 
-    test("should return phase 1 metadata for undefined", () => {
+    test("should return undefined for undefined phase", () => {
       const metadata = getPhaseMetadata(undefined);
-      expect(metadata.title).toBe("Initial Draft");
+      expect(metadata).toBeUndefined();
     });
   });
 
@@ -147,7 +143,7 @@ describe("Workflow Module", () => {
 
       const prompt = await generatePromptForPhase(project, 2);
 
-      expect(prompt).toContain("[No Phase 1 output yet]");
+      expect(prompt).toContain("[Phase 1 output not yet generated]");
     });
 
     test("should handle missing phase responses in phase 3", async () => {
@@ -163,20 +159,19 @@ describe("Workflow Module", () => {
 
       const prompt = await generatePromptForPhase(project, 3);
 
-      expect(prompt).toContain("[No Phase 1 output yet]");
-      expect(prompt).toContain("[No Phase 2 output yet]");
+      expect(prompt).toContain("[Phase 1 output not yet generated]");
+      expect(prompt).toContain("[Phase 2 output not yet generated]");
     });
 
-    test("should fallback to project.phase when phaseNumber not provided", async () => {
+    test("should require phaseNumber parameter", async () => {
       const project = {
         title: "Test ADR",
         phase: 1,
         phases: { 1: {}, 2: {}, 3: {} }
       };
 
-      const prompt = await generatePromptForPhase(project);
-
-      expect(prompt).toBeTruthy();
+      // Without phaseNumber, the Workflow class uses undefined which throws
+      await expect(generatePromptForPhase(project)).rejects.toThrow("Invalid phase");
     });
 
     test("should handle array-style phases (legacy format)", async () => {
@@ -196,16 +191,14 @@ describe("Workflow Module", () => {
       expect(prompt).toContain("Phase 1 from array");
     });
 
-    test("should return empty string for invalid phase", async () => {
+    test("should throw error for invalid phase", async () => {
       const project = {
         title: "Test",
         phase: 99,
         phases: {}
       };
 
-      const prompt = await generatePromptForPhase(project, 99);
-
-      expect(prompt).toBe("");
+      await expect(generatePromptForPhase(project, 99)).rejects.toThrow("Invalid phase");
     });
   });
 
@@ -283,8 +276,8 @@ describe("Workflow Module", () => {
 
       exportFinalADR(project);
 
-      expect(createdAnchor.download).toContain("adr-with-special-ch-rs-");
-      expect(createdAnchor.download).toContain("-adr.md");
+      // New sanitization removes special chars and collapses spaces to hyphens
+      expect(createdAnchor.download).toContain("adr-with-special-chrs-adr.md");
     });
 
     test("should use 'adr' as default filename for missing title", () => {
@@ -363,7 +356,8 @@ describe("Workflow Module", () => {
 
       const filename = getExportFilename(project);
 
-      expect(filename).toBe("decision--with-special-ch-rs--adr.md");
+      // New sanitization removes special chars and collapses spaces to hyphens
+      expect(filename).toBe("decision-with-special-chrs-adr.md");
     });
 
     test("should use 'adr' as default for missing title", () => {

@@ -4,52 +4,15 @@
  * @module workflow
  */
 
-import { WORKFLOW_CONFIG, generatePhase1Prompt, generatePhase2Prompt, generatePhase3Prompt } from './prompts.js';
+import {
+  WORKFLOW_CONFIG,
+  generatePhase1Prompt as genPhase1,
+  generatePhase2Prompt as genPhase2,
+  generatePhase3Prompt as genPhase3
+} from './prompts.js';
 
 // Re-export WORKFLOW_CONFIG for backward compatibility
 export { WORKFLOW_CONFIG };
-
-/**
- * @typedef {Object} PhaseMetadata
- * @property {string} title - Phase title
- * @property {string} description - Phase description
- * @property {string} ai - AI model name
- * @property {string} icon - Emoji icon
- * @property {string} color - Color theme
- */
-
-/**
- * Get phase metadata for UI display
- * @param {import('./types.js').PhaseNumber} phase - Phase number
- * @returns {PhaseMetadata}
- */
-export function getPhaseMetadata(phase) {
-  const phases = {
-    1: {
-      title: 'Initial Draft',
-      description: 'Generate the first draft of your ADR using Claude',
-      ai: 'Claude',
-      icon: '📝',
-      color: 'blue'
-    },
-    2: {
-      title: 'Alternative Perspective',
-      description: 'Get a different perspective and improvements from Gemini',
-      ai: 'Gemini',
-      icon: '🔄',
-      color: 'green'
-    },
-    3: {
-      title: 'Final Synthesis',
-      description: 'Combine the best elements into a polished final ADR',
-      ai: 'Claude',
-      icon: '✨',
-      color: 'purple'
-    }
-  };
-
-  return phases[phase] || phases[1];
-}
 
 /**
  * Helper to get phase data, handling both object and array formats
@@ -72,55 +35,185 @@ function getPhaseData(project, phaseNum) {
   return defaultPhase;
 }
 
-/**
- * Generate prompt for a specific phase
- * Uses prompts.js module for template loading and variable replacement
- * @param {import('./types.js').Project} project - The project object
- * @param {import('./types.js').PhaseNumber} phaseNumber - The phase number (1, 2, or 3)
- * @returns {Promise<string>} Generated prompt
- */
-export async function generatePromptForPhase(project, phaseNumber) {
-  const phase = phaseNumber || project.phase || 1;
-
-  if (phase === 1) {
-    // Phase 1: Initial Draft - use project fields
-    const formData = {
-      title: project.title || '',
-      status: project.status || 'Proposed',
-      context: project.context || ''
-    };
-    return generatePhase1Prompt(formData);
-  } else if (phase === 2) {
-    // Phase 2: Gemini Review - include Phase 1 output
-    const phase1Output = getPhaseData(project, 1).response || '[No Phase 1 output yet]';
-    return generatePhase2Prompt(phase1Output);
-  } else if (phase === 3) {
-    // Phase 3: Final Synthesis - include both Phase 1 and Phase 2 outputs
-    const phase1Output = getPhaseData(project, 1).response || '[No Phase 1 output yet]';
-    const phase2Output = getPhaseData(project, 2).response || '[No Phase 2 output yet]';
-    return generatePhase3Prompt(phase1Output, phase2Output);
+export class Workflow {
+  constructor(project) {
+    this.project = project;
+    this.currentPhase = project.phase || 1;
   }
 
-  return '';
+  /**
+   * Get current phase configuration
+   */
+  getCurrentPhase() {
+    return WORKFLOW_CONFIG.phases.find(p => p.number === this.currentPhase);
+  }
+
+  /**
+   * Get next phase configuration
+   */
+  getNextPhase() {
+    if (this.currentPhase >= WORKFLOW_CONFIG.phaseCount) {
+      return null;
+    }
+    return WORKFLOW_CONFIG.phases.find(p => p.number === this.currentPhase + 1);
+  }
+
+  /**
+   * Check if workflow is complete
+   */
+  isComplete() {
+    return this.currentPhase > WORKFLOW_CONFIG.phaseCount;
+  }
+
+  /**
+   * Advance to next phase
+   */
+  advancePhase() {
+    // Allow advancing up to phase 4 (complete state)
+    if (this.currentPhase <= WORKFLOW_CONFIG.phaseCount) {
+      this.currentPhase++;
+      this.project.phase = this.currentPhase;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Go back to previous phase
+   */
+  previousPhase() {
+    if (this.currentPhase > 1) {
+      this.currentPhase--;
+      this.project.phase = this.currentPhase;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Generate prompt for current phase
+   * Uses prompts.js module for template loading and variable replacement
+   */
+  async generatePrompt() {
+    const p = this.project;
+
+    switch (this.currentPhase) {
+    case 1: {
+      const formData = {
+        title: p.title || '',
+        status: p.status || 'Proposed',
+        context: p.context || ''
+      };
+      return await genPhase1(formData);
+    }
+    case 2: {
+      const phase1Output = getPhaseData(p, 1).response || '[Phase 1 output not yet generated]';
+      return await genPhase2(phase1Output);
+    }
+    case 3: {
+      const phase1Output = getPhaseData(p, 1).response || '[Phase 1 output not yet generated]';
+      const phase2Output = getPhaseData(p, 2).response || '[Phase 2 output not yet generated]';
+      return await genPhase3(phase1Output, phase2Output);
+    }
+    default:
+      throw new Error(`Invalid phase: ${this.currentPhase}`);
+    }
+  }
+
+  /**
+   * Save phase output
+   */
+  savePhaseOutput(output) {
+    if (!this.project.phases) {
+      this.project.phases = {};
+    }
+    if (!this.project.phases[this.currentPhase]) {
+      this.project.phases[this.currentPhase] = { prompt: '', response: '', completed: false };
+    }
+    this.project.phases[this.currentPhase].response = output;
+    this.project.phases[this.currentPhase].completed = true;
+    this.project.updatedAt = new Date().toISOString();
+  }
+
+  /**
+   * Get phase output
+   */
+  getPhaseOutput(phaseNumber) {
+    return getPhaseData(this.project, phaseNumber).response || '';
+  }
+
+  /**
+   * Export final output as Markdown
+   */
+  exportAsMarkdown() {
+    const attribution = '\n\n---\n\n*Generated with [Architecture Decision Record Assistant](https://bordenet.github.io/architecture-decision-record/)*';
+
+    // Return Phase 3 output if available, otherwise Phase 1
+    if (this.project.phases && this.project.phases[3] && this.project.phases[3].response) {
+      return this.project.phases[3].response + attribution;
+    } else if (this.project.phases && this.project.phases[1] && this.project.phases[1].response) {
+      return this.project.phases[1].response + attribution;
+    }
+
+    // Fallback to project metadata
+    let markdown = `# ${this.project.title || 'Untitled ADR'}\n\n`;
+    markdown += `**Status:** ${this.project.status || 'Proposed'}\n\n`;
+    markdown += `## Context\n\n${this.project.context || ''}\n`;
+    return markdown + attribution;
+  }
+
+  /**
+   * Get workflow progress percentage
+   */
+  getProgress() {
+    return Math.round((this.currentPhase / WORKFLOW_CONFIG.phaseCount) * 100);
+  }
 }
 
 /**
- * Export final ADR document
- * @param {import('./types.js').Project} project - Project to export
+ * Standalone helper functions for use in views
+ * These provide a simpler API for common workflow operations
+ */
+
+/**
+ * Get metadata for a specific phase
+ * @param {number} phaseNumber - Phase number (1, 2, 3, etc.)
+ * @returns {Object} Phase metadata
+ */
+export function getPhaseMetadata(phaseNumber) {
+  return WORKFLOW_CONFIG.phases.find(p => p.number === phaseNumber);
+}
+
+/**
+ * Generate prompt for a specific phase
+ * @param {Object} project - Project object
+ * @param {number} phaseNumber - Phase number
+ * @returns {Promise<string>} Generated prompt
+ */
+export async function generatePromptForPhase(project, phaseNumber) {
+  const workflow = new Workflow(project);
+  workflow.currentPhase = phaseNumber;
+  return await workflow.generatePrompt();
+}
+
+/**
+ * Export final document as Markdown
+ * @param {Object} project - Project object
+ * @returns {string} Markdown content
+ */
+export function exportFinalDocument(project) {
+  const workflow = new Workflow(project);
+  return workflow.exportAsMarkdown();
+}
+
+/**
+ * Export final ADR document (triggers download)
+ * @param {Object} project - Project to export
  * @returns {void}
  */
 export function exportFinalADR(project) {
-  let content = '';
-
-  if (project.phases && project.phases[3] && project.phases[3].response) {
-    content = project.phases[3].response;
-  } else if (project.phases && project.phases[1] && project.phases[1].response) {
-    content = project.phases[1].response;
-  } else {
-    content = `# ${project.title || 'Untitled ADR'}\n\n**Status:** ${project.status || 'Proposed'}\n\n## Context\n\n${project.context || ''}`;
-  }
-
-  const filename = `${(project.title || 'adr').replace(/[^a-z0-9]/gi, '-').toLowerCase()}-adr.md`;
+  const content = exportFinalDocument(project);
+  const filename = getExportFilename(project);
 
   const blob = new Blob([content], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
@@ -133,25 +226,36 @@ export function exportFinalADR(project) {
 
 /**
  * Get the final markdown content from a project
- * @param {import('./types.js').Project} project - Project object
+ * @param {Object} project - Project object
  * @returns {string|null} The markdown content or null if none exists
  */
 export function getFinalMarkdown(project) {
+  if (!project) return null;
+
   const attribution = '\n\n---\n\n*Generated with [Architecture Decision Record Assistant](https://bordenet.github.io/architecture-decision-record/)*';
 
+  // Check if phase 3 is complete and has output
   if (project.phases && project.phases[3] && project.phases[3].response) {
     return project.phases[3].response + attribution;
   } else if (project.phases && project.phases[1] && project.phases[1].response) {
     return project.phases[1].response + attribution;
   }
+
   return null;
 }
 
 /**
  * Generate export filename for a project
- * @param {import('./types.js').Project} project - Project object
+ * @param {Object} project - Project object
  * @returns {string} Filename with .md extension
  */
 export function getExportFilename(project) {
-  return `${(project.title || 'adr').replace(/[^a-z0-9]/gi, '-').toLowerCase()}-adr.md`;
+  const title = project.title || project.name || 'adr';
+  // Sanitize filename: remove special chars, replace spaces with hyphens
+  const sanitized = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .substring(0, 50);
+  return `${sanitized}-adr.md`;
 }
