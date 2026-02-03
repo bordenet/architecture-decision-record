@@ -115,6 +115,9 @@ export async function updatePhase(projectId, phase, updates = {}) {
   }
   if (updates.response !== undefined) {
     project.phases[phase].response = updates.response;
+    // Keep legacy flat field for backward compatibility (e.g., phase1_output)
+    const phaseKey = `phase${phase}_output`;
+    project[phaseKey] = updates.response;
   }
   if (updates.completed !== undefined) {
     project.phases[phase].completed = updates.completed;

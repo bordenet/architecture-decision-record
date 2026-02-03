@@ -121,6 +121,12 @@ export async function updatePhase(projectId, phase, prompt, response, options = 
     completed: !!response
   };
 
+  // Keep legacy flat field for backward compatibility (e.g., phase1_output)
+  if (response) {
+    const phaseKey = `phase${phase}_output`;
+    project[phaseKey] = response;
+  }
+
   // Auto-advance to next phase if current phase is completed (unless skipped)
   if (response && phase < 3 && !skipAutoAdvance) {
     project.phase = phase + 1;
