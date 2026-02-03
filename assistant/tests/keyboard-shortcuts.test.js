@@ -46,7 +46,7 @@ describe("Keyboard Shortcuts Module", () => {
   test("should have keyboard event listener after setup", () => {
     const spy = jest.spyOn(document, "addEventListener");
     setupKeyboardShortcuts();
-    
+
     expect(spy).toHaveBeenCalledWith("keydown", expect.any(Function));
     spy.mockRestore();
   });

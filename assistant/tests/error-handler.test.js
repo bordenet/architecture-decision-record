@@ -33,9 +33,9 @@ describe("Error Handler Module", () => {
   test("should handle storage errors with toast", () => {
     const mockToast = jest.fn();
     const error = new Error("QuotaExceededError");
-    
+
     const result = handleStorageError(error, mockToast, "Test");
-    
+
     expect(mockToast).toHaveBeenCalled();
     expect(result.title).toBe("Storage Full");
   });
@@ -43,18 +43,18 @@ describe("Error Handler Module", () => {
   test("should handle validation errors", () => {
     const mockToast = jest.fn();
     const errors = ["Title is required", "Context is required"];
-    
+
     const result = handleValidationError(errors, mockToast);
-    
+
     expect(mockToast).toHaveBeenCalled();
     expect(result.errors).toEqual(errors);
   });
 
   test("should handle single validation error string", () => {
     const mockToast = jest.fn();
-    
+
     const result = handleValidationError("Title is required", mockToast);
-    
+
     expect(mockToast).toHaveBeenCalled();
     expect(result.errors[0]).toBe("Title is required");
   });

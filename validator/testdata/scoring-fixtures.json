@@ -1,0 +1,22 @@
+{
+  "minimal": {
+    "content": "# Title\n\nUse PostgreSQL for database\n\n# Status\n\nProposed\n\n# Context\n\nWe need a database.",
+    "expectedMinScore": 5,
+    "expectedMaxScore": 40
+  },
+  "complete": {
+    "content": "# Title\n\nADR-001: Use PostgreSQL as Primary Database\n\n# Status\n\nAccepted - 2024-01-15\n\n# Context\n\nWe need to select a primary database for our new microservices architecture. The system must support 10,000 concurrent users and handle 1 million transactions per day. Our budget is limited to $50k annually for database infrastructure. The team has experience with both PostgreSQL and MySQL.\n\n# Decision\n\nWe will use PostgreSQL as our primary database for all microservices.\n\n# Options Considered\n\n## Option 1: PostgreSQL\n- Excellent JSON support for flexible schemas\n- Strong community and ecosystem\n- Better performance for complex queries\n\n## Option 2: MySQL\n- Simpler setup and administration\n- Lower resource requirements\n- Less suitable for complex data types\n\n## Option 3: MongoDB\n- Native document storage\n- Higher operational complexity\n- Less suitable for transactional workloads\n\n# Consequences\n\n## Positive\n- Better support for JSON data types needed by our API\n- Improved query performance for analytics\n- Strong ACID compliance for financial transactions\n- Excellent extensibility with custom functions\n\n## Negative\n- Slightly higher learning curve for developers new to PostgreSQL\n- More complex configuration than MySQL\n- Higher memory requirements\n\n## Neutral\n- Will require migration of existing MySQL data\n- Need to update CI/CD pipelines\n\n# Rationale\n\nPostgreSQL was chosen because it provides the best balance of performance, features, and cost for our specific requirements. The JSON support is critical for our API-first architecture, and the strong ACID compliance ensures data integrity for financial transactions.",
+    "expectedMinScore": 60,
+    "expectedMaxScore": 100
+  },
+  "contextOnly": {
+    "content": "# Context\n\nOur current authentication system is becoming a bottleneck. We are experiencing 500ms latency on login requests, which is impacting user experience. The system must support OAuth 2.0 and SAML for enterprise customers. We have a constraint of maintaining backward compatibility with existing integrations.",
+    "expectedMinScore": 10,
+    "expectedMaxScore": 35
+  },
+  "noConsequences": {
+    "content": "# Title\n\nUse React for Frontend\n\n# Status\n\nProposed\n\n# Context\n\nWe need to choose a frontend framework.\n\n# Decision\n\nWe will use React.",
+    "expectedMinScore": 15,
+    "expectedMaxScore": 50
+  }
+}

@@ -9,7 +9,8 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { describe, test, expect } from '@jest/globals';
 
-const PROJECT_ROOT = resolve(dirname(new URL(import.meta.url).pathname), '..');
+// Go up two levels from tests/ to reach the project root (assistant/tests -> assistant -> project)
+const PROJECT_ROOT = resolve(dirname(new URL(import.meta.url).pathname), '..', '..');
 
 /**
  * Recursively find all markdown files in a directory
