@@ -94,14 +94,20 @@ export async function getProject(id) {
 }
 
 /**
- * Update project phase data
+ * Update project phase data (canonical pattern matching other assistants)
  * @param {string} projectId - Project ID
  * @param {number} phase - Phase number (1, 2, or 3)
- * @param {object} updates - Object with prompt, response, and/or completed fields
+ * @param {string} prompt - The prompt used for this phase
+ * @param {string} response - The AI response for this phase
+ * @param {Object} options - Options object
+ * @param {boolean} options.skipAutoAdvance - If true, don't auto-advance to next phase
+ * @returns {Promise<Object>} Updated project
  */
-export async function updatePhase(projectId, phase, updates = {}) {
+export async function updatePhase(projectId, phase, prompt, response, options = {}) {
   const project = await storage.getProject(projectId);
   if (!project) throw new Error('Project not found');
+
+  const { skipAutoAdvance = false } = options;
 
   // Initialize phases if needed
   if (!project.phases) project.phases = {};
@@ -109,23 +115,26 @@ export async function updatePhase(projectId, phase, updates = {}) {
     project.phases[phase] = { prompt: '', response: '', completed: false };
   }
 
-  // Apply updates
-  if (updates.prompt !== undefined) {
-    project.phases[phase].prompt = updates.prompt;
-  }
-  if (updates.response !== undefined) {
-    project.phases[phase].response = updates.response;
-    // Keep legacy flat field for backward compatibility (e.g., phase1_output)
+  project.phases[phase] = {
+    prompt: prompt || '',
+    response: response || '',
+    completed: !!response
+  };
+
+  // Keep legacy flat field for backward compatibility (e.g., phase1_output)
+  if (response) {
     const phaseKey = `phase${phase}_output`;
-    project[phaseKey] = updates.response;
+    project[phaseKey] = response;
   }
-  if (updates.completed !== undefined) {
-    project.phases[phase].completed = updates.completed;
+
+  // Auto-advance to next phase if current phase is completed (unless skipped)
+  if (response && phase < 3 && !skipAutoAdvance) {
+    project.phase = phase + 1;
   }
 
   // Phase 3: Extract title from final document and update project title
-  if (phase === 3 && updates.response) {
-    const extractedTitle = extractTitleFromMarkdown(updates.response);
+  if (phase === 3 && response) {
+    const extractedTitle = extractTitleFromMarkdown(response);
     if (extractedTitle) {
       project.title = extractedTitle;
     }

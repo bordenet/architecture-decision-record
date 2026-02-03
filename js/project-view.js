@@ -404,7 +404,7 @@ function attachPhaseEventListeners(project, phase) {
         if (!project.phases[phase]) project.phases[phase] = {};
 
         project.phases[phase].prompt = prompt;
-        await updatePhase(project.id, phase, { prompt });
+        await updatePhase(project.id, phase, prompt, project.phases[phase]?.response || '', { skipAutoAdvance: true });
 
         return prompt;
       })();
@@ -473,7 +473,8 @@ function attachPhaseEventListeners(project, phase) {
 
         project.phases[phase].response = response;
         project.phases[phase].completed = true;
-        await updatePhase(project.id, phase, { response, completed: true });
+        const currentPrompt = project.phases[phase]?.prompt || '';
+        await updatePhase(project.id, phase, currentPrompt, response);
 
         // Re-fetch project from storage to get fresh data after saving
         const freshProject = await getProject(project.id);

@@ -94,7 +94,7 @@ export async function getProject(id) {
 }
 
 /**
- * Update project phase data (canonical pattern matching one-pager)
+ * Update project phase data (canonical pattern matching other assistants)
  * @param {string} projectId - Project ID
  * @param {number} phase - Phase number (1, 2, or 3)
  * @param {string} prompt - The prompt used for this phase
