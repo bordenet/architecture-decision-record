@@ -387,7 +387,8 @@ function attachPhaseEventListeners(project, phase) {
         if (!project.phases[phase]) project.phases[phase] = {};
 
         project.phases[phase].prompt = prompt;
-        await updatePhase(project.id, phase, { prompt });
+        // Save prompt without auto-advancing (skipAutoAdvance: true)
+        await updatePhase(project.id, phase, prompt, '', { skipAutoAdvance: true });
 
         return prompt;
       })();
@@ -445,21 +446,20 @@ function attachPhaseEventListeners(project, phase) {
     });
   }
 
-  // Save response button - auto-advance to next phase
+  // Save response button - auto-advance to next phase (canonical pattern matching one-pager)
   if (saveResponseBtn) {
     saveResponseBtn.addEventListener('click', async () => {
       const response = responseTextarea?.value.trim();
       if (response) {
-        // Initialize phases object if needed
-        if (!project.phases) project.phases = {};
-        if (!project.phases[phase]) project.phases[phase] = {};
-
-        project.phases[phase].response = response;
-        project.phases[phase].completed = true;
-        await updatePhase(project.id, phase, { response, completed: true });
-
-        // Re-fetch project from storage to get fresh data after saving
+        // Re-fetch project to get fresh prompt data (not stale closure)
         const freshProject = await getProject(project.id);
+        const currentPrompt = freshProject.phases?.[phase]?.prompt || '';
+
+        // Use canonical updatePhase - handles both saving AND auto-advance
+        await updatePhase(project.id, phase, currentPrompt, response);
+
+        // Re-fetch updated project (updatePhase already advanced the phase)
+        const updatedProject = await getProject(project.id);
 
         // Update tab to show checkmark
         const tab = document.querySelector(`.phase-tab[data-phase="${phase}"]`);
@@ -470,16 +470,17 @@ function attachPhaseEventListeners(project, phase) {
         // Auto-advance to next phase if not on final phase
         if (phase < WORKFLOW_CONFIG.phaseCount) {
           const nextPhase = phase + 1;
-          freshProject.phase = nextPhase;
           showToast('Response saved! Moving to next phase...', 'success');
           updatePhaseTabStyles(nextPhase);
-          document.getElementById('phase-content').innerHTML = renderPhaseContent(freshProject, nextPhase);
-          attachPhaseEventListeners(freshProject, nextPhase);
+          document.getElementById('phase-content').innerHTML = renderPhaseContent(updatedProject, nextPhase);
+          attachPhaseEventListeners(updatedProject, nextPhase);
         } else {
-          // Final phase - show completion message
+          // Final phase - set phase to 4 (complete state)
+          await updateProject(project.id, { phase: 4 });
           showToast('ADR Complete! You can now export your document.', 'success');
-          document.getElementById('phase-content').innerHTML = renderPhaseContent(freshProject, phase);
-          attachPhaseEventListeners(freshProject, phase);
+          const completeProject = await getProject(project.id);
+          document.getElementById('phase-content').innerHTML = renderPhaseContent(completeProject, phase);
+          attachPhaseEventListeners(completeProject, phase);
         }
       }
     });
