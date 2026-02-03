@@ -42,6 +42,9 @@ else
   HAS_COMMON=0
 fi
 
+# shellcheck source=lib/symlinks.sh
+source "${SCRIPT_DIR}/lib/symlinks.sh"
+
 # Colors (fallback if common.sh not available)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -166,6 +169,12 @@ else
   print_warning "Skipping tests (--skip-tests flag)"
 fi
 
+# Replace symlinks with real files for GitHub Pages
+replace_symlinks_with_real_files || exit 1
+
+# Set up trap to restore symlinks on failure
+trap 'restore_symlinks' EXIT
+
 # Get current branch
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo ""
@@ -194,6 +203,10 @@ else
   git push origin "$CURRENT_BRANCH" >/dev/null 2>&1 || { print_error "Failed to push to GitHub"; exit 1; }
 fi
 print_success "Push successful"
+
+# Restore symlinks for local development
+restore_symlinks
+trap - EXIT
 
 # Summary
 echo ""

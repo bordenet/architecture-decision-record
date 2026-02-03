@@ -162,7 +162,51 @@ function renderPhaseContent(project, phase) {
     ? { name: 'Gemini', url: 'https://gemini.google.com', color: 'green' }
     : { name: 'Claude', url: 'https://claude.ai', color: 'blue' };
 
+  // Completion banner shown above Phase 3 content when phase is complete
+  const completionBanner = phase === 3 && hasResponse ? `
+        <div class="mb-6 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h4 class="text-lg font-semibold text-green-800 dark:text-green-300 flex items-center">
+                        <span class="mr-2">🎉</span> Your ADR is Complete!
+                    </h4>
+                    <p class="text-green-700 dark:text-green-400 mt-1">
+                        <strong>Next steps:</strong> Preview & copy, then validate your document.
+                    </p>
+                </div>
+                <div class="flex gap-3 flex-wrap items-center">
+                    <button id="export-complete-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
+                        📄 Preview & Copy
+                    </button>
+                    <span class="text-gray-500 dark:text-gray-400">then</span>
+                    <a href="https://bordenet.github.io/architecture-decision-record-validator/" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium text-lg">
+                        Validate & Score ↗
+                    </a>
+                </div>
+            </div>
+            <!-- Expandable Help Section -->
+            <details class="mt-4">
+                <summary class="text-sm text-green-700 dark:text-green-400 cursor-pointer hover:text-green-800 dark:hover:text-green-300">
+                    Need help using your document?
+                </summary>
+                <div class="mt-3 p-4 bg-white dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li>Click <strong>"Preview & Copy"</strong> to see your formatted document</li>
+                        <li>Click <strong>"Copy Formatted Text"</strong> in the preview</li>
+                        <li>Open <strong>Microsoft Word</strong> or <strong>Google Docs</strong> and paste</li>
+                        <li>Use <strong><a href="https://bordenet.github.io/architecture-decision-record-validator/" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">ADR Validator</a></strong> to score and improve your document</li>
+                    </ol>
+                    <p class="mt-3 text-gray-500 dark:text-gray-400 text-xs">
+                        💡 The validator provides instant feedback and AI-powered suggestions for improvement.
+                    </p>
+                </div>
+            </details>
+        </div>
+  ` : '';
+
   return `
+        ${completionBanner}
+
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div class="mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -224,41 +268,7 @@ function renderPhaseContent(project, phase) {
                 </div>
             </div>
 
-            ${phase === 3 && hasResponse ? `
-                <!-- Phase 3 Complete: Export Call-to-Action -->
-                <div class="mt-6 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                    <div class="flex items-center justify-between flex-wrap gap-4">
-                        <div>
-                            <h4 class="text-lg font-semibold text-green-800 dark:text-green-300 flex items-center">
-                                <span class="mr-2">🎉</span> Your ADR is Complete!
-                            </h4>
-                            <p class="text-green-700 dark:text-green-400 mt-1">
-                                <strong>Next step:</strong> Copy this into Word or Google Docs so you can edit and share it.
-                            </p>
-                        </div>
-                        <button id="export-phase-btn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
-                            📄 Preview & Copy
-                        </button>
-                    </div>
-                    <!-- Expandable Help Section -->
-                    <details class="mt-4">
-                        <summary class="text-sm text-green-700 dark:text-green-400 cursor-pointer hover:text-green-800 dark:hover:text-green-300">
-                            Need help using your document?
-                        </summary>
-                        <div class="mt-3 p-4 bg-white dark:bg-gray-800 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-                            <ol class="list-decimal list-inside space-y-2">
-                                <li>Click <strong>"Preview & Copy"</strong> above to see your formatted document</li>
-                                <li>Click <strong>"Copy Formatted Text"</strong> in the preview</li>
-                                <li>Open <strong>Microsoft Word</strong> or <strong>Google Docs</strong></li>
-                                <li>Paste (Ctrl+V / ⌘V) — your headings and bullets will appear automatically</li>
-                            </ol>
-                            <p class="mt-3 text-gray-500 dark:text-gray-400 text-xs">
-                                💡 You can also download the raw file (.md format) if needed.
-                            </p>
-                        </div>
-                    </details>
-                </div>
-            ` : ''}
+
 
             <!-- Navigation -->
             <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -349,7 +359,7 @@ function attachPhaseEventListeners(project, phase) {
   }
 
   // Export button in phase content (Preview & Copy)
-  const exportPhaseBtn = document.getElementById('export-phase-btn');
+  const exportPhaseBtn = document.getElementById('export-complete-btn');
   if (exportPhaseBtn) {
     exportPhaseBtn.addEventListener('click', () => {
       const markdown = getFinalMarkdown(project);
