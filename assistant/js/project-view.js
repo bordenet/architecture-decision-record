@@ -210,7 +210,7 @@ function renderPhaseContent(project, phase) {
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div class="mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    ${meta.icon} ${meta.title}
+                    ${meta.icon} ${meta.name}
                 </h3>
                 <p class="text-gray-600 dark:text-gray-400 mb-2">${meta.description}</p>
                 <div class="inline-flex items-center px-3 py-1 bg-${aiInfo.color}-100 dark:bg-${aiInfo.color}-900/20 text-${aiInfo.color}-800 dark:text-${aiInfo.color}-300 rounded-full text-sm">
@@ -430,7 +430,7 @@ function attachPhaseEventListeners(project, phase) {
     viewPromptBtn.addEventListener('click', () => {
       const phaseData = project.phases && project.phases[phase] ? project.phases[phase] : {};
       if (phaseData.prompt) {
-        showPromptModal(phaseData.prompt, `Phase ${phase}: ${meta.title} Prompt`);
+        showPromptModal(phaseData.prompt, `Phase ${phase}: ${meta.name} Prompt`);
       }
     });
   }
