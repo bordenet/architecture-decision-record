@@ -10,7 +10,15 @@
  */
 
 import { jest } from '@jest/globals';
-import { Workflow, WORKFLOW_CONFIG, getPhaseMetadata, exportFinalDocument, getExportFilename } from '../js/workflow.js';
+import {
+  Workflow,
+  WORKFLOW_CONFIG,
+  getPhaseMetadata,
+  exportFinalDocument,
+  getExportFilename,
+  getFinalMarkdown,
+  generatePromptForPhase
+} from '../js/workflow.js';
 
 // Mock fetch for prompt template loading
 beforeAll(() => {
@@ -231,6 +239,48 @@ describe('Workflow class', () => {
       expect(workflow.getPhaseOutput(2)).toBe('');
       expect(workflow.getPhaseOutput(3)).toBe('');
     });
+
+    it('should fall back to array format phases', () => {
+      const projectWithArray = {
+        title: 'Test',
+        phases: [
+          { response: 'Array Phase 1' },
+          { response: 'Array Phase 2' },
+          { response: 'Array Phase 3' }
+        ]
+      };
+      const arrayWorkflow = new Workflow(projectWithArray);
+      expect(arrayWorkflow.getPhaseOutput(1)).toBe('Array Phase 1');
+      expect(arrayWorkflow.getPhaseOutput(2)).toBe('Array Phase 2');
+      expect(arrayWorkflow.getPhaseOutput(3)).toBe('Array Phase 3');
+    });
+
+    it('should fall back to nested object format phases', () => {
+      const projectWithNested = {
+        title: 'Test',
+        phases: {
+          1: { response: 'Nested Phase 1' },
+          2: { response: 'Nested Phase 2' },
+          3: { response: 'Nested Phase 3' }
+        }
+      };
+      const nestedWorkflow = new Workflow(projectWithNested);
+      expect(nestedWorkflow.getPhaseOutput(1)).toBe('Nested Phase 1');
+      expect(nestedWorkflow.getPhaseOutput(2)).toBe('Nested Phase 2');
+      expect(nestedWorkflow.getPhaseOutput(3)).toBe('Nested Phase 3');
+    });
+
+    it('should prefer flat format over nested formats', () => {
+      const projectWithBoth = {
+        title: 'Test',
+        phase1_output: 'Flat format preferred',
+        phases: {
+          1: { response: 'Nested format' }
+        }
+      };
+      const mixedWorkflow = new Workflow(projectWithBoth);
+      expect(mixedWorkflow.getPhaseOutput(1)).toBe('Flat format preferred');
+    });
   });
 
   describe('getProgress', () => {
@@ -343,5 +393,80 @@ describe('getExportFilename helper', () => {
     const project = { title: '' };
     const filename = getExportFilename(project);
     expect(filename).toMatch(/\.md$/);
+  });
+});
+
+// ============================================================================
+// Additional Helper Function Tests
+// ============================================================================
+
+describe('getFinalMarkdown', () => {
+  it('should return null for null project', () => {
+    expect(getFinalMarkdown(null)).toBeNull();
+  });
+
+  it('should return null for undefined project', () => {
+    expect(getFinalMarkdown(undefined)).toBeNull();
+  });
+
+  it('should return null for project without output', () => {
+    const project = { title: 'Test' };
+    expect(getFinalMarkdown(project)).toBeNull();
+  });
+
+  it('should return phase 3 output when available', () => {
+    const project = { title: 'Test', phase3_output: '# Final ADR' };
+    const result = getFinalMarkdown(project);
+    expect(result).toContain('# Final ADR');
+    expect(result).toContain('Generated with');
+  });
+
+  it('should fall back to phase 1 output', () => {
+    const project = { title: 'Test', phase1_output: '# Draft ADR' };
+    const result = getFinalMarkdown(project);
+    expect(result).toContain('# Draft ADR');
+  });
+
+  it('should handle legacy phases object format', () => {
+    const project = {
+      title: 'Test',
+      phases: { 3: { response: '# Legacy ADR' } }
+    };
+    const result = getFinalMarkdown(project);
+    expect(result).toContain('# Legacy ADR');
+  });
+
+  it('should prefer flat format over nested format', () => {
+    const project = {
+      title: 'Test',
+      phase3_output: '# Flat Format',
+      phases: { 3: { response: '# Nested Format' } }
+    };
+    const result = getFinalMarkdown(project);
+    expect(result).toContain('# Flat Format');
+  });
+});
+
+describe('generatePromptForPhase', () => {
+  it('should generate phase 1 prompt', async () => {
+    const project = { title: 'Test', description: 'Desc' };
+    const prompt = await generatePromptForPhase(project, 1);
+    expect(typeof prompt).toBe('string');
+  });
+
+  it('should generate phase 2 prompt', async () => {
+    const project = { title: 'Test', phase1_output: 'Phase 1 output' };
+    const prompt = await generatePromptForPhase(project, 2);
+    expect(typeof prompt).toBe('string');
+  });
+
+  it('should generate phase 3 prompt', async () => {
+    const project = {
+      title: 'Test',
+      phase1_output: 'Phase 1 output',
+      phase2_output: 'Phase 2 output'
+    };
+    const prompt = await generatePromptForPhase(project, 3);
+    expect(typeof prompt).toBe('string');
   });
 });

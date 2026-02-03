@@ -84,5 +84,114 @@ describe("Projects Module", () => {
       // Clean up
       await deleteProject(project.id);
     });
+
+    test("should auto-advance to next phase when response is provided", async () => {
+      const project = await createProject("Auto-advance ADR", "Context");
+      expect(project.phase).toBe(1);
+
+      // Update phase 1 without skipAutoAdvance
+      const updated = await updatePhase(project.id, 1, "Prompt", "Response");
+      expect(updated.phase).toBe(2);
+
+      await deleteProject(project.id);
+    });
+
+    test("should extract title from H1 in phase 3 response", async () => {
+      const project = await createProject("Original Title", "Context");
+
+      // Update phase 3 with markdown containing an H1
+      const markdown = "# New Extracted Title\n\nThis is the ADR content.";
+      const updated = await updatePhase(project.id, 3, "P3 prompt", markdown);
+
+      expect(updated.title).toBe("New Extracted Title");
+      await deleteProject(project.id);
+    });
+
+    test("should handle PRESS RELEASE style headers", async () => {
+      const project = await createProject("Original", "Context");
+
+      const markdown = "# PRESS RELEASE\n**Actual Headline Title**\n\nContent here.";
+      const updated = await updatePhase(project.id, 3, "Prompt", markdown);
+
+      expect(updated.title).toBe("Actual Headline Title");
+      await deleteProject(project.id);
+    });
+
+    test("should initialize phases object if missing", async () => {
+      const project = await createProject("Test", "Context");
+
+      // The phases object should exist after creation
+      expect(project.phases).toBeDefined();
+      expect(project.phases[1]).toBeDefined();
+      expect(project.phases[2]).toBeDefined();
+      expect(project.phases[3]).toBeDefined();
+
+      await deleteProject(project.id);
+    });
+  });
+
+  describe("updateProject", () => {
+    test("should update project metadata", async () => {
+      const project = await createProject("Original", "Context");
+
+      const updated = await updateProject(project.id, { title: "Updated Title" });
+      expect(updated.title).toBe("Updated Title");
+
+      await deleteProject(project.id);
+    });
+
+    test("should throw error for non-existent project", async () => {
+      await expect(updateProject("non-existent-id", { title: "Test" }))
+        .rejects.toThrow("Project not found");
+    });
+  });
+
+  describe("createProject", () => {
+    test("should create project with default status", async () => {
+      const project = await createProject("Test", "Context");
+      expect(project.status).toBe("Proposed");
+      await deleteProject(project.id);
+    });
+
+    test("should create project with custom status", async () => {
+      const project = await createProject("Test", "Context", "Accepted");
+      expect(project.status).toBe("Accepted");
+      await deleteProject(project.id);
+    });
+
+    test("should trim title and context", async () => {
+      const project = await createProject("  Title  ", "  Context  ");
+      expect(project.title).toBe("Title");
+      expect(project.context).toBe("Context");
+      await deleteProject(project.id);
+    });
+  });
+
+  describe("getAllProjects", () => {
+    test("should return array of projects", async () => {
+      const projects = await getAllProjects();
+      expect(Array.isArray(projects)).toBe(true);
+    });
+  });
+
+  describe("getProject", () => {
+    test("should return project by id", async () => {
+      const created = await createProject("Find Me", "Context");
+      const found = await getProject(created.id);
+      expect(found.title).toBe("Find Me");
+      await deleteProject(created.id);
+    });
+
+    test("should return undefined for non-existent project", async () => {
+      const found = await getProject("non-existent-id");
+      expect(found).toBeUndefined();
+    });
+  });
+
+  describe("exportProject", () => {
+    test("should throw error for non-existent project", async () => {
+      await expect(exportProject("non-existent-id"))
+        .rejects.toThrow("Project not found");
+    });
   });
 });
