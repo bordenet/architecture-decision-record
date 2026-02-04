@@ -262,24 +262,19 @@ function renderPhaseContent(project, phase) {
                     ${!hasResponse && !hasPrompt ? 'disabled' : ''}
                 >${escapeHtml(phaseData.response || '')}</textarea>
                 <div class="mt-3 flex justify-between items-center">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">
-                        ${hasResponse ? '✓ Phase completed' : 'Paste response to complete this phase'}
-                    </span>
+                    ${hasResponse && phase < 3 ? `
+                        <button id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Next Phase →
+                        </button>
+                    ` : `
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            Paste response to complete this phase
+                        </span>
+                    `}
                     <button id="save-response-btn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" ${!hasResponse ? 'disabled' : ''}>
                         Save Response
                     </button>
                 </div>
-            </div>
-
-
-
-            <!-- Navigation -->
-            <div class="flex justify-end items-center pt-6 border-t border-gray-200 dark:border-gray-700">
-                ${hasResponse && phase < 3 ? `
-                    <button id="next-phase-btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        Next Phase →
-                    </button>
-                ` : ''}
             </div>
         </div>
     `;
