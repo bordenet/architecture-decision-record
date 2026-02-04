@@ -128,6 +128,30 @@ This is a **living document**. Document changes as amendments with dates:
 Impact on decision: [Still valid? Needs revision? How does this affect implementation?]
 ```
 
+## ⚠️ FINAL AI Slop Sweep
+
+Before finalizing, eliminate ALL remaining slop:
+
+### Zero Tolerance Patterns
+
+**These MUST NOT appear in final output:**
+
+| Category | Banned Examples |
+|----------|-----------------|
+| Vague metrics | "improve", "enhance", "optimize" (without numbers) |
+| Generic impacts | "complexity", "overhead" (without specifics) |
+| Undefined terms | "scalable", "resilient", "robust" (without scope) |
+| Filler phrases | "It's important to note", "Going forward" |
+
+### Required Patterns
+
+**These MUST appear in final output:**
+- All consequences: **Specific, measurable impacts**
+- All decisions: **Alternatives comparison with trade-offs**
+- All claims: **Grounded in context facts with numbers**
+
+---
+
 ## Quality Checklist Before Returning
 - ✅ Decision names a specific approach (microservices, monorepo, event-driven, etc.)
 - ✅ Decision explains why, not how
@@ -143,5 +167,6 @@ Impact on decision: [Still valid? Needs revision? How does this affect implement
 - ✅ **Subsequent ADRs section present** (lists 2-3 triggered decisions)
 - ✅ **Recommended Review Timing present** (specific checkpoints)
 - ✅ **Living document guidance included** (amendment pattern with dates)
+- ✅ **Zero AI Slop** (no vague terms, filler phrases, or undefined buzzwords)
 
 Return the complete, production-ready ADR above. This is the version that will be published.

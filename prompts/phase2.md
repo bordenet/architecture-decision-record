@@ -134,6 +134,28 @@ This is a **living document**. If circumstances change, add a dated amendment in
 Impact on decision: [Does this affect the original decision? Still valid?]
 ```
 
+## ⚠️ CRITICAL: AI Slop Detection Checklist
+
+**Flag these issues in the Phase 1 ADR:**
+
+### Vague Language (must be replaced)
+- [ ] "improve", "enhance", "optimize" without specific metrics
+- [ ] "better performance" without baseline → target
+- [ ] "complexity" without describing WHAT is complex
+- [ ] "overhead" without quantifying the cost
+
+### Banned Filler Phrases (delete entirely)
+- [ ] "It's important to note..."
+- [ ] "In order to achieve..."
+- [ ] "Going forward..."
+
+### Architecture Buzzwords (require specifics)
+- [ ] "scalable" → specify to what load
+- [ ] "resilient" → specify failure modes handled
+- [ ] "robust" → describe specific capabilities
+
+---
+
 ## Quality Checklist Before Returning
 - ✅ Decision names a specific approach (not vague principles)
 - ✅ Decision explains WHY, not HOW
@@ -150,5 +172,6 @@ Impact on decision: [Does this affect the original decision? Still valid?]
 - ✅ **Subsequent ADRs section present** (lists 2-3 triggered decisions)
 - ✅ **Recommended Review Timing present** (specific checkpoints, not vague timelines)
 - ✅ **Living document guidance included** (amendment pattern shown)
+- ✅ **Zero AI Slop** (no vague terms, filler phrases, or undefined buzzwords)
 
 Return the complete, refined ADR above. This version will feed into final synthesis.
