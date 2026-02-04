@@ -1,70 +1,241 @@
 /**
- * UI Module
- * Handles theme, toasts, and UI utilities
+ * UI Utilities Module
+ * Common UI functions and helpers
  * @module ui
  */
 
+// Track active action menu for cleanup
+let activeActionMenu = null;
+
 /**
- * Initialize theme from localStorage
- * @returns {void}
+ * Create an action menu (overflow menu) with ARIA accessibility
+ * @param {Object} options - Menu configuration
+ * @param {HTMLElement} options.triggerElement - The button that triggers the menu
+ * @param {Array} options.items - Menu items [{label, icon, onClick, separator, destructive, disabled}]
+ * @param {string} [options.position='bottom-end'] - Menu position relative to trigger
+ * @returns {Object} - Menu controller with open(), close(), toggle() methods
  */
-function initializeTheme() {
-  // Initialize dark mode
-  const isDark = localStorage.getItem('darkMode') === 'true';
-  if (isDark) {
-    document.documentElement.classList.add('dark');
+export function createActionMenu({ triggerElement, items, position = 'bottom-end' }) {
+  const menuId = `action-menu-${Date.now()}`;
+  let isOpen = false;
+  let menu = null;
+  let focusedIndex = -1;
+
+  // Set ARIA attributes on trigger
+  triggerElement.setAttribute('aria-haspopup', 'menu');
+  triggerElement.setAttribute('aria-expanded', 'false');
+  triggerElement.setAttribute('aria-controls', menuId);
+
+  function createMenuElement() {
+    menu = document.createElement('div');
+    menu.id = menuId;
+    menu.className = 'action-menu';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-labelledby', triggerElement.id || 'action-menu-trigger');
+    menu.tabIndex = -1;
+
+    menu.innerHTML = items.map((item, index) => {
+      if (item.separator) {
+        return '<div class="action-menu-separator" role="separator"></div>';
+      }
+      const disabledClass = item.disabled ? 'action-menu-item-disabled' : '';
+      const destructiveClass = item.destructive ? 'action-menu-item-destructive' : '';
+      return `
+        <button
+          class="action-menu-item ${disabledClass} ${destructiveClass}"
+          role="menuitem"
+          data-index="${index}"
+          ${item.disabled ? 'disabled aria-disabled="true"' : ''}
+          tabindex="-1"
+        >
+          ${item.icon ? `<span class="action-menu-icon">${item.icon}</span>` : ''}
+          <span class="action-menu-label">${item.label}</span>
+        </button>
+      `;
+    }).join('');
+
+    return menu;
   }
-}
 
-/**
- * Show a toast notification
- * @param {string} message - Message to display
- * @param {import('./types.js').ToastType} [type='info'] - Toast type
- * @returns {void}
- */
-function showToast(message, type = 'info') {
-  // Implementation for showing toast notifications
-  console.log(`Toast [${type}]: ${message}`);
-}
+  function positionMenu() {
+    if (!menu) return;
+    const triggerRect = triggerElement.getBoundingClientRect();
+    const menuRect = menu.getBoundingClientRect();
 
-/**
- * Toggle between light and dark themes
- * @returns {void}
- */
-function toggleTheme() {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('darkMode', String(isDark));
-}
+    // Position based on specified position
+    let top, left;
+    if (position === 'bottom-end') {
+      top = triggerRect.bottom + 4;
+      left = triggerRect.right - menuRect.width;
+    } else if (position === 'bottom-start') {
+      top = triggerRect.bottom + 4;
+      left = triggerRect.left;
+    } else {
+      top = triggerRect.bottom + 4;
+      left = triggerRect.left;
+    }
 
-/**
- * Set up theme toggle button listener
- * @returns {void}
- */
-function setupThemeToggle() {
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
+    // Ensure menu stays in viewport
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    if (left < 8) left = 8;
+    if (left + menuRect.width > viewportWidth - 8) {
+      left = viewportWidth - menuRect.width - 8;
+    }
+    if (top + menuRect.height > viewportHeight - 8) {
+      top = triggerRect.top - menuRect.height - 4;
+    }
+
+    menu.style.position = 'fixed';
+    menu.style.top = `${top}px`;
+    menu.style.left = `${left}px`;
   }
+
+  function getMenuItems() {
+    return menu ? Array.from(menu.querySelectorAll('[role="menuitem"]:not([disabled])')) : [];
+  }
+
+  function focusItem(index) {
+    const menuItems = getMenuItems();
+    if (index < 0) index = menuItems.length - 1;
+    if (index >= menuItems.length) index = 0;
+    focusedIndex = index;
+    menuItems[focusedIndex]?.focus();
+  }
+
+  function handleKeydown(e) {
+    const menuItems = getMenuItems();
+    switch (e.key) {
+    case 'Escape':
+      e.preventDefault();
+      close();
+      triggerElement.focus();
+      break;
+    case 'ArrowDown':
+      e.preventDefault();
+      focusItem(focusedIndex + 1);
+      break;
+    case 'ArrowUp':
+      e.preventDefault();
+      focusItem(focusedIndex - 1);
+      break;
+    case 'Home':
+      e.preventDefault();
+      focusItem(0);
+      break;
+    case 'End':
+      e.preventDefault();
+      focusItem(menuItems.length - 1);
+      break;
+    case 'Tab':
+      close();
+      break;
+    }
+  }
+
+  function handleClick(e) {
+    const button = e.target.closest('[role="menuitem"]');
+    if (button && !button.disabled) {
+      const index = parseInt(button.dataset.index);
+      const item = items[index];
+      if (item && item.onClick) {
+        close();
+        item.onClick();
+      }
+    }
+  }
+
+  function handleOutsideClick(e) {
+    if (menu && !menu.contains(e.target) && !triggerElement.contains(e.target)) {
+      close();
+    }
+  }
+
+  function open() {
+    if (isOpen) return;
+
+    // Close any other open menu
+    if (activeActionMenu && activeActionMenu !== controller) {
+      activeActionMenu.close();
+    }
+
+    menu = createMenuElement();
+    document.body.appendChild(menu);
+    positionMenu();
+
+    isOpen = true;
+    activeActionMenu = controller;
+    triggerElement.setAttribute('aria-expanded', 'true');
+    menu.classList.add('action-menu-open');
+
+    // Focus first item
+    setTimeout(() => focusItem(0), 0);
+
+    // Event listeners
+    menu.addEventListener('keydown', handleKeydown);
+    menu.addEventListener('click', handleClick);
+    document.addEventListener('click', handleOutsideClick, true);
+    window.addEventListener('resize', positionMenu);
+  }
+
+  function close() {
+    if (!isOpen || !menu) return;
+
+    menu.classList.remove('action-menu-open');
+    menu.classList.add('action-menu-closing');
+
+    setTimeout(() => {
+      if (menu && menu.parentNode) {
+        menu.parentNode.removeChild(menu);
+      }
+      menu = null;
+    }, 150);
+
+    isOpen = false;
+    if (activeActionMenu === controller) {
+      activeActionMenu = null;
+    }
+    triggerElement.setAttribute('aria-expanded', 'false');
+    focusedIndex = -1;
+
+    // Remove event listeners
+    document.removeEventListener('click', handleOutsideClick, true);
+    window.removeEventListener('resize', positionMenu);
+  }
+
+  function toggle() {
+    if (isOpen) {
+      close();
+    } else {
+      open();
+    }
+  }
+
+  // Trigger click handler
+  triggerElement.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggle();
+  });
+
+  // Trigger keyboard handler
+  triggerElement.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      open();
+    }
+  });
+
+  const controller = { open, close, toggle, isOpen: () => isOpen };
+  return controller;
 }
 
 /**
- * Escape HTML special characters
- * @param {string} text - Text to escape
- * @returns {string} Escaped text
- */
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-/**
- * Format a date string for display
- * @param {string} dateString - ISO date string
+ * Format date for display
+ * @param {string | number | Date} dateString - Date to format
  * @returns {string} Formatted date string
  */
-function formatDate(dateString) {
-  if (!dateString) return 'Unknown';
+export function formatDate(dateString) {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now - date;
@@ -82,60 +253,37 @@ function formatDate(dateString) {
 }
 
 /**
- * Show a confirmation dialog
- * @param {string} message - The confirmation message
- * @param {string} title - Dialog title
- * @returns {Promise<boolean>} - Resolves to true if confirmed, false otherwise
+ * Format bytes as human-readable string (KB, MB, GB)
  */
-function confirm(message, title = 'Confirm') {
-  return new Promise((resolve) => {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    modal.innerHTML = `
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${escapeHtml(title)}</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-6">${escapeHtml(message)}</p>
-                <div class="flex justify-end gap-3">
-                    <button id="confirm-cancel" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Cancel
-                    </button>
-                    <button id="confirm-ok" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        Confirm
-                    </button>
-                </div>
-            </div>
-        `;
+export function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
 
-    document.body.appendChild(modal);
-
-    const closeModal = (result) => {
-      if (document.body.contains(modal)) document.body.removeChild(modal);
-      resolve(result);
-    };
-
-    modal.querySelector('#confirm-cancel').addEventListener('click', () => closeModal(false));
-    modal.querySelector('#confirm-ok').addEventListener('click', () => closeModal(true));
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal(false);
-    });
-
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        document.removeEventListener('keydown', handleEscape);
-        closeModal(false);
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
-  });
+/**
+ * Escape HTML to prevent XSS
+ */
+export function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 /**
  * Show prompt modal - displays full prompt text in a scrollable modal
+ */
+/**
+ * Show prompt modal - displays full prompt text in a scrollable modal
  * @param {string} promptText - The prompt text to display
  * @param {string} title - Modal title
- * @param {Function} [onCopySuccess] - Optional callback to run after successful copy
+ * @param {Function} [onCopySuccess] - Optional callback to run after successful copy (enables workflow progression)
  */
-function showPromptModal(promptText, title = 'Full Prompt', onCopySuccess = null) {
+export function showPromptModal(promptText, title = 'Full Prompt', onCopySuccess = null) {
   const modal = document.createElement('div');
   modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
   modal.innerHTML = `
@@ -160,44 +308,130 @@ function showPromptModal(promptText, title = 'Full Prompt', onCopySuccess = null
 
   document.body.appendChild(modal);
 
+  // Handle escape key
   const handleEscape = (e) => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') {
+      closeModal();
+    }
   };
 
   const closeModal = () => {
-    if (document.body.contains(modal)) document.body.removeChild(modal);
+    if (document.body.contains(modal)) {
+      document.body.removeChild(modal);
+    }
     document.removeEventListener('keydown', handleEscape);
   };
 
   modal.querySelector('#close-prompt-modal').addEventListener('click', closeModal);
   modal.querySelector('#close-prompt-modal-btn').addEventListener('click', closeModal);
 
+  // Copy button handler
   modal.querySelector('#copy-prompt-modal-btn').addEventListener('click', async () => {
     try {
       await copyToClipboard(promptText);
       showToast('Prompt copied to clipboard!', 'success');
-      if (onCopySuccess) onCopySuccess();
+      // Run callback to enable workflow progression (Open AI button, textarea, etc.)
+      if (onCopySuccess) {
+        onCopySuccess();
+      }
     } catch {
       showToast('Failed to copy to clipboard', 'error');
     }
   });
 
+  // Close on backdrop click
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
+    if (e.target === modal) {
+      closeModal();
+    }
   });
 
   document.addEventListener('keydown', handleEscape);
 }
 
 /**
+ * Show confirmation dialog
+ */
+export async function confirm(message, title = 'Confirm') {
+  return new Promise((resolve) => {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${escapeHtml(title)}</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">${escapeHtml(message)}</p>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#cancel-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+      resolve(false);
+    });
+
+    modal.querySelector('#confirm-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+      resolve(true);
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+        resolve(false);
+      }
+    });
+  });
+}
+
+/**
+ * Show toast notification
+ */
+export function showToast(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('toast-container') || createToastContainer();
+
+  const toast = document.createElement('div');
+  toast.className = `toast-notification transform transition-all duration-300 translate-x-full opacity-0 mb-2 px-4 py-3 rounded-lg shadow-lg text-white max-w-sm ${getToastColor(type)}`;
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.remove('translate-x-full', 'opacity-0');
+  }, 10);
+
+  // Auto remove
+  setTimeout(() => {
+    toast.classList.add('translate-x-full', 'opacity-0');
+    setTimeout(() => {
+      if (container.contains(toast)) {
+        container.removeChild(toast);
+      }
+    }, 300);
+  }, duration);
+}
+
+/**
  * Copy text to clipboard - wrapper for copyToClipboardAsync
- * IMPORTANT: For async operations, use copyToClipboardAsync() instead to preserve
- * Safari's transient activation window.
+ *
+ * IMPORTANT: For async operations (like generating prompts), use copyToClipboardAsync()
+ * instead to preserve Safari's transient activation window.
+ *
  * @param {string} text - Text to copy (must be available synchronously)
  * @returns {Promise<void>} Resolves if successful, throws if failed
- * @throws {Error} If copy fails
+ * @throws {Error} If clipboard access fails
  */
-async function copyToClipboard(text) {
+export async function copyToClipboard(text) {
   return copyToClipboardAsync(Promise.resolve(text));
 }
 
@@ -211,9 +445,18 @@ async function copyToClipboard(text) {
  *
  * @param {Promise<string>} textPromise - Promise that resolves to text to copy
  * @returns {Promise<void>} Resolves if successful, throws if failed
- * @throws {Error} If copy fails
+ * @throws {Error} If clipboard access fails
+ *
+ * @example
+ * // In click handler - call synchronously with Promise
+ * button.addEventListener('click', () => {
+ *     const textPromise = generatePromptAsync();
+ *     copyToClipboardAsync(textPromise)
+ *         .then(() => showToast('Copied!', 'success'))
+ *         .catch(() => showToast('Failed to copy', 'error'));
+ * });
  */
-async function copyToClipboardAsync(textPromise) {
+export async function copyToClipboardAsync(textPromise) {
   // Safari transient activation fix: Call clipboard.write() SYNCHRONOUSLY with Promise-wrapped Blob
   // The transient activation is evaluated when write() is called, not when Promise resolves
   if (navigator.clipboard && window.isSecureContext && typeof ClipboardItem !== 'undefined') {
@@ -270,6 +513,55 @@ async function copyToClipboardAsync(textPromise) {
 }
 
 /**
+ * Create toast container if it doesn't exist
+ */
+function createToastContainer() {
+  const container = document.createElement('div');
+  container.id = 'toast-container';
+  container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+  document.body.appendChild(container);
+  return container;
+}
+
+/**
+ * Get toast color class based on type
+ */
+function getToastColor(type) {
+  switch (type) {
+  case 'success':
+    return 'bg-green-500';
+  case 'error':
+    return 'bg-red-500';
+  case 'warning':
+    return 'bg-yellow-500';
+  case 'info':
+  default:
+    return 'bg-blue-500';
+  }
+}
+
+/**
+ * Show loading overlay
+ */
+export function showLoading(message = 'Loading...') {
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) {
+    overlay.querySelector('#loading-text').textContent = message;
+    overlay.classList.remove('hidden');
+  }
+}
+
+/**
+ * Hide loading overlay
+ */
+export function hideLoading() {
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+}
+
+/**
  * Show formatted document preview modal
  * @module ui
  * Displays markdown rendered as HTML with copy and download options
@@ -278,7 +570,7 @@ async function copyToClipboardAsync(textPromise) {
  * @param {string} filename - Filename for download (default: 'document.md')
  * @param {Function} [onDownload] - Optional callback after download
  */
-function showDocumentPreviewModal(markdown, title = 'Your Document is Ready', filename = 'document.md', onDownload = null) {
+export function showDocumentPreviewModal(markdown, title = 'Your Document is Ready', filename = 'document.md', onDownload = null) {
   // Render markdown to HTML using marked.js
   // @ts-ignore - marked is loaded via CDN
   let renderedHtml;
@@ -406,4 +698,33 @@ function showDocumentPreviewModal(markdown, title = 'Your Document is Ready', fi
   document.addEventListener('keydown', handleEscape);
 }
 
-export { initializeTheme, showToast, toggleTheme, setupThemeToggle, escapeHtml, copyToClipboard, copyToClipboardAsync, showPromptModal, confirm, formatDate, showDocumentPreviewModal };
+/**
+ * Initialize theme from localStorage
+ * @returns {void}
+ */
+export function initializeTheme() {
+  const isDark = localStorage.getItem('darkMode') === 'true';
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+  }
+}
+
+/**
+ * Toggle between light and dark themes
+ * @returns {void}
+ */
+export function toggleTheme() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('darkMode', String(isDark));
+}
+
+/**
+ * Set up theme toggle button listener
+ * @returns {void}
+ */
+export function setupThemeToggle() {
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+}
