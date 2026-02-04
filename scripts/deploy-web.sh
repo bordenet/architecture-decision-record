@@ -11,7 +11,7 @@
 #     Steps performed:
 #     1. Build CSS and JS bundle
 #     2. Run linting (npm run lint)
-#     3. Run tests (npm test:unit)
+#     3. Run tests (npm test)
 #     4. Verify coverage threshold
 #     5. Commit and push to GitHub
 #     6. Display deployment URL
@@ -153,9 +153,9 @@ fi
 if [[ "$SKIP_TESTS" == "false" ]]; then
   print_header "Running unit tests"
   if [[ "$VERBOSE" == "true" ]]; then
-    npm run test:unit || { print_error "Unit tests failed"; exit 1; }
+    npm test || { print_error "Unit tests failed"; exit 1; }
   else
-    npm run test:unit >/dev/null 2>&1 || { print_error "Unit tests failed. Run 'npm run test:unit' to see errors."; exit 1; }
+    npm test >/dev/null 2>&1 || { print_error "Unit tests failed. Run 'npm test' to see errors."; exit 1; }
   fi
   print_success "Unit tests passed"
 
