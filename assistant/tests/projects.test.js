@@ -62,7 +62,7 @@ describe("Projects Module", () => {
   describe("updatePhase", () => {
     test("should save response to both nested and flat formats", async () => {
       // Create a project
-      const project = await createProject("Test ADR", "Test context");
+      const project = await createProject({ title: "Test ADR", context: "Test context" });
       expect(project.id).toBeDefined();
 
       // Update phase 1 with a response (signature: projectId, phase, prompt, response, options)
@@ -81,7 +81,7 @@ describe("Projects Module", () => {
     });
 
     test("should handle all three phases with flat format", async () => {
-      const project = await createProject("Multi-phase ADR", "Multi-phase context");
+      const project = await createProject({ title: "Multi-phase ADR", context: "Multi-phase context" });
 
       // Update all three phases (signature: projectId, phase, prompt, response, options)
       await updatePhase(project.id, 1, "P1 prompt", "Phase 1 content", { skipAutoAdvance: true });
@@ -98,7 +98,7 @@ describe("Projects Module", () => {
     });
 
     test("should auto-advance to next phase when response is provided", async () => {
-      const project = await createProject("Auto-advance ADR", "Context");
+      const project = await createProject({ title: "Auto-advance ADR", context: "Context" });
       expect(project.phase).toBe(1);
 
       // Update phase 1 without skipAutoAdvance
@@ -109,7 +109,7 @@ describe("Projects Module", () => {
     });
 
     test("should extract title from H1 in phase 3 response", async () => {
-      const project = await createProject("Original Title", "Context");
+      const project = await createProject({ title: "Original Title", context: "Context" });
 
       // Update phase 3 with markdown containing an H1
       const markdown = "# New Extracted Title\n\nThis is the ADR content.";
@@ -120,7 +120,7 @@ describe("Projects Module", () => {
     });
 
     test("should handle PRESS RELEASE style headers", async () => {
-      const project = await createProject("Original", "Context");
+      const project = await createProject({ title: "Original", context: "Context" });
 
       const markdown = "# PRESS RELEASE\n**Actual Headline Title**\n\nContent here.";
       const updated = await updatePhase(project.id, 3, "Prompt", markdown);
@@ -130,7 +130,7 @@ describe("Projects Module", () => {
     });
 
     test("should initialize phases object if missing", async () => {
-      const project = await createProject("Test", "Context");
+      const project = await createProject({ title: "Test", context: "Context" });
 
       // The phases object should exist after creation
       expect(project.phases).toBeDefined();
@@ -144,7 +144,7 @@ describe("Projects Module", () => {
 
   describe("updateProject", () => {
     test("should update project metadata", async () => {
-      const project = await createProject("Original", "Context");
+      const project = await createProject({ title: "Original", context: "Context" });
 
       const updated = await updateProject(project.id, { title: "Updated Title" });
       expect(updated.title).toBe("Updated Title");
@@ -160,19 +160,19 @@ describe("Projects Module", () => {
 
   describe("createProject", () => {
     test("should create project with default status", async () => {
-      const project = await createProject("Test", "Context");
+      const project = await createProject({ title: "Test", context: "Context" });
       expect(project.status).toBe("Proposed");
       await deleteProject(project.id);
     });
 
     test("should create project with custom status", async () => {
-      const project = await createProject("Test", "Context", "Accepted");
+      const project = await createProject({ title: "Test", context: "Context", status: "Accepted" });
       expect(project.status).toBe("Accepted");
       await deleteProject(project.id);
     });
 
     test("should trim title and context", async () => {
-      const project = await createProject("  Title  ", "  Context  ");
+      const project = await createProject({ title: "  Title  ", context: "  Context  " });
       expect(project.title).toBe("Title");
       expect(project.context).toBe("Context");
       await deleteProject(project.id);
@@ -188,7 +188,7 @@ describe("Projects Module", () => {
 
   describe("getProject", () => {
     test("should return project by id", async () => {
-      const created = await createProject("Find Me", "Context");
+      const created = await createProject({ title: "Find Me", context: "Context" });
       const found = await getProject(created.id);
       expect(found.title).toBe("Find Me");
       await deleteProject(created.id);
@@ -203,7 +203,7 @@ describe("Projects Module", () => {
   describe("importProjects", () => {
     test("should import a single project from JSON file", async () => {
       // Create a project to export
-      const original = await createProject("Test ADR", "Test context for ADR");
+      const original = await createProject({ title: "Test ADR", context: "Test context for ADR" });
 
       // Create a mock File object with the project JSON
       const jsonContent = JSON.stringify(original);
@@ -226,9 +226,9 @@ describe("Projects Module", () => {
 
     test("should import multiple projects from backup file", async () => {
       // Create multiple projects
-      const project1 = await createProject("ADR 1", "Context 1");
-      const project2 = await createProject("ADR 2", "Context 2");
-      const project3 = await createProject("ADR 3", "Context 3");
+      const project1 = await createProject({ title: "ADR 1", context: "Context 1" });
+      const project2 = await createProject({ title: "ADR 2", context: "Context 2" });
+      const project3 = await createProject({ title: "ADR 3", context: "Context 3" });
 
       // Create backup format
       const backup = {
@@ -325,7 +325,7 @@ describe("Projects Module", () => {
     });
 
     test("should export a single project as JSON", async () => {
-      const project = await createProject("Export Test ADR", "Export context");
+      const project = await createProject({ title: "Export Test ADR", context: "Export context" });
 
       await exportProject(project.id);
 
@@ -381,8 +381,8 @@ describe("Projects Module", () => {
     });
 
     test("should export all projects as backup JSON", async () => {
-      await createProject("ADR 1", "Context 1");
-      await createProject("ADR 2", "Context 2");
+      await createProject({ title: "ADR 1", context: "Context 1" });
+      await createProject({ title: "ADR 2", context: "Context 2" });
 
       await exportAllProjects();
 

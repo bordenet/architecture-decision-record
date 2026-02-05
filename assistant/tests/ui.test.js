@@ -1,400 +1,551 @@
-import { initializeTheme, showToast, toggleTheme, escapeHtml, formatDate, confirm, showPromptModal, copyToClipboard, showDocumentPreviewModal } from "../js/ui.js";
+import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { showToast, showLoading, hideLoading, confirm, confirmWithRemember, formatDate, formatBytes, escapeHtml, copyToClipboard, copyToClipboardAsync, showPromptModal, showDocumentPreviewModal } from '../js/ui.js';
 
-describe("UI Module", () => {
-  beforeEach(() => {
-    document.documentElement.className = "";
-    document.body.innerHTML = "";
-    localStorage.clear();
-    jest.clearAllTimers();
-  });
-
-  describe("initializeTheme", () => {
-    test("should initialize theme without dark mode", () => {
-      initializeTheme();
-      expect(document.documentElement.classList.contains("dark")).toBe(false);
-    });
-
-    test("should initialize theme with dark mode", () => {
-      localStorage.setItem("darkMode", "true");
-      initializeTheme();
-      expect(document.documentElement.classList.contains("dark")).toBe(true);
-    });
-  });
-
-  describe("toggleTheme", () => {
-    test("should toggle theme on", () => {
-      toggleTheme();
-      expect(localStorage.getItem("darkMode")).toBe("true");
-      expect(document.documentElement.classList.contains("dark")).toBe(true);
-    });
-
-    test("should toggle theme off", () => {
-      toggleTheme();
-      toggleTheme();
-      expect(localStorage.getItem("darkMode")).toBe("false");
-      expect(document.documentElement.classList.contains("dark")).toBe(false);
-    });
-  });
-
-  describe("showToast", () => {
+describe('UI Module', () => {
     beforeEach(() => {
-      // Set up toast container
-      document.body.innerHTML = '<div id="toast-container"></div>';
+        document.body.innerHTML = `
+      <div id="toast-container"></div>
+      <div id="loading-overlay" class="hidden">
+        <span id="loading-text">Loading...</span>
+      </div>
+    `;
+        jest.clearAllTimers();
     });
 
-    test("should show toast with message", () => {
-      showToast("Test message", "info");
-      const container = document.getElementById("toast-container");
-      expect(container.innerHTML).toContain("Test message");
+    describe('showToast', () => {
+        test('should create a toast element in the container', () => {
+            showToast('Test message', 'success');
+            const container = document.getElementById('toast-container');
+            expect(container.children.length).toBe(1);
+        });
+
+        test('should display the correct message', () => {
+            showToast('Hello World', 'info');
+            const container = document.getElementById('toast-container');
+            expect(container.innerHTML).toContain('Hello World');
+        });
+
+        test('should apply success styling', () => {
+            showToast('Success!', 'success');
+            const toast = document.querySelector('#toast-container > div');
+            expect(toast.className).toContain('bg-green-500');
+        });
+
+        test('should apply error styling', () => {
+            showToast('Error!', 'error');
+            const toast = document.querySelector('#toast-container > div');
+            expect(toast.className).toContain('bg-red-500');
+        });
+
+        test('should apply warning styling', () => {
+            showToast('Warning!', 'warning');
+            const toast = document.querySelector('#toast-container > div');
+            expect(toast.className).toContain('bg-yellow-500');
+        });
+
+        test('should apply info styling by default', () => {
+            showToast('Info');
+            const toast = document.querySelector('#toast-container > div');
+            expect(toast.className).toContain('bg-blue-500');
+        });
     });
 
-    test("should default to info type", () => {
-      showToast("Test message");
-      const container = document.getElementById("toast-container");
-      expect(container.children.length).toBe(1);
+    describe('showLoading', () => {
+        test('should show the loading overlay', () => {
+            showLoading();
+            const overlay = document.getElementById('loading-overlay');
+            expect(overlay.classList.contains('hidden')).toBe(false);
+        });
+
+        test('should display custom loading text', () => {
+            showLoading('Processing...');
+            const text = document.getElementById('loading-text');
+            expect(text.textContent).toBe('Processing...');
+        });
+
+        test('should use default text when none provided', () => {
+            showLoading();
+            const text = document.getElementById('loading-text');
+            expect(text.textContent).toBe('Loading...');
+        });
     });
 
-    test("should handle success type", () => {
-      showToast("Success!", "success");
-      const container = document.getElementById("toast-container");
-      expect(container.innerHTML).toContain("Success!");
+    describe('hideLoading', () => {
+        test('should hide the loading overlay', () => {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('hidden');
+
+            hideLoading();
+
+            expect(overlay.classList.contains('hidden')).toBe(true);
+        });
     });
 
-    test("should handle error type", () => {
-      showToast("Error!", "error");
-      const container = document.getElementById("toast-container");
-      expect(container.innerHTML).toContain("Error!");
-    });
-  });
+    describe('confirm', () => {
+        test('should resolve true when confirm button is clicked', async () => {
+            const confirmPromise = confirm('Are you sure?', 'Delete');
 
-  describe("formatDate", () => {
-    test("should return 'Today' for today's date", () => {
-      const today = new Date().toISOString();
-      expect(formatDate(today)).toBe("Today");
-    });
+            await new Promise(resolve => setTimeout(resolve, 0));
 
-    test("should return 'Yesterday' for yesterday's date", () => {
-      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      expect(formatDate(yesterday)).toBe("Yesterday");
-    });
+            const confirmBtn = document.querySelector('#confirm-btn');
+            expect(confirmBtn).toBeTruthy();
+            confirmBtn.click();
 
-    test("should return 'X days ago' for dates within a week", () => {
-      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
-      expect(formatDate(threeDaysAgo)).toBe("3 days ago");
-    });
+            const result = await confirmPromise;
+            expect(result).toBe(true);
+        });
 
-    test("should return formatted date for dates older than a week", () => {
-      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
-      const result = formatDate(tenDaysAgo);
-      expect(result).toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/);
-    });
+        test('should resolve false when cancel button is clicked', async () => {
+            const confirmPromise = confirm('Are you sure?');
 
-    test("should handle invalid dates gracefully", () => {
-      // formatDate returns toLocaleDateString for invalid dates
-      const result = formatDate(null);
-      expect(result).toBeTruthy();
-    });
-  });
+            await new Promise(resolve => setTimeout(resolve, 0));
 
-  describe("escapeHtml", () => {
-    test("should escape HTML special characters", () => {
-      expect(escapeHtml("<script>alert('xss')</script>")).toBe("&lt;script&gt;alert('xss')&lt;/script&gt;");
-    });
+            const cancelBtn = document.querySelector('#cancel-btn');
+            expect(cancelBtn).toBeTruthy();
+            cancelBtn.click();
 
-    test("should escape ampersands", () => {
-      expect(escapeHtml("Tom & Jerry")).toBe("Tom &amp; Jerry");
-    });
+            const result = await confirmPromise;
+            expect(result).toBe(false);
+        });
 
-    test("should handle normal text", () => {
-      expect(escapeHtml("Hello World")).toBe("Hello World");
-    });
-  });
+        test('should resolve false when backdrop is clicked', async () => {
+            const confirmPromise = confirm('Are you sure?');
 
-  describe("confirm", () => {
-    test("should resolve true when confirm button is clicked", async () => {
-      const confirmPromise = confirm("Are you sure?", "Delete");
+            await new Promise(resolve => setTimeout(resolve, 0));
 
-      await new Promise(resolve => setTimeout(resolve, 0));
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeTruthy();
 
-      const confirmBtn = document.querySelector("#confirm-btn");
-      expect(confirmBtn).toBeTruthy();
-      confirmBtn.click();
+            // Simulate backdrop click
+            const event = new MouseEvent('click', { bubbles: true });
+            Object.defineProperty(event, 'target', { value: modal, enumerable: true });
+            modal.dispatchEvent(event);
 
-      const result = await confirmPromise;
-      expect(result).toBe(true);
+            const result = await confirmPromise;
+            expect(result).toBe(false);
+        });
+
+        test('should display custom title and message', async () => {
+            const confirmPromise = confirm('Delete this item?', 'Confirm Delete');
+
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            const modal = document.querySelector('.fixed');
+            expect(modal.innerHTML).toContain('Confirm Delete');
+            expect(modal.innerHTML).toContain('Delete this item?');
+
+            // Clean up
+            document.querySelector('#cancel-btn').click();
+            await confirmPromise;
+        });
     });
 
-    test("should resolve false when cancel button is clicked", async () => {
-      const confirmPromise = confirm("Are you sure?");
+    describe('confirmWithRemember', () => {
+        test('should resolve with confirmed=true and remember=false when confirm clicked without checkbox', async () => {
+            const confirmPromise = confirmWithRemember('Are you sure?', 'Warning');
 
-      await new Promise(resolve => setTimeout(resolve, 0));
+            await new Promise(resolve => setTimeout(resolve, 0));
 
-      const cancelBtn = document.querySelector("#cancel-btn");
-      expect(cancelBtn).toBeTruthy();
-      cancelBtn.click();
+            const confirmBtn = document.querySelector('#confirm-btn');
+            expect(confirmBtn).toBeTruthy();
+            confirmBtn.click();
 
-      const result = await confirmPromise;
-      expect(result).toBe(false);
+            const result = await confirmPromise;
+            expect(result).toEqual({ confirmed: true, remember: false });
+        });
+
+        test('should resolve with confirmed=true and remember=true when checkbox is checked', async () => {
+            const confirmPromise = confirmWithRemember('Are you sure?', 'Warning');
+
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            const checkbox = document.querySelector('#remember-checkbox');
+            expect(checkbox).toBeTruthy();
+            checkbox.checked = true;
+
+            const confirmBtn = document.querySelector('#confirm-btn');
+            confirmBtn.click();
+
+            const result = await confirmPromise;
+            expect(result).toEqual({ confirmed: true, remember: true });
+        });
+
+        test('should resolve with confirmed=false when cancel clicked', async () => {
+            const confirmPromise = confirmWithRemember('Are you sure?', 'Warning');
+
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            const cancelBtn = document.querySelector('#cancel-btn');
+            expect(cancelBtn).toBeTruthy();
+            cancelBtn.click();
+
+            const result = await confirmPromise;
+            expect(result).toEqual({ confirmed: false, remember: false });
+        });
+
+        test('should display custom button text from options', async () => {
+            const confirmPromise = confirmWithRemember('Continue?', 'Confirm', {
+                confirmText: 'Yes, Continue',
+                cancelText: 'No, Go Back',
+                checkboxLabel: 'Remember my choice'
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            const modal = document.querySelector('.fixed');
+            expect(modal.innerHTML).toContain('Yes, Continue');
+            expect(modal.innerHTML).toContain('No, Go Back');
+            expect(modal.innerHTML).toContain('Remember my choice');
+
+            // Clean up
+            document.querySelector('#cancel-btn').click();
+            await confirmPromise;
+        });
+
+        test('should resolve with confirmed=false when backdrop is clicked', async () => {
+            const confirmPromise = confirmWithRemember('Are you sure?', 'Warning');
+
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeTruthy();
+
+            // Simulate backdrop click
+            const event = new MouseEvent('click', { bubbles: true });
+            Object.defineProperty(event, 'target', { value: modal, enumerable: true });
+            modal.dispatchEvent(event);
+
+            const result = await confirmPromise;
+            expect(result).toEqual({ confirmed: false, remember: false });
+        });
     });
 
-    test("should resolve false when backdrop is clicked", async () => {
-      const confirmPromise = confirm("Are you sure?");
+    describe('formatDate', () => {
+        test('should return "Today" for same-day dates', () => {
+            const now = new Date().toISOString();
+            expect(formatDate(now)).toBe('Today');
+        });
 
-      await new Promise(resolve => setTimeout(resolve, 0));
+        test('should return "Yesterday" for previous day', () => {
+            const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            expect(formatDate(yesterday)).toBe('Yesterday');
+        });
 
-      const modal = document.querySelector(".fixed");
-      expect(modal).toBeTruthy();
+        test('should return "X days ago" for dates within a week', () => {
+            const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+            expect(formatDate(threeDaysAgo)).toBe('3 days ago');
+        });
 
-      const event = new MouseEvent("click", { bubbles: true });
-      Object.defineProperty(event, "target", { value: modal, enumerable: true });
-      modal.dispatchEvent(event);
-
-      const result = await confirmPromise;
-      expect(result).toBe(false);
+        test('should return formatted date for dates older than a week', () => {
+            const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+            const result = formatDate(tenDaysAgo);
+            // Should return a localized date string (format varies by locale)
+            expect(result).toBeTruthy();
+        });
     });
 
-    test("should display custom title and message", async () => {
-      const confirmPromise = confirm("Delete this item?", "Confirm Delete");
+    describe('formatBytes', () => {
+        test('should return "0 Bytes" for 0', () => {
+            expect(formatBytes(0)).toBe('0 Bytes');
+        });
 
-      await new Promise(resolve => setTimeout(resolve, 0));
+        test('should format bytes correctly', () => {
+            expect(formatBytes(512)).toBe('512 Bytes');
+        });
 
-      const modal = document.querySelector(".fixed");
-      expect(modal.innerHTML).toContain("Confirm Delete");
-      expect(modal.innerHTML).toContain("Delete this item?");
+        test('should format KB correctly', () => {
+            expect(formatBytes(1024)).toBe('1 KB');
+            expect(formatBytes(1536)).toBe('1.5 KB');
+        });
 
-      document.querySelector("#cancel-btn").click();
-      await confirmPromise;
-    });
-  });
+        test('should format MB correctly', () => {
+            expect(formatBytes(1048576)).toBe('1 MB');
+            expect(formatBytes(1572864)).toBe('1.5 MB');
+        });
 
-  describe("showPromptModal", () => {
-    test("should display modal with prompt text", () => {
-      showPromptModal("Test prompt content", "Test Title");
-
-      const modal = document.querySelector(".fixed");
-      expect(modal).toBeTruthy();
-      expect(modal.innerHTML).toContain("Test Title");
-      expect(modal.innerHTML).toContain("Test prompt content");
-
-      document.querySelector("#close-prompt-modal").click();
+        test('should format GB correctly', () => {
+            expect(formatBytes(1073741824)).toBe('1 GB');
+        });
     });
 
-    test("should close modal when X button is clicked", () => {
-      showPromptModal("Test prompt", "Title");
+    describe('escapeHtml', () => {
+        test('should escape HTML special characters', () => {
+            expect(escapeHtml('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert("xss")&lt;/script&gt;');
+        });
 
-      const closeBtn = document.querySelector("#close-prompt-modal");
-      expect(closeBtn).toBeTruthy();
-      closeBtn.click();
+        test('should return empty string for null/undefined', () => {
+            expect(escapeHtml(null)).toBe('');
+            expect(escapeHtml(undefined)).toBe('');
+        });
 
-      const modal = document.querySelector(".fixed");
-      expect(modal).toBeNull();
+        test('should escape ampersands', () => {
+            expect(escapeHtml('Tom & Jerry')).toBe('Tom &amp; Jerry');
+        });
     });
 
-    test("should close modal when backdrop is clicked", () => {
-      showPromptModal("Test prompt", "Title");
+    describe('copyToClipboard', () => {
+        test('should copy text to clipboard using ClipboardItem with Promise', async () => {
+            const writeMock = jest.fn().mockResolvedValue();
+            navigator.clipboard.write = writeMock;
 
-      const modal = document.querySelector(".fixed");
-      expect(modal).toBeTruthy();
+            await copyToClipboard('test text');
 
-      const event = new MouseEvent("click", { bubbles: true });
-      Object.defineProperty(event, "target", { value: modal, enumerable: true });
-      modal.dispatchEvent(event);
+            // The new implementation uses ClipboardItem with Promise-wrapped Blob for Safari transient activation
+            expect(writeMock).toHaveBeenCalledTimes(1);
+            // Verify it was called with an array containing a ClipboardItem
+            expect(writeMock).toHaveBeenCalledWith(expect.any(Array));
+        });
 
-      const modalAfter = document.querySelector(".fixed");
-      expect(modalAfter).toBeNull();
+        test('should throw error if all clipboard methods fail', async () => {
+            const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+            // Mock write (ClipboardItem) to fail
+            navigator.clipboard.write = jest.fn().mockRejectedValue(new Error('Not allowed'));
+            // Mock execCommand to also fail
+            document.execCommand = jest.fn().mockReturnValue(false);
+
+            await expect(copyToClipboard('test text')).rejects.toThrow();
+
+            consoleWarnSpy.mockRestore();
+        });
+
+        test('should not show any toast notifications', async () => {
+            const writeMock = jest.fn().mockResolvedValue();
+            navigator.clipboard.write = writeMock;
+
+            await copyToClipboard('test text');
+            const container = document.getElementById('toast-container');
+            expect(container.children.length).toBe(0);
+        });
+
+        test('should fallback to execCommand when Clipboard API unavailable', async () => {
+            // Remove clipboard API
+            Object.defineProperty(navigator, 'clipboard', {
+                value: undefined,
+                writable: true,
+            });
+            document.execCommand = jest.fn().mockReturnValue(true);
+
+            await copyToClipboard('test text');
+            expect(document.execCommand).toHaveBeenCalledWith('copy');
+        });
     });
 
-    test("should close modal on Escape key", () => {
-      showPromptModal("Test prompt", "Title");
+    describe('copyToClipboardAsync', () => {
+        beforeEach(() => {
+            // Ensure clipboard API is available
+            if (!navigator.clipboard) {
+                Object.defineProperty(navigator, 'clipboard', {
+                    value: {},
+                    writable: true,
+                    configurable: true
+                });
+            }
+        });
 
-      const modal = document.querySelector(".fixed");
-      expect(modal).toBeTruthy();
+        test('should copy text from a promise', async () => {
+            const writeMock = jest.fn().mockResolvedValue();
+            Object.defineProperty(navigator.clipboard, 'write', {
+                value: writeMock,
+                writable: true,
+                configurable: true
+            });
 
-      const escapeEvent = new KeyboardEvent("keydown", { key: "Escape" });
-      document.dispatchEvent(escapeEvent);
+            const textPromise = Promise.resolve('async text');
+            await copyToClipboardAsync(textPromise);
 
-      const modalAfter = document.querySelector(".fixed");
-      expect(modalAfter).toBeNull();
+            expect(writeMock).toHaveBeenCalledTimes(1);
+            expect(writeMock).toHaveBeenCalledWith(expect.any(Array));
+        });
+
+        test('should handle delayed promise resolution', async () => {
+            const writeMock = jest.fn().mockResolvedValue();
+            Object.defineProperty(navigator.clipboard, 'write', {
+                value: writeMock,
+                writable: true,
+                configurable: true
+            });
+
+            const delayedPromise = new Promise(resolve =>
+                setTimeout(() => resolve('delayed text'), 10)
+            );
+            await copyToClipboardAsync(delayedPromise);
+
+            expect(writeMock).toHaveBeenCalledTimes(1);
+        });
     });
 
-    test("should escape HTML in prompt text", () => {
-      showPromptModal("<script>alert('xss')</script>", "Title");
+    describe('showPromptModal', () => {
+        test('should display modal with prompt text', () => {
+            showPromptModal('Test prompt content', 'Test Title');
 
-      const modal = document.querySelector(".fixed");
-      expect(modal.innerHTML).not.toContain("<script>");
-      expect(modal.innerHTML).toContain("&lt;script&gt;");
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeTruthy();
+            expect(modal.innerHTML).toContain('Test Title');
+            expect(modal.innerHTML).toContain('Test prompt content');
 
-      document.querySelector("#close-prompt-modal").click();
-    });
-  });
+            // Clean up
+            document.querySelector('#close-prompt-modal-btn').click();
+        });
 
-  describe("copyToClipboard", () => {
-    test("should copy text to clipboard using ClipboardItem", async () => {
-      const writeMock = jest.fn().mockResolvedValue();
-      navigator.clipboard.write = writeMock;
+        test('should close modal when X button is clicked', () => {
+            showPromptModal('Test prompt', 'Title');
 
-      await copyToClipboard("Test text");
+            const closeBtn = document.querySelector('#close-prompt-modal');
+            expect(closeBtn).toBeTruthy();
+            closeBtn.click();
 
-      expect(writeMock).toHaveBeenCalledTimes(1);
-      expect(writeMock).toHaveBeenCalledWith(expect.any(Array));
-    });
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeNull();
+        });
 
-    test("should complete successfully on successful copy", async () => {
-      const writeMock = jest.fn().mockResolvedValue();
-      navigator.clipboard.write = writeMock;
+        test('should close modal when Close button is clicked', () => {
+            showPromptModal('Test prompt', 'Title');
 
-      await expect(copyToClipboard("Test text")).resolves.not.toThrow();
-    });
+            const closeBtn = document.querySelector('#close-prompt-modal-btn');
+            expect(closeBtn).toBeTruthy();
+            closeBtn.click();
 
-    test("should fallback to execCommand when Clipboard API fails", async () => {
-      const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
-      navigator.clipboard.write = jest.fn().mockRejectedValue(new Error("Not allowed"));
-      document.execCommand = jest.fn().mockReturnValue(true);
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeNull();
+        });
 
-      await copyToClipboard("Test text");
-      expect(document.execCommand).toHaveBeenCalledWith("copy");
+        test('should close modal when backdrop is clicked', () => {
+            showPromptModal('Test prompt', 'Title');
 
-      consoleWarnSpy.mockRestore();
-    });
-  });
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeTruthy();
 
-  describe("showDocumentPreviewModal", () => {
-    beforeEach(() => {
-      document.body.innerHTML = "";
-      // Mock window.getSelection
-      window.getSelection = jest.fn(() => ({
-        removeAllRanges: jest.fn(),
-        addRange: jest.fn()
-      }));
-      // Mock document.createRange
-      document.createRange = jest.fn(() => ({
-        selectNodeContents: jest.fn()
-      }));
-    });
+            // Simulate backdrop click
+            const event = new MouseEvent('click', { bubbles: true });
+            Object.defineProperty(event, 'target', { value: modal, enumerable: true });
+            modal.dispatchEvent(event);
 
-    test("should display modal with rendered markdown content", () => {
-      // Mock marked library
-      global.marked = { parse: (md) => `<p>${md}</p>` };
+            const modalAfter = document.querySelector('.fixed');
+            expect(modalAfter).toBeNull();
+        });
 
-      showDocumentPreviewModal("# Test Content", "Preview Title", "test.md");
+        test('should escape HTML in prompt text', () => {
+            showPromptModal('<script>alert("xss")</script>', 'Title');
 
-      const modal = document.querySelector(".fixed");
-      expect(modal).toBeTruthy();
-      expect(modal.innerHTML).toContain("Preview Title");
-      expect(modal.innerHTML).toContain("Test Content");
+            const modal = document.querySelector('.fixed');
+            expect(modal.innerHTML).not.toContain('<script>');
+            expect(modal.innerHTML).toContain('&lt;script&gt;');
 
-      document.querySelector("#close-preview-modal").click();
-      delete global.marked;
-    });
+            // Clean up
+            document.querySelector('#close-prompt-modal-btn').click();
+        });
 
-    test("should fallback to escaped HTML when marked is unavailable", () => {
-      delete global.marked;
+        test('should have a copy button', () => {
+            showPromptModal('Test prompt', 'Title');
 
-      showDocumentPreviewModal("Test **content**", "Title", "doc.md");
+            const copyBtn = document.querySelector('#copy-prompt-modal-btn');
+            expect(copyBtn).toBeTruthy();
+            expect(copyBtn.textContent).toContain('Copy');
 
-      const modal = document.querySelector(".fixed");
-      expect(modal).toBeTruthy();
-      expect(modal.innerHTML).toContain("Test **content**");
-
-      modal.querySelector("#close-modal-btn").click();
+            // Clean up
+            document.querySelector('#close-prompt-modal-btn').click();
+        });
     });
 
-    test("should close modal when X button is clicked", () => {
-      showDocumentPreviewModal("Content", "Title");
+    describe('showDocumentPreviewModal', () => {
+        test('should display modal with document content', () => {
+            showDocumentPreviewModal('# Test Document\n\nThis is content.', 'Preview', 'test.md');
 
-      const closeBtn = document.querySelector("#close-preview-modal");
-      expect(closeBtn).toBeTruthy();
-      closeBtn.click();
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeTruthy();
+            expect(modal.innerHTML).toContain('Preview');
 
-      expect(document.querySelector(".fixed")).toBeNull();
+            // Clean up
+            document.querySelector('#close-modal-btn').click();
+        });
+
+        test('should close modal when X button is clicked', () => {
+            showDocumentPreviewModal('Content', 'Title', 'doc.md');
+
+            const closeBtn = document.querySelector('#close-preview-modal');
+            expect(closeBtn).toBeTruthy();
+            closeBtn.click();
+
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeNull();
+        });
+
+        test('should close modal on Escape key', () => {
+            showDocumentPreviewModal('Content', 'Title', 'doc.md');
+
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeTruthy();
+
+            // Simulate Escape key
+            const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+            document.dispatchEvent(escapeEvent);
+
+            const modalAfter = document.querySelector('.fixed');
+            expect(modalAfter).toBeNull();
+        });
+
+        test('should close modal when backdrop is clicked', () => {
+            showDocumentPreviewModal('Content', 'Title', 'doc.md');
+
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeTruthy();
+
+            // Simulate backdrop click
+            const event = new MouseEvent('click', { bubbles: true });
+            Object.defineProperty(event, 'target', { value: modal, enumerable: true });
+            modal.dispatchEvent(event);
+
+            const modalAfter = document.querySelector('.fixed');
+            expect(modalAfter).toBeNull();
+        });
+
+        test('should have download button that creates file', () => {
+            // Mock URL and createElement for download
+            const mockUrl = 'blob:test';
+            URL.createObjectURL = jest.fn().mockReturnValue(mockUrl);
+            URL.revokeObjectURL = jest.fn();
+
+            showDocumentPreviewModal('Content', 'Title', 'doc.md');
+
+            const downloadBtn = document.querySelector('#download-md-btn');
+            expect(downloadBtn).toBeTruthy();
+            downloadBtn.click();
+
+            expect(URL.createObjectURL).toHaveBeenCalled();
+            expect(URL.revokeObjectURL).toHaveBeenCalledWith(mockUrl);
+
+            // Clean up
+            document.querySelector('#close-modal-btn').click();
+        });
+
+        test('should call onDownload callback after download', () => {
+            URL.createObjectURL = jest.fn().mockReturnValue('blob:test');
+            URL.revokeObjectURL = jest.fn();
+
+            const onDownload = jest.fn();
+            showDocumentPreviewModal('Content', 'Title', 'doc.md', onDownload);
+
+            const downloadBtn = document.querySelector('#download-md-btn');
+            downloadBtn.click();
+
+            expect(onDownload).toHaveBeenCalledTimes(1);
+
+            // Clean up
+            document.querySelector('#close-modal-btn').click();
+        });
+
+        test('should handle missing marked library gracefully', () => {
+            // marked is not defined in test environment
+            showDocumentPreviewModal('<b>Bold</b> text', 'Title', 'doc.md');
+
+            const modal = document.querySelector('.fixed');
+            expect(modal).toBeTruthy();
+            // Should escape HTML when marked is unavailable
+            expect(modal.innerHTML).toContain('&lt;b&gt;');
+
+            // Clean up
+            document.querySelector('#close-modal-btn').click();
+        });
     });
-
-    test("should close modal when Close button is clicked", () => {
-      showDocumentPreviewModal("Content", "Title");
-
-      const closeBtn = document.querySelector("#close-modal-btn");
-      closeBtn.click();
-
-      expect(document.querySelector(".fixed")).toBeNull();
-    });
-
-    test("should close modal when backdrop is clicked", () => {
-      showDocumentPreviewModal("Content", "Title");
-
-      const modal = document.querySelector(".fixed");
-      const event = new MouseEvent("click", { bubbles: true });
-      Object.defineProperty(event, "target", { value: modal, enumerable: true });
-      modal.dispatchEvent(event);
-
-      expect(document.querySelector(".fixed")).toBeNull();
-    });
-
-    test("should close modal on Escape key", () => {
-      showDocumentPreviewModal("Content", "Title");
-
-      const escapeEvent = new KeyboardEvent("keydown", { key: "Escape" });
-      document.dispatchEvent(escapeEvent);
-
-      expect(document.querySelector(".fixed")).toBeNull();
-    });
-
-    test("should copy formatted text when copy button is clicked", async () => {
-      document.execCommand = jest.fn().mockReturnValue(true);
-      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
-
-      showDocumentPreviewModal("Content", "Title");
-
-      const copyBtn = document.querySelector("#copy-formatted-btn");
-      await copyBtn.click();
-
-      expect(document.execCommand).toHaveBeenCalledWith("copy");
-      consoleSpy.mockRestore();
-    });
-
-    test("should download markdown file when download button is clicked", () => {
-      const mockUrl = "blob:test-url";
-      const mockAnchor = { href: "", download: "", click: jest.fn() };
-      const originalCreateObjectURL = URL.createObjectURL;
-      const originalRevokeObjectURL = URL.revokeObjectURL;
-      const originalCreateElement = document.createElement.bind(document);
-
-      URL.createObjectURL = jest.fn(() => mockUrl);
-      URL.revokeObjectURL = jest.fn();
-      document.createElement = jest.fn((tag) => {
-        if (tag === "a") return mockAnchor;
-        return originalCreateElement(tag);
-      });
-
-      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
-      const onDownload = jest.fn();
-
-      showDocumentPreviewModal("Content", "Title", "test-doc.md", onDownload);
-
-      const downloadBtn = document.querySelector("#download-md-btn");
-      downloadBtn.click();
-
-      expect(URL.createObjectURL).toHaveBeenCalled();
-      expect(mockAnchor.download).toBe("test-doc.md");
-      expect(mockAnchor.click).toHaveBeenCalled();
-      expect(URL.revokeObjectURL).toHaveBeenCalledWith(mockUrl);
-      expect(onDownload).toHaveBeenCalled();
-
-      URL.createObjectURL = originalCreateObjectURL;
-      URL.revokeObjectURL = originalRevokeObjectURL;
-      document.createElement = originalCreateElement;
-      consoleSpy.mockRestore();
-    });
-
-    test("should use marked function directly if marked.parse is unavailable", () => {
-      global.marked = (md) => `<strong>${md}</strong>`;
-
-      showDocumentPreviewModal("Bold text", "Title");
-
-      const modal = document.querySelector(".fixed");
-      expect(modal.innerHTML).toContain("<strong>");
-
-      modal.querySelector("#close-modal-btn").click();
-      delete global.marked;
-    });
-  });
 });

@@ -51,17 +51,15 @@ function extractTitleFromMarkdown(markdown) {
 
 /**
  * Create a new project
- * @param {string} title - ADR title
- * @param {string} context - ADR context
- * @param {string} [status='Proposed'] - ADR status
+ * @param {import('./types.js').ADRFormData} formData - ADR form data
  * @returns {Promise<import('./types.js').Project>}
  */
-export async function createProject(title, context, status = 'Proposed') {
+export async function createProject(formData) {
   const project = {
     id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    title: title.trim(),
-    context: context.trim(),
-    status: status,
+    title: (formData.title || '').trim(),
+    context: (formData.context || '').trim(),
+    status: formData.status || 'Proposed',
     phase: 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

@@ -278,7 +278,7 @@ export function renderNewProjectForm(existingProject = null) {
       }
       return existingProject;
     } else {
-      const project = await createProject(formData.title, formData.context, formData.status);
+      const project = await createProject(formData);
       showToast('ADR created!', 'success');
       if (navigateAfter) {
         navigateTo('project/' + project.id);
