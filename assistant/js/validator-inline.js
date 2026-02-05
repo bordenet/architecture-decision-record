@@ -117,7 +117,7 @@ function scoreStatus(text) {
   return { score: Math.min(25, score), maxScore: 25, issues };
 }
 
-export function validateADR(text) {
+export function validateDocument(text) {
   if (!text || typeof text !== 'string' || text.trim().length < 50) {
     return {
       totalScore: 0,
