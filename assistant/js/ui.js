@@ -411,7 +411,7 @@ export async function confirmWithRemember(message, title = 'Confirm', options = 
   const {
     confirmText = 'Continue',
     cancelText = 'Cancel',
-    checkboxLabel = "Don't remind me again"
+    checkboxLabel = 'Don\'t remind me again'
   } = options;
 
   return new Promise((resolve) => {
