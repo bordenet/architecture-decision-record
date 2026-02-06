@@ -338,6 +338,19 @@ describe('Workflow class', () => {
       const md = workflow.exportAsMarkdown();
       expect(md).toContain('Final content');
     });
+
+    it('should fall back to phase 1 output when phase 3 not available', () => {
+      // Set phase 1 output but no phase 3
+      project.phases = {
+        1: { response: 'Phase 1 content here', completed: true },
+        2: { response: '', completed: false }
+      };
+      // Ensure phase3_output is not set
+      delete project.phase3_output;
+
+      const md = workflow.exportAsMarkdown();
+      expect(md).toContain('Phase 1 content here');
+    });
   });
 });
 

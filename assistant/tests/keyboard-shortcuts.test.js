@@ -90,4 +90,71 @@ describe("Keyboard Shortcuts Module", () => {
 
     exportBtn.remove();
   });
+
+  test("should close privacy notice on Escape", () => {
+    const privacyNotice = document.createElement("div");
+    privacyNotice.id = "privacy-notice";
+    document.body.appendChild(privacyNotice);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.id = "close-privacy-notice";
+    closeBtn.onclick = jest.fn();
+    document.body.appendChild(closeBtn);
+
+    setupKeyboardShortcuts();
+
+    const event = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true
+    });
+
+    document.dispatchEvent(event);
+    expect(closeBtn.onclick).toHaveBeenCalled();
+
+    privacyNotice.remove();
+    closeBtn.remove();
+  });
+
+  test("should close related projects dropdown on Escape", () => {
+    const dropdownMenu = document.createElement("div");
+    dropdownMenu.id = "related-projects-menu";
+    document.body.appendChild(dropdownMenu);
+
+    setupKeyboardShortcuts();
+
+    const event = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true
+    });
+
+    document.dispatchEvent(event);
+    expect(dropdownMenu.classList.contains("hidden")).toBe(true);
+
+    dropdownMenu.remove();
+  });
+
+  test("should auto-remove toast after timeout", () => {
+    jest.useFakeTimers();
+    showToast("Test message", "success");
+
+    const toast = mockContainer.querySelector("div");
+    expect(toast).toBeTruthy();
+
+    jest.advanceTimersByTime(3000);
+
+    expect(mockContainer.querySelector("div")).toBeFalsy();
+    jest.useRealTimers();
+  });
+
+  test("should handle missing toast container gracefully", () => {
+    mockContainer.remove();
+    expect(() => showToast("Test message", "success")).not.toThrow();
+  });
+
+  test("should use default gray color for unknown toast type", () => {
+    showToast("Test message", "unknown");
+
+    const toast = mockContainer.querySelector("div");
+    expect(toast.className).toContain("bg-gray-500");
+  });
 });

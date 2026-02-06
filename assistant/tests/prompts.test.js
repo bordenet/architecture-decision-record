@@ -95,4 +95,49 @@ describe('prompt generation', () => {
   test('generatePhase3Prompt should reject when fetch unavailable', async () => {
     await expect(generatePhase3Prompt('phase 1 output', 'phase 2 output')).rejects.toThrow();
   });
+
+  describe('with mocked fetch', () => {
+    let originalFetch;
+
+    beforeEach(() => {
+      originalFetch = global.fetch;
+    });
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+    });
+
+    test('preloadPromptTemplates should be a function', () => {
+      expect(typeof preloadPromptTemplates).toBe('function');
+    });
+
+    test('should handle failed fetch response (non-ok)', async () => {
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          ok: false,
+          status: 404,
+          statusText: 'Not Found'
+        })
+      );
+
+      const formData = { title: 'Test', status: 'Proposed', context: 'Context' };
+      await expect(generatePhase1Prompt(formData)).rejects.toThrow('Failed to load');
+    });
+
+    test('preloadPromptTemplates should preload all templates', async () => {
+      // Mock successful fetch responses for all phases
+      const mockTemplate = '{{TITLE}} - {{CONTEXT}}';
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve(mockTemplate)
+        })
+      );
+
+      await expect(preloadPromptTemplates()).resolves.not.toThrow();
+
+      // Should have called fetch for each phase
+      expect(global.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
 });

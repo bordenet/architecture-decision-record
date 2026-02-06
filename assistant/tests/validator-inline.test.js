@@ -85,6 +85,123 @@ We will do something.
       const result = validateDocument(proposedADR);
       expect(result.status.score).toBeGreaterThan(0);
     });
+
+    test('should give partial decision score for limited decision language', () => {
+      // This content has exactly 1 decision language match ("chose") to trigger partial score path
+      const partialADR = `
+# ADR: Partial Choice
+
+## Status
+Proposed
+
+## Context
+This is the background context for our problem statement.
+We have a constraint that limits our available options and paths.
+The team needed to evaluate multiple approaches carefully.
+There are several factors driving the current situation forward.
+We must consider both short-term and long-term implications.
+
+## Choice
+The team chose option A after extensive discussion.
+
+## Consequences
+This approach brings several advantages to the project.
+There may be some challenges with implementation timing.
+Overall the path forward looks promising for success.
+The benefits outweigh the potential drawbacks here.
+`;
+      const result = validateDocument(partialADR);
+      // Should have some decision score but not full marks (10 for section + 4 for partial = 14)
+      expect(result.decision.score).toBe(14);
+      // Should have an issue about stating decision more clearly
+      expect(result.decision.issues.some(i => i.includes('State the decision'))).toBe(true);
+    });
+
+    test('should flag missing decision language entirely', () => {
+      // No decision language words (decide/decision/choose/chose/select/selected/adopt/use/implement/will)
+      const noDecisionLang = `
+# ADR: Missing Language
+
+## Status
+Proposed
+
+## Context
+This is the background context for our problem statement.
+We have a constraint that limits our available options and paths.
+The team needed to evaluate multiple approaches carefully.
+There are several factors driving the current situation forward.
+We must consider both short-term and long-term implications.
+
+## Determination
+The team went with option A after extensive discussion.
+
+## Consequences
+This approach brings several advantages to the project.
+There may be some challenges with implementation timing.
+Overall the path forward looks promising for success.
+The benefits outweigh the potential drawbacks here.
+`;
+      const result = validateDocument(noDecisionLang);
+      // Should have only 0 points for decision language (section not matched either)
+      expect(result.decision.score).toBe(0);
+      // Should have an issue about stating decision explicitly
+      expect(result.decision.issues.some(i => i.includes('State the decision explicitly'))).toBe(true);
+    });
+
+    test('should give partial context score for limited context language', () => {
+      // Exactly 1-2 context language matches to trigger partial score (line 53)
+      const partialContext = `
+# ADR: Partial Context
+
+## Status
+Proposed
+
+## Context
+This situation requires attention.
+The project team discussed various approaches.
+A determination was made after long meetings.
+The path forward was not immediately clear.
+
+## Decision
+We will proceed with the standard approach after careful consideration.
+
+## Consequences
+This is a benefit of the chosen approach.
+There are advantages to this path forward.
+`;
+      const result = validateDocument(partialContext);
+      // Should have partial context score and issue about explaining context
+      expect(result.context.issues.some(i =>
+        i.includes('Explain the problem context') || i.includes('Document constraints')
+      )).toBe(true);
+    });
+
+    test('should give partial consequences score for limited positive/negative', () => {
+      // Exactly 1 positive and 1 negative match to trigger partial score (lines 96-97, 103)
+      const partialConsequences = `
+# ADR: Partial Consequences
+
+## Status
+Proposed
+
+## Context
+This is the background and context for our situation.
+We have a constraint and requirement to address.
+The problem requires a solution quickly.
+
+## Decision
+We will implement the new system as designed.
+
+## Consequences
+There is one benefit from this approach.
+There is one drawback to consider as well.
+`;
+      const result = validateDocument(partialConsequences);
+      // Check for partial score issues
+      expect(result.consequences.issues.some(i =>
+        i.includes('Document more benefits') || i.includes('Document more trade-offs')
+      )).toBe(true);
+    });
   });
 
   describe('getScoreColor', () => {
