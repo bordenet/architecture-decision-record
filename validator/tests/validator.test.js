@@ -91,11 +91,12 @@ describe('validateADR', () => {
       }
     });
 
-    test('total score equals sum of dimension scores', () => {
+    test('total score equals sum of dimension scores minus slop deduction', () => {
       const result = validateADR(fixtures.complete.content);
       const sum = result.context.score + result.decision.score +
                   result.consequences.score + result.status.score;
-      expect(result.totalScore).toBe(sum);
+      const expectedTotal = sum - (result.slopDetection?.deduction || 0);
+      expect(result.totalScore).toBe(expectedTotal);
     });
   });
 });
