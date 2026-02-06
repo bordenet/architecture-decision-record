@@ -534,8 +534,17 @@ export function validateADR(text) {
     }
   }
 
+  // Include slop deduction in status category so categories sum to total
+  const adjustedStatus = {
+    ...status,
+    score: Math.max(0, status.score - slopDeduction),
+    issues: slopDeduction > 0
+      ? [...status.issues, `AI patterns detected (-${slopDeduction})`]
+      : status.issues
+  };
+
   const totalScore = Math.max(0,
-    context.score + decision.score + consequences.score + status.score - slopDeduction
+    context.score + decision.score + consequences.score + adjustedStatus.score
   );
 
   return {
@@ -543,7 +552,7 @@ export function validateADR(text) {
     context,
     decision,
     consequences,
-    status,
+    status: adjustedStatus,
     slopDetection: {
       ...slopPenalty,
       deduction: slopDeduction,
