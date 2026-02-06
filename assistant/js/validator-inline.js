@@ -10,6 +10,11 @@
  * 4. Status (25 pts) - Clear status (proposed/accepted/deprecated/superseded)
  */
 
+import { getSlopPenalty, calculateSlopScore } from './slop-detection.js';
+
+// Re-export for direct access
+export { calculateSlopScore };
+
 const CONTEXT_PATTERNS = {
   section: /^#+\s*(context|background|problem|situation)/im,
   language: /\b(context|background|problem|situation|challenge|need|requirement|constraint)\b/gi,
@@ -133,9 +138,30 @@ export function validateDocument(text) {
   const consequences = scoreConsequences(text);
   const status = scoreStatus(text);
 
+  // AI slop detection
+  const slopPenalty = getSlopPenalty(text);
+  let slopDeduction = 0;
+  const slopIssues = [];
+
+  if (slopPenalty.penalty > 0) {
+    slopDeduction = Math.min(5, Math.floor(slopPenalty.penalty * 0.6));
+    if (slopPenalty.issues.length > 0) {
+      slopIssues.push(...slopPenalty.issues.slice(0, 2));
+    }
+  }
+
+  const totalScore = Math.max(0,
+    context.score + decision.score + consequences.score + status.score - slopDeduction
+  );
+
   return {
-    totalScore: context.score + decision.score + consequences.score + status.score,
-    context, decision, consequences, status
+    totalScore,
+    context, decision, consequences, status,
+    slopDetection: {
+      ...slopPenalty,
+      deduction: slopDeduction,
+      issues: slopIssues
+    }
   };
 }
 
