@@ -2,7 +2,7 @@
  * Tests for validator-inline.js
  * Architecture Decision Record inline validation
  */
-import { validateDocument, getScoreColor, getScoreLabel } from '../js/validator-inline.js';
+import { validateDocument, getScoreColor, getScoreLabel } from '../../shared/js/validator-inline.js';
 
 describe('Inline ADR Validator', () => {
   describe('validateDocument', () => {

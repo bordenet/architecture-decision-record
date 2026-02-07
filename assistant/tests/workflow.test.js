@@ -18,7 +18,7 @@ import {
   getExportFilename,
   getFinalMarkdown,
   generatePromptForPhase
-} from '../js/workflow.js';
+} from '../../shared/js/workflow.js';
 
 // Mock fetch for prompt template loading
 beforeAll(() => {
