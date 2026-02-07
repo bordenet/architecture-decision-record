@@ -1,4 +1,4 @@
-import { setupKeyboardShortcuts, showToast } from "../js/keyboard-shortcuts.js";
+import { setupKeyboardShortcuts, showToast } from "../../shared/js/keyboard-shortcuts.js";
 
 describe("Keyboard Shortcuts Module", () => {
   let mockContainer;

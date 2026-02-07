@@ -11,7 +11,7 @@ describe("ADR Form", () => {
 
   describe("Form Fields", () => {
     test("should have all required ADR fields", async () => {
-      const { App } = await import("../js/app.js");
+      const { App } = await import("../../shared/js/app.js");
       const app = new App();
 
       expect(app).toBeDefined();
