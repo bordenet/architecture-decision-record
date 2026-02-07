@@ -6,8 +6,29 @@
     <title>Architecture Decision Record Assistant</title>
     <meta name="description" content="An AI-assisted tool for drafting architecture decision records (ADRs) using the standard GitHub template format - 100% client-side, privacy-first">
 
-    <!-- Tailwind CSS (built with PostCSS) -->
-    <link rel="stylesheet" href="shared/css/tailwind.css">
+    <!-- Tailwind CSS with Typography plugin -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+
+    <!-- Fallback prose styles for markdown preview -->
+    <style>
+        .prose h1 { font-size: 2em; font-weight: bold; margin: 0.67em 0; }
+        .prose h2 { font-size: 1.5em; font-weight: bold; margin: 0.83em 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.3em; }
+        .prose h3 { font-size: 1.17em; font-weight: bold; margin: 1em 0; }
+        .prose p { margin: 1em 0; }
+        .prose ul, .prose ol { margin: 1em 0; padding-left: 2em; }
+        .prose ul { list-style-type: disc; }
+        .prose ol { list-style-type: decimal; }
+        .prose li { margin: 0.5em 0; }
+        .prose table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+        .prose th, .prose td { border: 1px solid #d1d5db; padding: 0.5em 1em; text-align: left; }
+        .prose th { background-color: #f3f4f6; font-weight: bold; }
+        .dark .prose th { background-color: #374151; }
+    </style>
 
     <!-- Marked.js for Markdown rendering (local copy to avoid CDN blocking) -->
     <script src="shared/js/lib/marked.min.js"></script>

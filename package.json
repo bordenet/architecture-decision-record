@@ -11,8 +11,6 @@
     "url": "https://github.com/bordenet/architecture-decision-record.git"
   },
   "scripts": {
-    "build:css": "tailwindcss -i assistant/css/tailwind-input.css -o assistant/css/tailwind.css",
-    "build": "npm run build:css && esbuild assistant/js/app.js --bundle --outfile=app-bundle.js --platform=browser",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "test:assistant": "NODE_OPTIONS='--experimental-vm-modules' jest assistant/tests/",
     "test:validator": "NODE_OPTIONS='--experimental-vm-modules' jest validator/tests/",
@@ -25,7 +23,7 @@
     "quality": "npm run lint && npm run test:coverage",
     "validate": "./scripts/validate.sh",
     "validate:docs": "bash ./scripts/lib/validate-docs.sh",
-    "serve": "npm run build && python3 -m http.server 8000 --directory .",
+    "serve": "python3 -m http.server 8000",
     "deploy": "./scripts/deploy-web.sh",
     "prepare": "command -v pre-commit >/dev/null 2>&1 && pre-commit install || echo 'pre-commit not installed, skipping hook setup'"
   },
