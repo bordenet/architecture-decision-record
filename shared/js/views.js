@@ -10,6 +10,7 @@ import { navigateTo } from './router.js';
 import { getFinalMarkdown, getExportFilename } from './workflow.js';
 import { getAllTemplates, getTemplate } from './document-specific-templates.js';
 import { validateDocument, getScoreColor, getScoreLabel } from './validator-inline.js';
+import { showImportModal } from './import-document.js';
 
 /** @constant {string} ADR documentation URL */
 const ADR_DOCS_URL = 'https://adr.github.io/';
@@ -227,6 +228,14 @@ export function renderNewProjectForm(existingProject = null) {
                                     <span class="text-xs text-gray-500 dark:text-gray-400">${t.description}</span>
                                 </button>
                             `).join('')}
+                            <!-- Import Existing Document tile -->
+                            <button type="button"
+                                id="import-doc-btn"
+                                class="p-3 border-2 border-dashed rounded-lg text-center transition-all hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 border-gray-300 dark:border-gray-600">
+                                <span class="text-2xl block mb-1">📥</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white block">Import</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">Paste from Word/Docs</span>
+                            </button>
                         </div>
                     </div>
                 `}
@@ -342,6 +351,13 @@ export function renderNewProjectForm(existingProject = null) {
       navigateTo('home');
     }
   });
+
+  // Import document button handler (only when creating new)
+  if (!isEditing) {
+    document.getElementById('import-doc-btn')?.addEventListener('click', () => {
+      showImportModal();
+    });
+  }
 
   // Next Phase button - saves and navigates to Phase 1
   document.getElementById('next-phase-btn').addEventListener('click', async () => {
