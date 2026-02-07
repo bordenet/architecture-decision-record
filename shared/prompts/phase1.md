@@ -83,24 +83,10 @@ These questions should probe for:
 - "Will your team need hiring/training? What's the budget for that?"
 - "What would failure look like for this decision?"
 
-**Format**: Return questions BEFORE the ADR, like:
-```
-## Clarifying Questions
-
-I'd like to ask a few questions to make this ADR stronger:
-
-1. **On timing**: You mention 45-minute deployments are blocking features. How often are you trying to deploy per week?
-2. **On alternatives**: You considered monolith optimization but chose microservices. What was the cost comparison?
-3. **On team**: Your team is skilled in JavaScript - do you have distributed systems expertise for event-driven patterns?
-4. **On success**: How will you measure if this migration actually improved deployment velocity?
-5. **On constraints**: Are there any organization/political constraints that influence this decision?
-
----
-
-# [ADR Title]
-
-[Then proceed with the full ADR as usual...]
-```
+**Format**: Return questions BEFORE the ADR using this structure:
+- Start with "## Clarifying Questions" header
+- List 3-5 numbered questions with bold topic labels
+- Follow with horizontal rule then the ADR
 
 **Why this matters**: The best ADRs emerge from dialogue. Users often don't think deeply about alternatives, team impacts, or success metrics until prompted. Your job is to ask the smart questions that reveal what they're missing.
 
@@ -108,46 +94,29 @@ I'd like to ask a few questions to make this ADR stronger:
 
 ## Output Format
 
-Return the completed ADR in this markdown format:
+<output_rules>
+CRITICAL - Your final ADR must be COPY-PASTE READY:
+- Start IMMEDIATELY with "## Clarifying Questions" or "# {title}" (no preamble like "Here's the ADR...")
+- End after the Amendment section (no sign-off like "Let me know if...")
+- NO markdown code fences (```markdown) wrapping the output
+- NO explanations of what you did or why
+- The user will paste your ENTIRE response directly into the tool
+</output_rules>
 
-```markdown
-# {title}
+### Required Sections (in order)
 
-## Status
-{status}
-
-## Context
-{context}
-
-## Decision
-[Your decision statement here - specific and actionable, INCLUDING alternatives comparison and business drivers]
-
-## Consequences
-
-### Positive Consequences
-[At least 2-3 specific positive impacts]
-
-### Negative Consequences
-[At least 2-3 specific negative impacts]
-
-### Subsequent ADRs Triggered by This Decision
-[List 2-3 architectural decisions that this decision necessitates]
-
-### Recommended Review Timing
-[Specify when to review: e.g., "30 days", "end of Q1", or "after 3 deployments"]
-
-## If This ADR Is Updated Later
-
-This is a **living document**. If circumstances change (new tools, new constraints, new learning), add a dated amendment instead of modifying the original text:
-
-### Amendment - YYYY-MM-DD
-[Date]: [What changed]
-Impact on decision: [How does this affect the original decision? Still valid? Needs revision?]
-
-Example:
-### Amendment - 2025-12-15
-Kubernetes became the standard for orchestration (was Mesos). Impact: Our service mesh strategy (Istio) is now more aligned with industry standard. Decision remains valid; implementation easier than initially planned.
-```
+| Section | Content | Format |
+|---------|---------|--------|
+| # {title} | ADR title | H1 header |
+| ## Status | Proposed/Accepted/Deprecated/Superseded | Paragraph |
+| ## Context | Background, constraints, problem statement | Paragraph |
+| ## Decision | Specific architectural choice with alternatives comparison and business drivers | Paragraph |
+| ## Consequences | Positive and negative impacts | Two subsections |
+| ### Positive Consequences | 3+ specific positive impacts | Bullet list |
+| ### Negative Consequences | 3+ specific negative impacts | Bullet list |
+| ### Subsequent ADRs Triggered | 2-3 decisions this necessitates | Bullet list |
+| ### Recommended Review Timing | When to review (e.g., "30 days") | Paragraph |
+| ## If This ADR Is Updated Later | Amendment pattern with dates | Subsection template |
 
 ## Context Grounding
 Reference specific facts from the context in your Decision and Consequences:

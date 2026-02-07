@@ -69,27 +69,10 @@ These questions should probe for:
 - **Risk** - "What would cause this decision to fail? What's your fallback plan?"
 - **Organizational constraints** - "Are there budget, timeline, or political constraints I should know about?"
 
-**Format**: Return questions BEFORE the improved ADR:
-
-```
-## Questions About This ADR
-
-As I reviewed the draft, a few areas need clarification to make the final version stronger:
-
-1. **On the alternative**: You considered monolith optimization ($150k) but chose microservices. What's the cost/timeline of the microservices migration itself? That's critical for the trade-off analysis.
-
-2. **On team readiness**: You mention 8 engineers skilled in JavaScript. How many have distributed systems experience? The event-driven architecture requires expertise you may not have.
-
-3. **On success criteria**: You want to reduce deployments from 45 minutes to 5 minutes. But what if you hit 8 minutes? Is that success? Defining this makes the after-action review meaningful.
-
-4. **On risk**: If this migration takes longer than expected, what's your contingency? Keep the monolith running in parallel? Emergency hiring?
-
-5. **On organizational**: Is there executive support for a 6-12 month migration? Or budget constraints that affect scope?
-
----
-
-[Then provide the improved ADR...]
-```
+**Format**: Return questions BEFORE the improved ADR using this structure:
+- Start with "## Questions About This ADR" header
+- List 3-5 numbered questions with bold topic labels
+- Follow with horizontal rule then the improved ADR
 
 **Why this matters**: The review phase isn't just about polishing language. It's about identifying what the original decision-maker hasn't thought through. Good review questions expose hidden assumptions and gaps.
 
@@ -97,42 +80,30 @@ As I reviewed the draft, a few areas need clarification to make the final versio
 
 ## Output Format
 
-Return the improved ADR in this markdown format:
+<output_rules>
+CRITICAL - Your review and improved ADR must be COPY-PASTE READY:
+- Start IMMEDIATELY with "## Questions About This ADR" (no preamble like "Here's my review...")
+- When providing improved ADR, start with "# {title}" (no intro)
+- End after the Amendment section (no sign-off like "Let me know if...")
+- NO markdown code fences (```markdown) wrapping the output
+- NO explanations of what you did or why
+- The user will paste your ENTIRE response directly into the tool
+</output_rules>
 
-```markdown
-# [Title]
+### Required Sections (in order)
 
-## Status
-[Status]
-
-## Context
-[Original context - keep as-is unless critical gap identified]
-
-## Decision
-[Improved decision with specific architectural approach, alternatives comparison, business drivers, and clear rationale]
-
-## Consequences
-
-### Positive Consequences
-[3+ specific, concrete positive impacts with details]
-
-### Negative Consequences
-[3+ specific, concrete negative impacts with honest assessment]
-
-### Subsequent ADRs Triggered by This Decision
-[List 2-3 architectural decisions that this decision necessitates]
-
-### Recommended Review Timing
-[Specify clear checkpoints for after-action review]
-
-## If This ADR Is Updated Later
-
-This is a **living document**. If circumstances change, add a dated amendment instead of modifying the original:
-
-### Amendment - YYYY-MM-DD
-[What changed]: [Description]
-Impact on decision: [Does this affect the original decision? Still valid?]
-```
+| Section | Content | Format |
+|---------|---------|--------|
+| ## Questions About This ADR | 3-5 clarifying questions | Numbered list |
+| # {title} | ADR title | H1 header |
+| ## Status | Proposed/Accepted/Deprecated/Superseded | Paragraph |
+| ## Context | Keep as-is unless critical gap | Paragraph |
+| ## Decision | Improved with alternatives and business drivers | Paragraph |
+| ### Positive Consequences | 3+ specific impacts | Bullet list |
+| ### Negative Consequences | 3+ specific impacts (honest) | Bullet list |
+| ### Subsequent ADRs Triggered | 2-3 decisions this necessitates | Bullet list |
+| ### Recommended Review Timing | Clear checkpoints | Paragraph |
+| ## If This ADR Is Updated Later | Amendment pattern | Template |
 
 ## ⚠️ CRITICAL: AI Slop Detection Checklist
 

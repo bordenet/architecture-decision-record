@@ -553,6 +553,11 @@ export function validateADR(text) {
     decision,
     consequences,
     status: adjustedStatus,
+    // Dimension mappings for app.js compatibility
+    dimension1: context,
+    dimension2: decision,
+    dimension3: consequences,
+    dimension4: adjustedStatus,
     slopDetection: {
       ...slopPenalty,
       deduction: slopDeduction,

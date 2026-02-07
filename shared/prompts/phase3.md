@@ -67,23 +67,10 @@ These questions probe for:
 - **Consequences completeness** - "Are there consequences I'm missing? What about [obvious impact]?"
 - **Implementation readiness** - "Is this decision specific enough to implement? Or do you need more detail?"
 
-**Format**: Return final questions BEFORE the synthesized ADR:
-
-```
-## Final Validation Questions
-
-As I synthesized these two versions, I want to confirm a few things:
-
-1. **On the core decision**: I'm reading this as "split the monolith into domain-driven microservices with independent databases and deployment pipelines". Is that the right decision? Or is there nuance I'm missing?
-
-2. **On consequences**: The key negative impact I'm seeing is "requires distributed systems expertise and event-driven architecture mastery". Does this match your biggest concern? Or is there a different impact that matters more (e.g., cost, timeline, team retention)?
-
-3. **On specificity**: Is this decision specific enough for your team to implement? Or do you need guidance on service boundaries, deployment architecture, or data migration strategy?
-
----
-
-[Then provide the final ADR...]
-```
+**Format**: Return final questions BEFORE the synthesized ADR using this structure:
+- Start with "## Final Validation Questions" header
+- List 2-3 numbered questions with bold topic labels
+- Follow with horizontal rule then the final ADR
 
 **Why this matters**: Synthesis isn't mechanical averaging. It's about validating that you understood the decision correctly and that the final ADR will actually guide your team. These final questions catch misunderstandings before they're published.
 
@@ -91,42 +78,28 @@ As I synthesized these two versions, I want to confirm a few things:
 
 ## Output Format
 
-Return the final ADR in this markdown format:
+<output_rules>
+CRITICAL - Your final ADR must be COPY-PASTE READY:
+- Start IMMEDIATELY with "## Final Validation Questions" or "# {title}" (no preamble like "Here's the final ADR...")
+- End after the Amendment section (no sign-off like "Let me know if...")
+- NO markdown code fences (```markdown) wrapping the output
+- NO explanations of what you did or why
+- The user will paste your ENTIRE response directly into the tool
+</output_rules>
 
-```markdown
-# [Title]
+### Required Sections (Synthesize Best from Both Versions)
 
-## Status
-[Status]
-
-## Context
-[Improved context addressing feedback]
-
-## Decision
-[Polished decision incorporating specificity feedback, alternatives discussion, and business drivers]
-
-## Consequences
-
-### Positive Consequences
-[3+ specific positive impacts with details]
-
-### Negative Consequences
-[3+ specific negative impacts with honest assessment]
-
-### Subsequent ADRs Triggered by This Decision
-[List 2-3 architectural decisions that this decision necessitates]
-
-### Recommended Review Timing
-[Specify clear checkpoints for after-action review]
-
-## If This ADR Is Updated Later
-
-This is a **living document**. Document changes as amendments with dates:
-
-### Amendment - YYYY-MM-DD
-[What changed]: [Description]
-Impact on decision: [Still valid? Needs revision? How does this affect implementation?]
-```
+| Section | Synthesis Guidance | Format |
+|---------|-------------------|--------|
+| # {title} | Use clearer title from either version | H1 header |
+| ## Status | Keep original unless changed | Paragraph |
+| ## Context | Incorporate feedback improvements | Paragraph |
+| ## Decision | Best specificity from either version | Paragraph |
+| ### Positive Consequences | 3+ most concrete impacts | Bullet list |
+| ### Negative Consequences | 3+ most honest assessments | Bullet list |
+| ### Subsequent ADRs Triggered | Combined from both | Bullet list |
+| ### Recommended Review Timing | Most specific checkpoint | Paragraph |
+| ## If This ADR Is Updated Later | Amendment pattern | Template |
 
 ## ⚠️ FINAL AI Slop Sweep
 
