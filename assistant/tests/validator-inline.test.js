@@ -2,7 +2,21 @@
  * Tests for validator-inline.js
  * Architecture Decision Record inline validation
  */
-import { validateDocument, getScoreColor, getScoreLabel } from '../../shared/js/validator-inline.js';
+import {
+  validateDocument,
+  getScoreColor,
+  getScoreLabel,
+  scoreContext,
+  scoreDecision,
+  scoreConsequences,
+  scoreStatus,
+  detectContext,
+  detectDecision,
+  detectOptions,
+  detectConsequences,
+  detectStatus,
+  detectRationale
+} from '../../shared/js/validator-inline.js';
 
 describe('Inline ADR Validator', () => {
   describe('validateDocument', () => {
@@ -243,3 +257,192 @@ There is one drawback to consider as well.
   });
 });
 
+// ============================================================================
+// Scoring Function Tests
+// ============================================================================
+
+describe('Scoring Functions', () => {
+  describe('scoreContext', () => {
+    test('should return maxScore of 25', () => {
+      const result = scoreContext('Context and background');
+      expect(result.maxScore).toBe(25);
+    });
+
+    test('should score higher for comprehensive context', () => {
+      const content = `
+## Context
+Our current system has a constraint that requires careful consideration.
+The situation demands a decision about database architecture.
+We need 99.9% uptime for our business stakeholders.
+      `.repeat(2);
+      const result = scoreContext(content);
+      expect(result.score).toBeGreaterThan(0);
+    });
+
+    test('should return issues for empty content', () => {
+      const result = scoreContext('');
+      expect(result.issues.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('scoreDecision', () => {
+    test('should return maxScore of 25', () => {
+      const result = scoreDecision('We decided to use PostgreSQL');
+      expect(result.maxScore).toBe(25);
+    });
+
+    test('should score higher for clear decisions', () => {
+      const content = `
+## Decision
+We will use PostgreSQL as our primary database.
+We decided this because of its reliability.
+We chose this approach over alternatives.
+      `.repeat(2);
+      const result = scoreDecision(content);
+      expect(result.score).toBeGreaterThan(0);
+    });
+  });
+
+  describe('scoreConsequences', () => {
+    test('should return maxScore of 25', () => {
+      const result = scoreConsequences('The consequences are significant.');
+      expect(result.maxScore).toBe(25);
+    });
+
+    test('should score higher for balanced consequences', () => {
+      const content = `
+## Consequences
+
+### Positive
+- Better performance and reliability
+- Improved scalability advantage
+
+### Negative
+- Increased complexity risk
+- Higher maintenance cost
+      `.repeat(2);
+      const result = scoreConsequences(content);
+      expect(result.score).toBeGreaterThan(0);
+    });
+  });
+
+  describe('scoreStatus', () => {
+    test('should return maxScore of 25', () => {
+      const result = scoreStatus('Status: Proposed');
+      expect(result.maxScore).toBe(25);
+    });
+
+    test('should score for accepted status', () => {
+      const content = `
+## Status
+Accepted
+
+Date: 2024-01-15
+      `.repeat(2);
+      const result = scoreStatus(content);
+      expect(result.score).toBeGreaterThan(0);
+    });
+  });
+});
+
+// ============================================================================
+// Detection Function Tests
+// ============================================================================
+
+describe('Detection Functions', () => {
+  describe('detectContext', () => {
+    test('should detect context section', () => {
+      const content = '## Context\nThe current situation requires attention.';
+      const result = detectContext(content);
+      expect(result.hasContextSection).toBe(true);
+    });
+
+    test('should detect constraints', () => {
+      const content = 'The constraint is that we must support legacy systems. There is a requirement for 99% uptime.';
+      const result = detectContext(content);
+      expect(result.hasConstraints).toBe(true);
+    });
+  });
+
+  describe('detectDecision', () => {
+    test('should detect decision language', () => {
+      const content = 'We decided to use PostgreSQL. We will implement this approach.';
+      const result = detectDecision(content);
+      expect(result.hasDecisionLanguage).toBe(true);
+    });
+
+    test('should detect decision section', () => {
+      const content = '## Decision\nWe will use PostgreSQL.';
+      const result = detectDecision(content);
+      expect(result.hasDecisionSection).toBe(true);
+    });
+  });
+
+  describe('detectOptions', () => {
+    test('should detect options language', () => {
+      const content = 'Option 1 is PostgreSQL. Alternative 2 is MySQL.';
+      const result = detectOptions(content);
+      expect(result.hasOptionsLanguage).toBe(true);
+    });
+
+    test('should detect rejected options', () => {
+      const content = 'We ruled out MySQL because of licensing. MongoDB was dismissed due to costs.';
+      const result = detectOptions(content);
+      expect(result.hasRejected).toBe(true);
+    });
+  });
+
+  describe('detectConsequences', () => {
+    test('should detect positive consequences', () => {
+      const content = 'This will provide a benefit and advantage to the team.';
+      const result = detectConsequences(content);
+      expect(result.hasPositive).toBe(true);
+    });
+
+    test('should detect negative consequences', () => {
+      const content = 'The risk is increased complexity. There is a drawback of higher costs.';
+      const result = detectConsequences(content);
+      expect(result.hasNegative).toBe(true);
+    });
+
+    test('should detect both positive and negative', () => {
+      const content = 'The benefit is performance. The risk is complexity.';
+      const result = detectConsequences(content);
+      expect(result.hasBothPosNeg).toBe(true);
+    });
+  });
+
+  describe('detectStatus', () => {
+    test('should detect proposed status', () => {
+      const content = 'Status: Proposed';
+      const result = detectStatus(content);
+      expect(result.hasProposed).toBe(true);
+    });
+
+    test('should detect accepted status', () => {
+      const content = '## Status\nAccepted';
+      const result = detectStatus(content);
+      expect(result.hasAccepted).toBe(true);
+    });
+
+    test('should detect dates', () => {
+      const content = 'Decision made on 2024-01-15.';
+      const result = detectStatus(content);
+      expect(result.hasDate).toBe(true);
+    });
+  });
+
+  describe('detectRationale', () => {
+    test('should detect rationale language', () => {
+      const content = 'The reason for this decision is performance. Because of the requirements.';
+      const result = detectRationale(content);
+      expect(result.hasRationaleLanguage).toBe(true);
+    });
+
+    test('should detect evidence', () => {
+      const content = 'The benchmark shows 50% improvement. Research indicates better outcomes.';
+      const result = detectRationale(content);
+      expect(result.hasEvidence).toBe(true);
+    });
+  });
+});
