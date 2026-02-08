@@ -85,6 +85,11 @@ The scoring system addresses common ADR failure modes:
 | Vague "we considered alternatives" | Options must include pros/cons comparison |
 | Omitting team impact | Team factors (training, skills, hiring) are explicitly scored |
 | No review commitment | Review timing is a scored element |
+| Vague decisions ("strategic approach") | VAGUE_DECISION_PATTERNS detects banned phrases (-5 pts) |
+| Using "complexity"/"overhead" | Vague consequence terms trigger penalty (-3 pts) |
+| Missing action verbs | Requires use/adopt/implement/migrate/split/combine/establish/enforce |
+| Generic "triggers a decision" | Subsequent ADR pattern requires specific topic |
+| Non-standard review timing | Expanded pattern catches "45 days", "quarterly", etc. |
 
 ### Calibration Notes
 
