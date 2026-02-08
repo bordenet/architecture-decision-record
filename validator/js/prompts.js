@@ -95,7 +95,7 @@ export function generateCritiquePrompt(adrContent, currentResult) {
     ...(currentResult.status?.issues || [])
   ].slice(0, 5).map(i => `- ${i}`).join('\n');
 
-  return `You are a senior Software Architect providing detailed feedback on an ADR.
+  return `You are a senior Software Architect helping improve an ADR.
 
 ## CURRENT VALIDATION RESULTS
 Total Score: ${currentResult.totalScore}/100
@@ -115,15 +115,39 @@ ${adrContent}
 
 ## YOUR TASK
 
-Provide:
-1. **Executive Summary** (2-3 sentences on overall ADR quality)
-2. **Detailed Critique** by dimension:
-   - What works well
-   - What needs improvement
-   - Specific suggestions with examples
-3. **Revised ADR** - A complete rewrite addressing all issues
+Help the author improve this ADR by asking clarifying questions.
 
-Be specific. Show exact rewrites. Make it ready for team adoption.`;
+## REQUIRED OUTPUT FORMAT
+
+**Score Summary:** ${currentResult.totalScore}/100
+
+**Top 3 Issues:**
+1. [Most critical gap - be specific]
+2. [Second most critical gap]
+3. [Third most critical gap]
+
+**Questions to Improve Your ADR:**
+1. **[Question about missing/weak area]**
+   _Why this matters:_ [How answering this improves the score]
+
+2. **[Question about another gap]**
+   _Why this matters:_ [Score impact]
+
+3. **[Question about consequences/alternatives]**
+   _Why this matters:_ [Score impact]
+
+(Provide 3-5 questions total, focused on the weakest dimensions)
+
+**Quick Wins (fix these now):**
+- [Specific fix that doesn't require user input]
+- [Another immediate improvement]
+
+<output_rules>
+- Start directly with "**Score Summary:**" (no preamble)
+- Do NOT include a revised ADR
+- Only provide questions and quick wins
+- Focus questions on: alternatives considered, team impact, consequences
+</output_rules>`;
 }
 
 /**
