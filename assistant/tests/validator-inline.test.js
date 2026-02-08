@@ -7,7 +7,15 @@
 import {
   validateDocument,
   getScoreColor,
-  getScoreLabel
+  getScoreLabel,
+  // Detection functions
+  detectContext,
+  detectDecision,
+  detectOptions,
+  detectConsequences,
+  detectStatus,
+  detectRationale,
+  detectSections
 } from '../../validator/js/validator.js';
 
 describe('ADR Validator Integration', () => {
@@ -87,6 +95,61 @@ Better data integrity.`);
     test('should return Incomplete for scores < 30', () => {
       expect(getScoreLabel(0)).toBe('Incomplete');
       expect(getScoreLabel(29)).toBe('Incomplete');
+    });
+  });
+});
+
+// ============================================================================
+// Detection Functions Tests
+// ============================================================================
+
+describe('Detection Functions', () => {
+  describe('detectContext', () => {
+    test('should detect context section', () => {
+      const result = detectContext('## Context\nWe need a database solution.');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectDecision', () => {
+    test('should detect decision section', () => {
+      const result = detectDecision('## Decision\nWe will use PostgreSQL.');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectOptions', () => {
+    test('should detect options considered', () => {
+      const result = detectOptions('## Options\n1. PostgreSQL\n2. MySQL\n3. MongoDB');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectConsequences', () => {
+    test('should detect consequences section', () => {
+      const result = detectConsequences('## Consequences\nBetter data integrity.');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectStatus', () => {
+    test('should detect status', () => {
+      const result = detectStatus('## Status\nAccepted');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectRationale', () => {
+    test('should detect rationale', () => {
+      const result = detectRationale('We chose this because it provides ACID compliance.');
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('detectSections', () => {
+    test('should detect ADR sections', () => {
+      const result = detectSections('## Context\nTest\n## Decision\nTest');
+      expect(result).toBeDefined();
     });
   });
 });
