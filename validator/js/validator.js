@@ -356,15 +356,23 @@ export function scoreDecision(text) {
     issues.push('Decision statement missing - clearly state what was decided');
   }
 
-  // Options considered (0-8 pts)
-  if (optionsDetection.hasOptionsSection && optionsDetection.hasComparison) {
+  // Explicit alternatives comparison pattern: "We considered X, Y, Z but chose..." (0-8 pts)
+  // This is the mandated Phase1 format for alternatives documentation
+  const alternativesPattern = /we considered .+?,\s*.+?(?:,\s*.+?)?\s*(?:and\s+.+?\s+)?but (?:chose|selected|decided|went with)/i;
+  const hasExplicitAlternatives = alternativesPattern.test(text);
+
+  if (hasExplicitAlternatives) {
     score += 8;
+    strengths.push('Explicit alternatives comparison with "considered X but chose Y" format');
+  } else if (optionsDetection.hasOptionsSection && optionsDetection.hasComparison) {
+    score += 6;
     strengths.push('Options compared with pros/cons');
+    issues.push('Use explicit format: "We considered X, Y, Z but chose..."');
   } else if (optionsDetection.hasOptionsLanguage) {
-    score += 4;
-    issues.push('Options mentioned but not compared - add pros/cons for each');
+    score += 3;
+    issues.push('Options mentioned but not compared - use "We considered X, Y, Z but chose..." format');
   } else {
-    issues.push('Options not documented - list alternatives that were considered');
+    issues.push('Alternatives not documented - use "We considered X, Y, Z but chose..." format');
   }
 
   // Rationale provided (0-7 pts)
@@ -388,6 +396,7 @@ export function scoreDecision(text) {
 
 /**
  * Score consequences documentation (25 pts max)
+ * Phase1.md requires: 3+ positive, 3+ negative, team factors, subsequent ADRs, review timing
  * @param {string} text - ADR content
  * @returns {Object} Score result with issues and strengths
  */
@@ -399,37 +408,60 @@ export function scoreConsequences(text) {
 
   const consequencesDetection = detectConsequences(text);
 
-  // Consequences section exists (0-8 pts)
+  // Consequences section exists (0-5 pts)
   if (consequencesDetection.hasConsequencesSection) {
-    score += 8;
+    score += 5;
     strengths.push('Dedicated consequences section');
   } else if (consequencesDetection.hasConsequencesLanguage) {
-    score += 4;
+    score += 2;
     issues.push('Consequences mentioned but lack dedicated section');
   } else {
     issues.push('Consequences section missing - document impacts of this decision');
   }
 
-  // Positive consequences documented (0-8 pts)
-  if (consequencesDetection.hasPositive && consequencesDetection.positiveCount >= 2) {
-    score += 8;
-    strengths.push(`${consequencesDetection.positiveCount} positive consequences documented`);
-  } else if (consequencesDetection.hasPositive) {
-    score += 4;
-    issues.push('Some benefits mentioned - add more specific positive outcomes');
+  // Positive/Negative balance check (0-10 pts) - Phase1 requires 3+ each
+  const posCount = consequencesDetection.positiveCount || 0;
+  const negCount = consequencesDetection.negativeCount || 0;
+  const hasBalance = posCount >= 3 && negCount >= 3;
+
+  if (hasBalance) {
+    score += 10;
+    strengths.push(`Balanced consequences: ${posCount} positive, ${negCount} negative`);
+  } else if (posCount >= 2 && negCount >= 2) {
+    score += 6;
+    issues.push(`Need 3+ each: currently ${posCount} positive, ${negCount} negative`);
+  } else if (posCount >= 1 || negCount >= 1) {
+    score += 3;
+    issues.push(`Imbalanced: ${posCount} positive, ${negCount} negative - need 3+ each`);
   } else {
-    issues.push('Positive consequences missing - list benefits of this decision');
+    issues.push('Missing positive AND negative consequences - need 3+ each');
   }
 
-  // Negative consequences/trade-offs documented (0-9 pts)
-  if (consequencesDetection.hasNegative && consequencesDetection.negativeCount >= 2) {
-    score += 9;
-    strengths.push(`${consequencesDetection.negativeCount} trade-offs/risks documented`);
-  } else if (consequencesDetection.hasNegative) {
+  // Team factors detection (0-5 pts) - Phase1 requires training/skill/hiring
+  const teamPatterns = /training.*need|skill gap|hiring impact|team ramp|learning curve|expertise required|onboarding|team structure|hiring/i;
+  if (teamPatterns.test(text)) {
     score += 5;
-    issues.push('Some trade-offs mentioned - be more explicit about risks and costs');
+    strengths.push('Team factors addressed (training/skills/hiring)');
   } else {
-    issues.push('Trade-offs missing - document risks, costs, and downsides');
+    issues.push('Missing team factors - address training needs, skill gaps, hiring impact');
+  }
+
+  // Subsequent ADR detection (0-3 pts) - Phase1 requires triggered decisions
+  const subsequentPattern = /subsequent ADR|follow-on ADR|triggers ADR|future ADR|necessitates.*decision|triggers.*decision|ADR-\d+/i;
+  if (subsequentPattern.test(text)) {
+    score += 3;
+    strengths.push('Subsequent ADRs/decisions identified');
+  } else {
+    issues.push('Missing subsequent ADRs - what decisions does this trigger?');
+  }
+
+  // After-action review timing (0-2 pts) - Phase1 requires review timing
+  const reviewPattern = /\b(30|60|90)\s*(days?|weeks?)\s*(review|reassess)|after-action|review.*timing|recommended.*review|review in \d+/i;
+  if (reviewPattern.test(text)) {
+    score += 2;
+    strengths.push('Review timing specified');
+  } else {
+    issues.push('Missing review timing - when should this decision be reassessed?');
   }
 
   return {

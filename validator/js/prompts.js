@@ -25,9 +25,11 @@ Score this ADR using the following rubric (0-100 points total):
 - **Rationale (7 pts)**: Clear explanation of WHY this decision was made
 
 ### 3. Consequences (25 points)
-- **Consequences Section (8 pts)**: Dedicated section documenting impacts
-- **Positive Outcomes (8 pts)**: Benefits and advantages documented
-- **Trade-offs (9 pts)**: Risks, costs, and downsides explicitly stated
+- **Consequences Section (5 pts)**: Dedicated section documenting impacts
+- **Balance (10 pts)**: 3+ positive AND 3+ negative consequences (Phase1 requirement)
+- **Team Factors (5 pts)**: Training needs, skill gaps, hiring impact addressed
+- **Subsequent ADRs (3 pts)**: Triggered decisions identified (e.g., "triggers ADR-42")
+- **Review Timing (2 pts)**: After-action review specified (e.g., "Review in 30 days")
 
 ### 4. Status (25 points)
 - **Status Value (10 pts)**: Clear status (Proposed/Accepted/Deprecated/Superseded)
