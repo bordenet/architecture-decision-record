@@ -40,62 +40,16 @@ Write Architecture Decision Records with AI. Three phases: draft, review, refine
 
 ## Scoring Methodology
 
-The validator scores ADRs on a 100-point scale across four dimensions aligned with the [ADR specification](https://adr.github.io/). This scoring system enforces the principle that ADRs must document *why* a decision was made, not just *what* was decided.
+The validator scores ADRs on a **100-point scale** across four equally-weighted dimensions aligned with the [ADR specification](https://adr.github.io/):
 
-### Scoring Taxonomy
+| Dimension | Points |
+|-----------|--------|
+| Context | 25 |
+| Decision | 25 |
+| Consequences | 25 |
+| Status | 25 |
 
-| Category | Weight | Rationale |
-|----------|--------|-----------|
-| **Context** | 25 pts | Validates problem framing and constraint identification |
-| **Decision** | 25 pts | Ensures clear decision statement with alternatives considered |
-| **Consequences** | 25 pts | Enforces balanced positive/negative impact analysis |
-| **Status** | 25 pts | Validates lifecycle metadata and completeness |
-
-### Why These Weights?
-
-**Context (25 pts)** establishes the foundation for decision validity. Without clear context, readers cannot evaluate whether the decision was appropriate. The validator checks:
-- **Context section** (10 pts): Dedicated section with problem/situation description
-- **Constraints** (8 pts): Requirements, limitations, and forces identified
-- **Business focus** (7 pts): Context tied to business/stakeholder needs, not just technical concerns
-
-**Decision (25 pts)** is the core of the ADR. A decision without rationale is an edict, not a record. The validator measures:
-- **Decision statement** (10 pts): Clear, unambiguous statement of what was decided
-- **Options considered** (8 pts): Alternatives documented with pros/cons comparison
-- **Rationale** (7 pts): Explicit explanation of *why* this option was chosen
-
-**Consequences (25 pts)** receives equal weight because ADRs that only list benefits are marketing documents, not decision records. The validator enforces:
-- **Consequences section** (5 pts): Dedicated section documenting impacts
-- **Balance** (10 pts): Requires 3+ positive AND 3+ negative consequences
-- **Team factors** (5 pts): Training needs, skill gaps, hiring impact addressed
-- **Subsequent ADRs** (3 pts): Triggered decisions identified (e.g., "triggers ADR-42")
-- **Review timing** (2 pts): After-action review specified (e.g., "Review in 30 days")
-
-**Status (25 pts)** ensures the ADR is actionable and traceable:
-- **Status value** (10 pts): Clear status (Proposed/Accepted/Deprecated/Superseded)
-- **Date** (7 pts): When the decision was made
-- **Completeness** (8 pts): All required sections present
-
-### Adversarial Robustness
-
-The scoring system addresses common ADR failure modes:
-
-| Gaming Attempt | Why It Fails |
-|----------------|--------------|
-| Listing only positive consequences | Balance check requires 3+ negative consequences |
-| Vague "we considered alternatives" | Options must include pros/cons comparison |
-| Omitting team impact | Team factors (training, skills, hiring) are explicitly scored |
-| No review commitment | Review timing is a scored element |
-| Vague decisions ("strategic approach") | VAGUE_DECISION_PATTERNS detects banned phrases (-5 pts) |
-| Using "complexity"/"overhead" | Vague consequence terms trigger penalty (-3 pts) |
-| Missing action verbs | Requires use/adopt/implement/migrate/split/combine/establish/enforce |
-| Generic "triggers a decision" | Subsequent ADR pattern requires specific topic |
-| Non-standard review timing | Expanded pattern catches "45 days", "quarterly", etc. |
-
-### Calibration Notes
-
-The **balance check** (10 pts) is the most distinctive feature of this validator. Research on decision-making shows that decisions made without considering downsides are more likely to fail. By requiring explicit negative consequences, the validator forces authors to confront tradeoffs rather than advocate for a predetermined conclusion.
-
-The **subsequent ADRs** pattern (3 pts) addresses decision coupling. Architectural decisions rarely exist in isolation—choosing a database triggers decisions about caching, replication, and backup. Documenting these dependencies creates a traceable decision graph.
+The scoring enforces that ADRs document *why* a decision was made, not just *what* was decided. For complete methodology details including detection patterns, adversarial robustness, and calibration notes, see **[docs/Scoring_Methods.md](./docs/Scoring_Methods.md)**.
 
 ---
 
