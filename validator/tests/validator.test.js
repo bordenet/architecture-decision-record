@@ -245,8 +245,15 @@ describe('detectConsequences', () => {
   });
 
   test('detects negative consequences', () => {
-    const result = detectConsequences('However, this increases complexity and maintenance burden.');
+    // Updated: "complexity" is now a vague term per phase1.md, use specific negative terms
+    const result = detectConsequences('However, this adds latency and creates coupling between services.');
     expect(result.hasNegative).toBe(true);
+  });
+
+  test('detects vague consequence terms', () => {
+    const result = detectConsequences('This increases complexity and overhead.');
+    expect(result.hasVagueConsequences).toBe(true);
+    expect(result.vagueConsequenceCount).toBeGreaterThan(0);
   });
 });
 

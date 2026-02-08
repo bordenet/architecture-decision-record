@@ -40,8 +40,16 @@ const DECISION_PATTERNS = {
   decisionSection: /^#+\s*(decision|choice|selected|chosen|we.will)/im,
   decisionLanguage: /\b(decide|decision|choose|chose|select|selected|adopt|use|implement|will)\b/gi,
   clarity: /\b(we.will|we.have.decided|the.decision.is|we.chose|we.selected)\b/gi,
-  specificity: /\b(specifically|exactly|precisely|concretely|particular)\b/gi
+  specificity: /\b(specifically|exactly|precisely|concretely|particular)\b/gi,
+  // Phase1.md required action verbs: use, adopt, implement, migrate, split, combine, establish, enforce
+  actionVerbs: /\b(use|adopt|implement|migrate|split|combine|establish|enforce)\b/gi
 };
+
+// Vague decision phrases explicitly banned in phase1.md examples
+// "We will adopt a strategic approach to improve scalability" ❌
+// "We will implement a critical architectural intervention" ❌
+// "We will make the system more maintainable" ❌
+const VAGUE_DECISION_PATTERNS = /\b(strategic\s+approach|architectural\s+intervention|improve\s+scalability|more\s+maintainable|better\s+architecture|enhance\s+performance|optimize\s+the\s+system|modernize\s+the\s+platform|transform\s+the\s+infrastructure)\b/gi;
 
 // Options patterns
 const OPTIONS_PATTERNS = {
@@ -55,10 +63,17 @@ const OPTIONS_PATTERNS = {
 const CONSEQUENCES_PATTERNS = {
   consequencesSection: /^#+\s*(consequence|impact|result|outcome|implication)/im,
   consequencesLanguage: /\b(consequence|impact|result|outcome|implication|effect|affect)\b/gi,
-  positive: /\b(benefit|advantage|improve|enable|allow|simplify|reduce|faster|easier|better)\b/gi,
-  negative: /\b(drawback|disadvantage|risk|cost|complexity|overhead|slower|harder|worse|trade.?off)\b/gi,
+  // Positive consequences - specific, measurable terms
+  positive: /\b(benefit|advantage|improve|enable|allow|simplify|reduce|faster|easier|better|scalable|maintainable|testable|decoupled|independent|automated)\b/gi,
+  // Negative consequences - REMOVED "complexity" and "overhead" per phase1.md vague language ban
+  // These are now in VAGUE_CONSEQUENCE_TERMS below
+  negative: /\b(drawback|disadvantage|risk|cost|slower|harder|worse|trade.?off|latency|coupling|dependency|bottleneck|single.point.of.failure|migration.effort)\b/gi,
   neutral: /\b(change|require|need|must|will.need|migration|update)\b/gi
 };
+
+// Vague consequence terms that phase1.md explicitly bans
+// "Replace 'complexity' with specific impacts, 'overhead' with measurable costs"
+const VAGUE_CONSEQUENCE_TERMS = /\b(complexity|overhead|difficult|challenging|problematic|issues?|concerns?)\b/gi;
 
 // Status patterns
 const STATUS_PATTERNS = {
@@ -119,6 +134,8 @@ export function detectDecision(text) {
   const decisionMatches = text.match(DECISION_PATTERNS.decisionLanguage) || [];
   const clarityMatches = text.match(DECISION_PATTERNS.clarity) || [];
   const specificityMatches = text.match(DECISION_PATTERNS.specificity) || [];
+  const actionVerbMatches = text.match(DECISION_PATTERNS.actionVerbs) || [];
+  const vagueDecisionMatches = text.match(VAGUE_DECISION_PATTERNS) || [];
 
   return {
     hasDecisionSection,
@@ -126,11 +143,17 @@ export function detectDecision(text) {
     hasClarity: clarityMatches.length > 0,
     clarityCount: clarityMatches.length,
     hasSpecificity: specificityMatches.length > 0,
+    hasActionVerbs: actionVerbMatches.length > 0,
+    actionVerbCount: actionVerbMatches.length,
+    hasVagueDecision: vagueDecisionMatches.length > 0,
+    vagueDecisionCount: vagueDecisionMatches.length,
     indicators: [
       hasDecisionSection && 'Dedicated decision section',
       decisionMatches.length > 0 && 'Decision language present',
       clarityMatches.length > 0 && 'Clear decision statement',
-      specificityMatches.length > 0 && 'Specific details provided'
+      specificityMatches.length > 0 && 'Specific details provided',
+      actionVerbMatches.length > 0 && `${actionVerbMatches.length} action verbs used`,
+      vagueDecisionMatches.length > 0 && `⚠️ ${vagueDecisionMatches.length} vague decision phrases detected`
     ].filter(Boolean)
   };
 }
@@ -173,6 +196,7 @@ export function detectConsequences(text) {
   const positiveMatches = text.match(CONSEQUENCES_PATTERNS.positive) || [];
   const negativeMatches = text.match(CONSEQUENCES_PATTERNS.negative) || [];
   const neutralMatches = text.match(CONSEQUENCES_PATTERNS.neutral) || [];
+  const vagueConsequenceMatches = text.match(VAGUE_CONSEQUENCE_TERMS) || [];
 
   return {
     hasConsequencesSection,
@@ -183,11 +207,14 @@ export function detectConsequences(text) {
     negativeCount: negativeMatches.length,
     hasNeutral: neutralMatches.length > 0,
     hasBothPosNeg: positiveMatches.length > 0 && negativeMatches.length > 0,
+    hasVagueConsequences: vagueConsequenceMatches.length > 0,
+    vagueConsequenceCount: vagueConsequenceMatches.length,
     indicators: [
       hasConsequencesSection && 'Dedicated consequences section',
       positiveMatches.length > 0 && `${positiveMatches.length} positive consequences`,
       negativeMatches.length > 0 && `${negativeMatches.length} negative consequences`,
-      neutralMatches.length > 0 && 'Neutral impacts noted'
+      neutralMatches.length > 0 && 'Neutral impacts noted',
+      vagueConsequenceMatches.length > 0 && `⚠️ ${vagueConsequenceMatches.length} vague terms (complexity/overhead)`
     ].filter(Boolean)
   };
 }
@@ -356,20 +383,35 @@ export function scoreDecision(text) {
     issues.push('Decision statement missing - clearly state what was decided');
   }
 
-  // Explicit alternatives comparison pattern: "We considered X, Y, Z but chose..." (0-8 pts)
+  // Vague decision penalty (-5 pts) - Phase1 explicitly bans these phrases
+  // "We will adopt a strategic approach to improve scalability" ❌
+  if (decisionDetection.hasVagueDecision) {
+    score -= 5;
+    issues.push(`Vague decision detected (${decisionDetection.vagueDecisionCount} phrases) - be specific about technology/pattern choice`);
+  }
+
+  // Action verb bonus (+2 pts) - Phase1 requires: use, adopt, implement, migrate, split, combine, establish, enforce
+  if (decisionDetection.hasActionVerbs && decisionDetection.actionVerbCount >= 2) {
+    score += 2;
+    strengths.push(`Strong action verbs used (${decisionDetection.actionVerbCount})`);
+  } else if (!decisionDetection.hasActionVerbs) {
+    issues.push('Missing action verbs - use: adopt, implement, migrate, split, combine, establish, enforce');
+  }
+
+  // Explicit alternatives comparison pattern: "We considered X, Y, Z but chose..." (0-6 pts, reduced from 8)
   // This is the mandated Phase1 format for alternatives documentation
   const alternativesPattern = /we considered .+?,\s*.+?(?:,\s*.+?)?\s*(?:and\s+.+?\s+)?but (?:chose|selected|decided|went with)/i;
   const hasExplicitAlternatives = alternativesPattern.test(text);
 
   if (hasExplicitAlternatives) {
-    score += 8;
+    score += 6;
     strengths.push('Explicit alternatives comparison with "considered X but chose Y" format');
   } else if (optionsDetection.hasOptionsSection && optionsDetection.hasComparison) {
-    score += 6;
+    score += 4;
     strengths.push('Options compared with pros/cons');
     issues.push('Use explicit format: "We considered X, Y, Z but chose..."');
   } else if (optionsDetection.hasOptionsLanguage) {
-    score += 3;
+    score += 2;
     issues.push('Options mentioned but not compared - use "We considered X, Y, Z but chose..." format');
   } else {
     issues.push('Alternatives not documented - use "We considered X, Y, Z but chose..." format');
@@ -387,7 +429,7 @@ export function scoreDecision(text) {
   }
 
   return {
-    score: Math.min(score, maxScore),
+    score: Math.max(0, Math.min(score, maxScore)),
     maxScore,
     issues,
     strengths
@@ -437,8 +479,15 @@ export function scoreConsequences(text) {
     issues.push('Missing positive AND negative consequences - need 3+ each');
   }
 
+  // Vague consequence penalty (-3 pts) - Phase1 bans "complexity", "overhead"
+  // "Replace 'complexity' with specific impacts, 'overhead' with measurable costs"
+  if (consequencesDetection.hasVagueConsequences) {
+    score -= 3;
+    issues.push(`Vague consequence terms detected (${consequencesDetection.vagueConsequenceCount}) - replace "complexity"/"overhead" with specific impacts`);
+  }
+
   // Team factors detection (0-5 pts) - Phase1 requires training/skill/hiring
-  const teamPatterns = /training.*need|skill gap|hiring impact|team ramp|learning curve|expertise required|onboarding|team structure|hiring/i;
+  const teamPatterns = /training.*need|skill gap|hiring impact|team ramp|learning curve|expertise required|onboarding|team structure|hiring|staffing/i;
   if (teamPatterns.test(text)) {
     score += 5;
     strengths.push('Team factors addressed (training/skills/hiring)');
@@ -447,7 +496,8 @@ export function scoreConsequences(text) {
   }
 
   // Subsequent ADR detection (0-3 pts) - Phase1 requires triggered decisions
-  const subsequentPattern = /subsequent ADR|follow-on ADR|triggers ADR|future ADR|necessitates.*decision|triggers.*decision|ADR-\d+/i;
+  // Tightened pattern to require specific decision topics, not just "triggers a decision"
+  const subsequentPattern = /subsequent ADR|follow-on ADR|triggers ADR|future ADR|ADR-\d+|triggers.*(?:decision|choice).*(?:on|for|about|regarding)\s+\w+/i;
   if (subsequentPattern.test(text)) {
     score += 3;
     strengths.push('Subsequent ADRs/decisions identified');
@@ -456,7 +506,8 @@ export function scoreConsequences(text) {
   }
 
   // After-action review timing (0-2 pts) - Phase1 requires review timing
-  const reviewPattern = /\b(30|60|90)\s*(days?|weeks?)\s*(review|reassess)|after-action|review.*timing|recommended.*review|review in \d+/i;
+  // Expanded pattern to catch more variations: "45 days", "2 weeks", "quarterly"
+  const reviewPattern = /\b\d+\s*(days?|weeks?|months?)\s*(review|reassess|revisit)|after-action|review.*timing|recommended.*review|review in \d+|quarterly\s+review|annual\s+review/i;
   if (reviewPattern.test(text)) {
     score += 2;
     strengths.push('Review timing specified');
@@ -465,7 +516,7 @@ export function scoreConsequences(text) {
   }
 
   return {
-    score: Math.min(score, maxScore),
+    score: Math.max(0, Math.min(score, maxScore)),
     maxScore,
     issues,
     strengths
