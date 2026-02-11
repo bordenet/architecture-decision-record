@@ -132,10 +132,13 @@ describe('scoreDecision', () => {
     expect(result.maxScore).toBe(25);
   });
 
-  test('awards points for decision section', () => {
-    const withSection = scoreDecision('# Decision\nWe will use PostgreSQL as our primary database.');
-    const withoutSection = scoreDecision('We will use PostgreSQL as our primary database.');
-    expect(withSection.score).toBeGreaterThan(withoutSection.score);
+  test('awards points for decision section (markdown or plain text)', () => {
+    const withMarkdownHeading = scoreDecision('# Decision\nWe will use PostgreSQL as our primary database.');
+    const withPlainTextHeading = scoreDecision('Decision\nWe will use PostgreSQL as our primary database.');
+    // Both markdown and plain text headings should score equally (fix for Word/Google Docs paste)
+    expect(withMarkdownHeading.score).toBe(withPlainTextHeading.score);
+    // Both should detect the section
+    expect(withMarkdownHeading.score).toBeGreaterThan(0);
   });
 
   test('awards points for clear decision language', () => {

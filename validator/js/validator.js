@@ -18,17 +18,17 @@ export { calculateSlopScore };
 // ============================================================================
 
 const REQUIRED_SECTIONS = [
-  { pattern: /^#+\s*(context|background|problem|situation)/im, name: 'Context', weight: 2 },
-  { pattern: /^#+\s*(decision|choice|selected|chosen)/im, name: 'Decision', weight: 2 },
-  { pattern: /^#+\s*(consequence|impact|result|outcome|implication)/im, name: 'Consequences', weight: 2 },
-  { pattern: /^#+\s*(status|state)/im, name: 'Status', weight: 2 },
-  { pattern: /^#+\s*(option|alternative|considered)/im, name: 'Options Considered', weight: 1 },
-  { pattern: /^#+\s*(rationale|reason|justification|why)/im, name: 'Rationale', weight: 1 }
+  { pattern: /^(#+\s*)?(context|background|problem|situation)/im, name: 'Context', weight: 2 },
+  { pattern: /^(#+\s*)?(decision|choice|selected|chosen)/im, name: 'Decision', weight: 2 },
+  { pattern: /^(#+\s*)?(consequence|impact|result|outcome|implication)/im, name: 'Consequences', weight: 2 },
+  { pattern: /^(#+\s*)?(status|state)/im, name: 'Status', weight: 2 },
+  { pattern: /^(#+\s*)?(option|alternative|considered)/im, name: 'Options Considered', weight: 1 },
+  { pattern: /^(#+\s*)?(rationale|reason|justification|why)/im, name: 'Rationale', weight: 1 }
 ];
 
 // Context patterns
 const CONTEXT_PATTERNS = {
-  contextSection: /^#+\s*(context|background|problem|situation|why)/im,
+  contextSection: /^(#+\s*)?(context|background|problem|situation|why)/im,
   contextLanguage: /\b(context|background|problem|situation|challenge|need|requirement|constraint|driver|force)\b/gi,
   constraints: /\b(constraint|limitation|requirement|must|should|cannot|restriction|boundary)\b/gi,
   quantified: /\d+\s*(%|million|thousand|hour|day|week|month|year|\$|dollar|user|customer|transaction)/gi,
@@ -37,7 +37,7 @@ const CONTEXT_PATTERNS = {
 
 // Decision patterns
 const DECISION_PATTERNS = {
-  decisionSection: /^#+\s*(decision|choice|selected|chosen|we.will)/im,
+  decisionSection: /^(#+\s*)?(decision|choice|selected|chosen|we.will)/im,
   decisionLanguage: /\b(decide|decision|choose|chose|select|selected|adopt|use|implement|will)\b/gi,
   clarity: /\b(we.will|we.have.decided|the.decision.is|we.chose|we.selected)\b/gi,
   specificity: /\b(specifically|exactly|precisely|concretely|particular)\b/gi,
@@ -53,7 +53,7 @@ const VAGUE_DECISION_PATTERNS = /\b(strategic\s+approach|architectural\s+interve
 
 // Options patterns
 const OPTIONS_PATTERNS = {
-  optionsSection: /^#+\s*(option|alternative|considered|candidate)/im,
+  optionsSection: /^(#+\s*)?(option|alternative|considered|candidate)/im,
   optionsLanguage: /\b(option|alternative|candidate|possibility|approach|solution|choice)\b/gi,
   comparison: /\b(compare|versus|vs|pro|con|advantage|disadvantage|trade.?off|benefit|drawback)\b/gi,
   rejected: /\b(reject|not.chosen|ruled.out|dismissed|discarded|eliminated)\b/gi
@@ -61,7 +61,7 @@ const OPTIONS_PATTERNS = {
 
 // Consequences patterns
 const CONSEQUENCES_PATTERNS = {
-  consequencesSection: /^#+\s*(consequence|impact|result|outcome|implication)/im,
+  consequencesSection: /^(#+\s*)?(consequence|impact|result|outcome|implication)/im,
   consequencesLanguage: /\b(consequence|impact|result|outcome|implication|effect|affect)\b/gi,
   // Positive consequences - specific, measurable terms
   positive: /\b(benefit|advantage|improve|enable|allow|simplify|reduce|faster|easier|better|scalable|maintainable|testable|decoupled|independent|automated)\b/gi,
@@ -77,7 +77,7 @@ const VAGUE_CONSEQUENCE_TERMS = /\b(complexity|overhead|difficult|challenging|pr
 
 // Status patterns
 const STATUS_PATTERNS = {
-  statusSection: /^#+\s*(status|state)/im,
+  statusSection: /^(#+\s*)?(status|state)/im,
   statusValues: /\b(proposed|accepted|deprecated|superseded|rejected|draft|approved|implemented)\b/gi,
   datePatterns: /\b(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}|january|february|march|april|may|june|july|august|september|october|november|december)\b/gi,
   supersededBy: /\b(superseded.by|replaced.by|see.also|successor)\b/gi
@@ -85,7 +85,7 @@ const STATUS_PATTERNS = {
 
 // Rationale patterns
 const RATIONALE_PATTERNS = {
-  rationaleSection: /^#+\s*(rationale|reason|justification|why)/im,
+  rationaleSection: /^(#+\s*)?(rationale|reason|justification|why)/im,
   rationaleLanguage: /\b(because|reason|rationale|justification|why|due.to|since|therefore|thus)\b/gi,
   evidence: /\b(evidence|data|research|study|benchmark|test|experiment|proof|demonstrate)\b/gi
 };
