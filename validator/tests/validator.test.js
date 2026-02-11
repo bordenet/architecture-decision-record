@@ -303,3 +303,59 @@ describe('detectSections', () => {
     expect(result.missing.length).toBeGreaterThan(0);
   });
 });
+
+describe('detectSections - Plain Text Heading Detection', () => {
+  // Tests for ^(#+\s*)? regex pattern that allows plain text headings (Word/Google Docs imports)
+
+  test('detects Context section without markdown prefix', () => {
+    const text = 'Context\nWe are building a new system.';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Context')).toBe(true);
+  });
+
+  test('detects Decision section without markdown prefix', () => {
+    const text = 'Decision\nWe will use microservices architecture.';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Decision')).toBe(true);
+  });
+
+  test('detects Consequences section without markdown prefix', () => {
+    const text = 'Consequences\n- Increased complexity\n- Better scalability';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Consequences')).toBe(true);
+  });
+
+  test('detects Options section without markdown prefix', () => {
+    const text = 'Options Considered\nOption 1: Monolith. Option 2: Serverless.';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Options Considered')).toBe(true);
+  });
+
+  test('handles mixed markdown and plain text headings', () => {
+    const text = '# Context\nSome background.\n\nDecision\nOur choice is X.';
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Context')).toBe(true);
+    expect(result.found.some((s) => s.name === 'Decision')).toBe(true);
+  });
+
+  test('handles Word/Google Docs pasted content without markdown', () => {
+    const text = `Context
+We need to decide on the database technology.
+
+Decision
+We will use PostgreSQL.
+
+Consequences
+- SQL compatibility
+- ACID transactions
+
+Options Considered
+- MongoDB
+- DynamoDB`;
+    const result = detectSections(text);
+    expect(result.found.some((s) => s.name === 'Context')).toBe(true);
+    expect(result.found.some((s) => s.name === 'Decision')).toBe(true);
+    expect(result.found.some((s) => s.name === 'Consequences')).toBe(true);
+    expect(result.found.some((s) => s.name === 'Options Considered')).toBe(true);
+  });
+});

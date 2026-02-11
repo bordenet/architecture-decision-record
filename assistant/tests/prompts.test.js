@@ -10,7 +10,8 @@ import {
   generatePhase1Prompt,
   generatePhase2Prompt,
   generatePhase3Prompt,
-  preloadPromptTemplates
+  preloadPromptTemplates,
+  replaceTemplateVars
 } from '../../shared/js/prompts.js';
 
 describe('WORKFLOW_CONFIG', () => {
@@ -139,5 +140,49 @@ describe('prompt generation', () => {
       // Should have called fetch for each phase
       expect(global.fetch).toHaveBeenCalledTimes(3);
     });
+  });
+});
+
+describe('replaceTemplateVars - Placeholder Safety Check', () => {
+  // These tests verify the safety check that removes unsubstituted {{PLACEHOLDER}} patterns
+
+  test('should replace known variables', () => {
+    const template = 'Hello {{NAME}}, welcome to {{PROJECT}}';
+    const vars = { NAME: 'World', PROJECT: 'ADR' };
+
+    const result = replaceTemplateVars(template, vars);
+
+    expect(result).toBe('Hello World, welcome to ADR');
+  });
+
+  test('should remove unsubstituted UPPER_CASE placeholders', () => {
+    const template = 'Hello {{NAME}}, your {{UNKNOWN_FIELD}} is ready';
+    const vars = { NAME: 'World' };
+
+    const result = replaceTemplateVars(template, vars);
+
+    expect(result).toBe('Hello World, your  is ready');
+    expect(result).not.toContain('{{UNKNOWN_FIELD}}');
+  });
+
+  test('should remove multiple unsubstituted placeholders', () => {
+    const template = '{{TITLE}} - {{MISSING_A}} and {{MISSING_B}}';
+    const vars = { TITLE: 'My Document' };
+
+    const result = replaceTemplateVars(template, vars);
+
+    expect(result).toBe('My Document -  and ');
+    expect(result).not.toContain('{{MISSING_A}}');
+    expect(result).not.toContain('{{MISSING_B}}');
+  });
+
+  test('should handle phase output placeholders when not provided', () => {
+    const template = '{{PHASE1_OUTPUT}} and {{PHASE2_OUTPUT}}';
+    const vars = { PHASE1_OUTPUT: 'Draft content here' };
+
+    const result = replaceTemplateVars(template, vars);
+
+    expect(result).toContain('Draft content here');
+    expect(result).not.toContain('{{PHASE2_OUTPUT}}');
   });
 });
