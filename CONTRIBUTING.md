@@ -14,7 +14,7 @@ We welcome contributions to this project!
 ### Before You Start
 
 Read these documents:
-- [`Agents.md`](Agents.md) - AI assistant instructions and standards
+- [`AGENTS.md`](AGENTS.md) - AI assistant instructions and standards
 - [`README.md`](README.md) - Project overview
 - [Architecture Decision Record Standard](https://github.com/joelparkerhenderson/architecture-decision-record)
 
