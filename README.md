@@ -1,12 +1,14 @@
 # Architecture Decision Record (ADR) Assistant
 
-> ⚠️ **Deprecation Notice**: This repository is deprecated in favor of [DocForge AI](https://github.com/bordenet/docforge-ai), which consolidates all genesis-derived assistants into a single project. This repo will be archived on **March 1, 2026**.
+> 🗄️ **ARCHIVED**: This repository has been archived. All pages now **redirect to [DocForge AI](https://bordenet.github.io/docforge-ai/)**, which consolidates all genesis-derived assistants into a single unified platform.
+>
+> **New location**: https://bordenet.github.io/docforge-ai/
 
 Write Architecture Decision Records with AI. Three phases: draft, review, refine.
 
 [![Star this repo](https://img.shields.io/github/stars/bordenet/architecture-decision-record?style=social)](https://github.com/bordenet/architecture-decision-record)
 
-**Try it**: [Assistant](https://bordenet.github.io/architecture-decision-record/) · [Validator](https://bordenet.github.io/architecture-decision-record/validator/)
+**⚠️ Redirects to DocForge AI**: [Assistant](https://bordenet.github.io/architecture-decision-record/) · [Validator](https://bordenet.github.io/architecture-decision-record/validator/)
 
 > **What is an ADR?** An Architecture Decision Record captures a significant architectural decision along with its context and consequences. ADRs document *why* a decision was made, not just *what* was decided. See [adr.github.io](https://adr.github.io/) for the full specification.
 
